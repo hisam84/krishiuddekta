@@ -8,24 +8,15 @@ export function WelcomeToast() {
     // ignore if screen height is too small
     if (window.innerHeight < 650) return;
     if (!document.cookie.includes("welcome-toast=2")) {
-      toast("🛍️ Welcome to Next.js Commerce!", {
+      toast("🌱 কৃষি উদ্যোক্তা-তে স্বাগতম!", {
         id: "welcome-toast",
-        duration: Infinity,
+        duration: 5000,
         onDismiss: () => {
           document.cookie = "welcome-toast=2; max-age=31536000; path=/";
         },
         description: (
           <>
-            This is a high-performance, SSR storefront powered by Shopify,
-            Next.js, and Vercel.{" "}
-            <a
-              href="https://vercel.com/templates/next.js/nextjs-commerce"
-              className="text-blue-600 hover:underline"
-              target="_blank"
-            >
-              Deploy your own
-            </a>
-            .
+            উন্নত প্রযুক্তির ই-কমার্স প্ল্যাটফর্মে আপনার কৃষি পণ্য ও সেবার সেরা অভিজ্ঞতা।
           </>
         ),
       });

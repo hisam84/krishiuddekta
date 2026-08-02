@@ -5,7 +5,8 @@ import LogoSquare from "components/logo-square";
 import { getMenu } from "lib/shopify";
 import { Suspense } from "react";
 
-const { COMPANY_NAME, SITE_NAME } = process.env;
+const COMPANY_NAME = process.env.COMPANY_NAME || "কৃষি উদ্যোক্তা";
+const SITE_NAME = process.env.SITE_NAME || "কৃষি উদ্যোক্তা";
 
 export default async function Footer() {
   const currentYear = new Date().getFullYear();
