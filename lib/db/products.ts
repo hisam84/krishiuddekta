@@ -324,3 +324,37 @@ export async function addDbReview(data: {
     return false;
   }
 }
+
+export async function getDbSettings(): Promise<Record<string, string>> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const rows = await sql`SELECT key, value FROM settings;`;
+    const settingsMap: Record<string, string> = {};
+    rows.forEach((r: any) => {
+      settingsMap[r.key] = r.value;
+    });
+    return settingsMap;
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+    return {};
+  }
+}
+
+export async function updateDbSettings(settings: Record<string, string>): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    for (const [key, value] of Object.entries(settings)) {
+      await sql`
+        INSERT INTO settings (key, value)
+        VALUES (${key}, ${value})
+        ON CONFLICT (key) DO UPDATE SET value = ${value};
+      `;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    return false;
+  }
+}

@@ -23,7 +23,7 @@ export default function AdminProductsPage() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Form state
+  // WordPress-style Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -31,6 +31,7 @@ export default function AdminProductsPage() {
   const [badge, setBadge] = useState("Best Seller");
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("seeds");
+  const [available, setAvailable] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchProducts = async () => {
@@ -52,6 +53,17 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price) {
@@ -72,6 +84,7 @@ export default function AdminProductsPage() {
           badge,
           image_url: imageUrl,
           category,
+          available,
         }),
       });
 
@@ -148,14 +161,14 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* WordPress Subsubsub Navigation */}
+      {/* Subsubsub Navigation */}
       <div className="text-xs text-neutral-500">
         <span className="font-bold text-neutral-900 dark:text-white">All ({products.length})</span> |{" "}
         <span className="text-[#2271b1]">Published ({products.length})</span> |{" "}
         <span className="text-neutral-400">Trash (0)</span>
       </div>
 
-      {/* WordPress Data Table */}
+      {/* Products Data Table */}
       {loading ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           Loading products from database...
@@ -241,138 +254,222 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* WordPress Add Product Modal */}
+      {/* WordPress Classic Add Product Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 max-h-[90vh] overflow-y-auto">
-            <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
-              <h2 className="text-base font-bold text-[#1d2327] dark:text-white">
-                Add New Product
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-4xl rounded-lg border border-neutral-300 bg-[#f0f0f1] p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[92vh] overflow-y-auto">
+            {/* Modal Top Bar */}
+            <div className="mb-4 flex items-center justify-between border-b border-neutral-300 pb-3 dark:border-neutral-800">
+              <h2 className="text-xl font-bold text-[#1d2327] dark:text-white">
+                Add New Product — WordPress Post Editor
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-neutral-400 hover:text-neutral-600"
+                className="text-[#1d2327] font-bold text-lg hover:text-rose-600 dark:text-neutral-300"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddProduct} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  Product Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. High Yield Tomato Seeds (50g)"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleAddProduct} className="grid grid-cols-1 gap-6 lg:grid-cols-3 text-xs">
+              {/* Left Column: Title, Description, Product Data Box */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Title Box */}
                 <div>
-                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                    Original Price (BDT) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="e.g. 350"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                    Discount Price (BDT)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 290"
-                    value={discountPrice}
-                    onChange={(e) => setDiscountPrice(e.target.value)}
-                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                    Category
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  >
-                    <option value="seeds">Seeds & Saplings</option>
-                    <option value="fertilizer">Fertilizers</option>
-                    <option value="tools">Agro Tools</option>
-                    <option value="general">General</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                    Badge Tag
-                  </label>
                   <input
                     type="text"
-                    placeholder="e.g. Best Seller / 100% Organic"
-                    value={badge}
-                    onChange={(e) => setBadge(e.target.value)}
-                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    required
+                    placeholder="Enter product title here..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white px-4 py-3 text-base font-bold text-[#1d2327] placeholder:text-neutral-400 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
                   />
+                </div>
+
+                {/* Main Product Description Editor Box */}
+                <div className="rounded border border-neutral-300 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-2">
+                    Product Description
+                  </label>
+                  <textarea
+                    rows={6}
+                    placeholder="Add detailed product description, usage instructions, specifications..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white p-3 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  />
+                </div>
+
+                {/* Product Data Meta Box */}
+                <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+                    Product Data
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
+                          Regular Price (in BDT) *
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="e.g. 350"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                          className="w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white font-mono font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
+                          Sale / Discount Price (BDT)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 290"
+                          value={discountPrice}
+                          onChange={(e) => setDiscountPrice(e.target.value)}
+                          className="w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
+                        Badge Tag Label
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Best Seller / 100% Organic"
+                        value={badge}
+                        onChange={(e) => setBadge(e.target.value)}
+                        className="w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white font-bold"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                />
-              </div>
+              {/* Right Sidebar: Publish Box, Category Box, Featured Image Box */}
+              <div className="space-y-4">
+                {/* 1. Publish Box */}
+                <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+                    Publish
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between text-neutral-600 dark:text-neutral-400">
+                      <span>Status:</span>
+                      <span className="font-bold text-emerald-600">Published</span>
+                    </div>
 
-              <div>
-                <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Product specifications and features..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                />
-              </div>
+                    <div className="flex items-center justify-between">
+                      <span>Stock Availability:</span>
+                      <select
+                        value={available ? "true" : "false"}
+                        onChange={(e) => setAvailable(e.target.value === "true")}
+                        className="rounded border border-neutral-300 bg-white px-2 py-1 font-bold text-neutral-800 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      >
+                        <option value="true">In Stock</option>
+                        <option value="false">Out of Stock</option>
+                      </select>
+                    </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="w-1/2 rounded border border-neutral-300 py-2 font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-semibold text-white transition hover:bg-[#135e96] disabled:opacity-50"
-                >
-                  {submitting ? "Publishing..." : "Publish Product"}
-                </button>
+                    <div className="border-t pt-3 flex gap-2 dark:border-neutral-800">
+                      <button
+                        type="button"
+                        onClick={() => setShowModal(false)}
+                        className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow transition hover:bg-[#135e96] disabled:opacity-50"
+                      >
+                        {submitting ? "Publishing..." : "Publish"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Product Categories Box */}
+                <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+                    Product Categories
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="seeds"
+                        checked={category === "seeds"}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="text-blue-600"
+                      />
+                      <span>Seeds & Saplings</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="fertilizer"
+                        checked={category === "fertilizer"}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="text-blue-600"
+                      />
+                      <span>Organic Fertilizers</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="tools"
+                        checked={category === "tools"}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="text-blue-600"
+                      />
+                      <span>Agro Tools & Equipment</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="general"
+                        checked={category === "general"}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="text-blue-600"
+                      />
+                      <span>General Products</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 3. Featured Image Meta Box with Native Local File Picker */}
+                <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+                    Product Image (File Select)
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="w-full rounded border border-neutral-300 bg-white p-2 text-neutral-700 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 cursor-pointer"
+                    />
+
+                    {imageUrl ? (
+                      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800">
+                        <img src={imageUrl} alt="Featured Preview" className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-neutral-400 italic">No image selected. Click button above to choose file from computer.</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </form>
           </div>

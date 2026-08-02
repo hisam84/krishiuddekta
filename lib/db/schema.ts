@@ -47,6 +47,11 @@ export interface DbReview {
   created_at?: string;
 }
 
+export interface DbSetting {
+  key: string;
+  value: string;
+}
+
 export async function initDatabase() {
   const sql = getDb();
 
@@ -121,6 +126,29 @@ export async function initDatabase() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
+
+    // 6. Create Settings Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `;
+
+    // Insert Default Hero Settings if empty
+    const existingSettings = await sql`SELECT COUNT(*) as count FROM settings;`;
+    if (Number(existingSettings[0]?.count || 0) === 0) {
+      await sql`
+        INSERT INTO settings (key, value)
+        VALUES 
+        ('hero_badge', '100% Pure & Organic Agro Products'),
+        ('hero_title', 'Krishi Uddokta — Premium Seeds, Fertilizers & Agro Tools'),
+        ('hero_subtitle', 'Directly source high-yield hybrid seeds, organic vermicompost, and modern agricultural equipment with nationwide Cash on Delivery.'),
+        ('hero_button_text', 'Shop Now'),
+        ('hero_button_url', '/search'),
+        ('hero_image', 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=1200');
+      `;
+    }
 
     // Insert Default Sample Agricultural Products if empty
     const existingProducts = await sql`SELECT COUNT(*) as count FROM products;`;
