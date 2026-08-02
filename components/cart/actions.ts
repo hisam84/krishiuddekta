@@ -111,3 +111,45 @@ export async function createCartAndSetCookie() {
   let cart = await createCart();
   (await cookies()).set("cartId", cart.id!);
 }
+
+// Direct add-to-cart action (not for useActionState — can be called directly)
+export async function addItemDirect(
+  selectedVariantId: string,
+  quantity: number = 1
+) {
+  try {
+    const cookieStore = await cookies();
+    if (!cookieStore.get("cartId")?.value) {
+      const cart = await createCart();
+      cookieStore.set("cartId", cart.id!);
+    }
+
+    await addToCart([{ merchandiseId: selectedVariantId, quantity }]);
+    updateTag(TAGS.cart);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: "Error adding item to cart" };
+  }
+}
+
+// Buy now: add item then redirect to checkout
+export async function buyNow(
+  selectedVariantId: string,
+  quantity: number = 1
+) {
+  try {
+    const cookieStore = await cookies();
+    if (!cookieStore.get("cartId")?.value) {
+      const cart = await createCart();
+      cookieStore.set("cartId", cart.id!);
+    }
+
+    await addToCart([{ merchandiseId: selectedVariantId, quantity }]);
+    updateTag(TAGS.cart);
+  } catch (e) {
+    return { success: false, error: "Error adding item to cart" };
+  }
+
+  const cart = await getCart();
+  redirect(cart!.checkoutUrl);
+}

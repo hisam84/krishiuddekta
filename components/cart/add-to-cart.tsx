@@ -1,11 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { addItem } from "components/cart/actions";
-import { redirectToCheckout } from "components/cart/actions";
+import { addItemDirect, buyNow } from "components/cart/actions";
 import { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useState, useTransition } from "react";
 import { useCart } from "./cart-context";
 
 function CartIcon() {
@@ -38,8 +37,9 @@ export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
   const { addCartItem } = useCart();
   const searchParams = useSearchParams();
-  const [message, formAction] = useActionState(addItem, null);
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, startAddToCart] = useTransition();
+  const [isBuyingNow, startBuyNow] = useTransition();
 
   const variant = variants.find((variant: ProductVariant) =>
     variant.selectedOptions.every(
@@ -67,6 +67,30 @@ export function AddToCart({ product }: { product: Product }) {
   };
 
   const isDisabled = !availableForSale || !selectedVariantId;
+
+  const handleAddToCart = () => {
+    if (!finalVariant || !selectedVariantId) return;
+
+    // Optimistic UI update
+    addCartItem(finalVariant, product);
+
+    // Call server action inside a transition
+    startAddToCart(async () => {
+      await addItemDirect(selectedVariantId, quantity);
+    });
+  };
+
+  const handleBuyNow = () => {
+    if (!finalVariant || !selectedVariantId) return;
+
+    // Optimistic UI update
+    addCartItem(finalVariant, product);
+
+    // Add item then redirect to checkout
+    startBuyNow(async () => {
+      await buyNow(selectedVariantId, quantity);
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -102,60 +126,37 @@ export function AddToCart({ product }: { product: Product }) {
       {/* Action Buttons — 2×2 Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* ADD TO CART */}
-        <form
-          action={async () => {
-            if (!finalVariant) return;
-            // Add the selected quantity
-            for (let i = 0; i < quantity; i++) {
-              addCartItem(finalVariant, product);
-            }
-            const addItemAction = formAction.bind(null, selectedVariantId);
-            addItemAction();
-          }}
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isDisabled || isAddingToCart}
+          className={clsx(
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
+            isDisabled || isAddingToCart
+              ? "cursor-not-allowed bg-neutral-400 opacity-60"
+              : "bg-orange-500 hover:bg-orange-600 active:scale-[0.98] shadow-md hover:shadow-lg"
+          )}
+          aria-label="Add to cart"
         >
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className={clsx(
-              "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
-              isDisabled
-                ? "cursor-not-allowed bg-neutral-400 opacity-60"
-                : "bg-orange-500 hover:bg-orange-600 active:scale-[0.98] shadow-md hover:shadow-lg"
-            )}
-            aria-label="Add to cart"
-          >
-            <CartIcon />
-            {!availableForSale ? "Out of Stock" : "ADD TO CART"}
-          </button>
-        </form>
+          <CartIcon />
+          {!availableForSale ? "Out of Stock" : isAddingToCart ? "Adding..." : "ADD TO CART"}
+        </button>
 
         {/* BUY NOW */}
-        <form
-          action={async () => {
-            if (!finalVariant) return;
-            for (let i = 0; i < quantity; i++) {
-              addCartItem(finalVariant, product);
-            }
-            const addItemAction = formAction.bind(null, selectedVariantId);
-            addItemAction();
-            // Redirect to checkout after adding
-            await redirectToCheckout();
-          }}
+        <button
+          type="button"
+          onClick={handleBuyNow}
+          disabled={isDisabled || isBuyingNow}
+          className={clsx(
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
+            isDisabled || isBuyingNow
+              ? "cursor-not-allowed bg-neutral-400 opacity-60"
+              : "bg-[#1a3c34] hover:bg-[#15322c] active:scale-[0.98] shadow-md hover:shadow-lg"
+          )}
+          aria-label="Buy now"
         >
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className={clsx(
-              "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
-              isDisabled
-                ? "cursor-not-allowed bg-neutral-400 opacity-60"
-                : "bg-[#1a3c34] hover:bg-[#15322c] active:scale-[0.98] shadow-md hover:shadow-lg"
-            )}
-            aria-label="Buy now"
-          >
-            BUY NOW
-          </button>
-        </form>
+          {isBuyingNow ? "Processing..." : "BUY NOW"}
+        </button>
 
         {/* ORDER ON WHATSAPP */}
         <a
@@ -189,10 +190,6 @@ export function AddToCart({ product }: { product: Product }) {
           Call For Order
         </a>
       </div>
-
-      <p aria-live="polite" className="sr-only" role="status">
-        {message}
-      </p>
     </div>
   );
 }
