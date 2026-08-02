@@ -21,6 +21,13 @@ export async function addItem(
   }
 
   try {
+    // Auto-create cart if none exists (first-time visitors)
+    const cookieStore = await cookies();
+    if (!cookieStore.get("cartId")?.value) {
+      const cart = await createCart();
+      cookieStore.set("cartId", cart.id!);
+    }
+
     await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     updateTag(TAGS.cart);
   } catch (e) {
