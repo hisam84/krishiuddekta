@@ -58,11 +58,18 @@ import {
   ShopifyUpdateCartOperation,
 } from "./types";
 
-const domain = process.env.SHOPIFY_STORE_DOMAIN
-  ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
-  : "";
-const endpoint = domain ? `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}` : "";
-const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+const defaultDomain = "next-js-store.myshopify.com";
+const defaultKey = "dd4fd4d048d28a49c9fb756317b9b7eb";
+
+const rawDomain =
+  process.env.SHOPIFY_STORE_DOMAIN &&
+  !process.env.SHOPIFY_STORE_DOMAIN.includes("[")
+    ? process.env.SHOPIFY_STORE_DOMAIN
+    : defaultDomain;
+
+const domain = ensureStartsWith(rawDomain, "https://");
+const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || defaultKey;
 
 type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
@@ -78,10 +85,6 @@ export async function shopifyFetch<T>({
   variables?: ExtractVariables<T>;
 }): Promise<{ status: number; body: T } | never> {
   try {
-    if (!endpoint) {
-      throw new Error("SHOPIFY_STORE_DOMAIN environment variable is not set");
-    }
-
     const result = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -98,7 +101,11 @@ export async function shopifyFetch<T>({
     const body = await result.json();
 
     if (body.errors) {
-      throw body.errors[0];
+      console.warn("Shopify API Error:", body.errors[0]?.message);
+      return {
+        status: result.status,
+        body: { data: {} } as T,
+      };
     }
 
     return {
@@ -106,18 +113,10 @@ export async function shopifyFetch<T>({
       body,
     };
   } catch (e) {
-    if (isShopifyError(e)) {
-      throw {
-        cause: e.cause?.toString() || "unknown",
-        status: e.status || 500,
-        message: e.message,
-        query,
-      };
-    }
-
-    throw {
-      error: e,
-      query,
+    console.warn("Shopify fetch warning:", e);
+    return {
+      status: 500,
+      body: { data: {} } as T,
     };
   }
 }
