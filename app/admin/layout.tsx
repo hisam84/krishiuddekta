@@ -3,52 +3,116 @@ import { ReactNode } from "react";
 import LogoIcon from "components/icons/logo";
 
 export const metadata = {
-  title: "এডমিন প্যানেল | কৃষি উদ্যোক্তা",
+  title: "ওয়ার্ডপ্রেস ড্যাশবোর্ড | কৃষি উদ্যোক্তা",
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-      {/* Admin Top Header */}
-      <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950">
-              <LogoIcon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <Link href="/admin" className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
-                কৃষি উদ্যোক্তা <span className="text-xs font-normal text-neutral-500">(এডমিন কন্ট্রোল)</span>
-              </Link>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#f0f0f1] text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
+      {/* WordPress Classic Top Admin Bar */}
+      <header className="sticky top-0 z-50 flex h-10 w-full items-center justify-between bg-[#1d2327] px-4 text-xs text-white shadow">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 font-bold text-white hover:text-emerald-400"
+          >
+            <LogoIcon className="h-4 w-4 text-emerald-400" />
+            <span>কৃষি উদ্যোক্তা</span>
+          </Link>
 
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link
-              href="/admin/products"
-              className="rounded-lg px-3 py-1.5 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-400"
+          <Link
+            href="/"
+            target="_blank"
+            className="hidden items-center gap-1 text-neutral-300 hover:text-white sm:flex"
+          >
+            <span>🏠 ওয়েবসাইট দেখুন ↗</span>
+          </Link>
+
+          <Link
+            href="/admin/products"
+            className="hidden items-center gap-1 rounded bg-[#2271b1] px-2 py-0.5 font-medium text-white hover:bg-[#135e96] sm:flex"
+          >
+            <span>+ নতুন পণ্য</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-neutral-300">
+            সালাম, <strong className="text-white">এডমিন 👤</strong>
+          </span>
+          <form action="/api/admin/login" method="DELETE">
+            <button
+              type="submit"
+              className="text-neutral-400 hover:text-rose-400 hover:underline"
             >
-              🌱 পণ্যসমূহ
-            </Link>
-            <Link
-              href="/admin/orders"
-              className="rounded-lg px-3 py-1.5 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-400"
-            >
-              📦 অর্ডারসমূহ
-            </Link>
-            <Link
-              href="/"
-              target="_blank"
-              className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-            >
-              🌐 প্রধান ওয়েবসাইট
-            </Link>
-          </nav>
+              লগআউট (Logout)
+            </button>
+          </form>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</main>
+      <div className="flex min-h-[calc(100vh-40px)]">
+        {/* WordPress Classic Dark Left Sidebar */}
+        <aside className="w-56 flex-none border-r border-[#2c3338] bg-[#1d2327] text-sm text-[#f0f6fc]">
+          <div className="py-2">
+            <div className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+              ওয়ার্ডপ্রেস নেভিগেশন
+            </div>
+
+            <nav className="space-y-0.5">
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
+              >
+                <span className="text-base">📊</span>
+                <span>ড্যাশবোর্ড</span>
+              </Link>
+
+              <Link
+                href="/admin/products"
+                className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
+              >
+                <span className="text-base">📦</span>
+                <span>পণ্যসমূহ (Products)</span>
+              </Link>
+
+              <Link
+                href="/admin/orders"
+                className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
+              >
+                <span className="text-base">🛒</span>
+                <span>অর্ডারসমূহ (WooCommerce)</span>
+              </Link>
+
+              <Link
+                href="/admin/categories"
+                className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
+              >
+                <span className="text-base">🏷️</span>
+                <span>ক্যাটাগরি (Categories)</span>
+              </Link>
+
+              <Link
+                href="/admin/settings"
+                className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
+              >
+                <span className="text-base">⚙️</span>
+                <span>সেটিংস (Settings)</span>
+              </Link>
+            </nav>
+          </div>
+
+          <div className="mt-8 border-t border-[#2c3338] p-4 text-xs text-neutral-400">
+            <p>ভার্সন: WordPress 6.7 / Neon Engine</p>
+            <p className="mt-1">কৃষি উদ্যোক্তা v2.0</p>
+          </div>
+        </aside>
+
+        {/* Main WordPress Content Area */}
+        <main className="flex-1 bg-[#f0f0f1] p-6 text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
+          <div className="mx-auto max-w-6xl">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ interface OrderItem {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -58,74 +59,123 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const filteredOrders =
+    statusFilter === "All"
+      ? orders
+      : orders.filter((o) => o.status === statusFilter);
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-          📦 কাস্টমার অর্ডারসমূহ (Order Manager)
+    <div className="space-y-4">
+      {/* WooCommerce Page Header */}
+      <div className="border-b border-neutral-300 pb-3 dark:border-neutral-800">
+        <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
+          অর্ডারসমূহ (WooCommerce Orders)
         </h1>
-        <p className="text-sm text-neutral-500">
-          গ্রাহকদের ফোন নম্বর, ডেলিভারি ঠিকানা এবং ক্যাশ অন ডেলিভারি অর্ডারের স্ট্যাটাস দেখুন
+        <p className="text-xs text-neutral-500">
+          গ্রাহকদের ডিরেক্ট ক্যাশ অন ডেলিভারি (COD) অর্ডার পরিচালনা করুন
         </p>
       </div>
 
+      {/* WooCommerce Status Filter Tabs */}
+      <div className="flex gap-2 text-xs font-semibold">
+        <button
+          onClick={() => setStatusFilter("All")}
+          className={`rounded px-3 py-1 ${
+            statusFilter === "All"
+              ? "bg-[#2271b1] text-white"
+              : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
+          }`}
+        >
+          সবকটি ({orders.length})
+        </button>
+        <button
+          onClick={() => setStatusFilter("Pending")}
+          className={`rounded px-3 py-1 ${
+            statusFilter === "Pending"
+              ? "bg-amber-600 text-white"
+              : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
+          }`}
+        >
+          🟡 পেন্ডিং ({orders.filter((o) => o.status === "Pending").length})
+        </button>
+        <button
+          onClick={() => setStatusFilter("Processing")}
+          className={`rounded px-3 py-1 ${
+            statusFilter === "Processing"
+              ? "bg-blue-600 text-white"
+              : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
+          }`}
+        >
+          🔵 প্রসেসিং ({orders.filter((o) => o.status === "Processing").length})
+        </button>
+        <button
+          onClick={() => setStatusFilter("Completed")}
+          className={`rounded px-3 py-1 ${
+            statusFilter === "Completed"
+              ? "bg-emerald-600 text-white"
+              : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
+          }`}
+        >
+          🟢 সম্পন্ন ({orders.filter((o) => o.status === "Completed").length})
+        </button>
+      </div>
+
+      {/* WooCommerce Orders Table */}
       {loading ? (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-12 text-center text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           অর্ডারসমূহ লোড হচ্ছে...
         </div>
-      ) : orders.length === 0 ? (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-lg font-medium text-neutral-600 dark:text-neutral-300">এখনও কোনো অর্ডার পাওয়া যায়নি</p>
+      ) : filteredOrders.length === 0 ? (
+        <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          <p className="text-neutral-600 dark:text-neutral-300">কোনো অর্ডার পাওয়া যায়নি</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-neutral-600 dark:text-neutral-300">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-xs font-semibold uppercase text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800/50">
-                <tr>
-                  <th className="px-6 py-4">অর্ডার আইডি</th>
-                  <th className="px-6 py-4">গ্রাহকের নাম ও ফোন</th>
-                  <th className="px-6 py-4">ঠিকানা ও জেলা</th>
-                  <th className="px-6 py-4">মোট টাকা</th>
-                  <th className="px-6 py-4">স্ট্যাটাস</th>
+        <div className="overflow-hidden rounded border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
+            <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+              <tr>
+                <th className="px-4 py-3">অর্ডার #</th>
+                <th className="px-4 py-3">গ্রাহকের নাম ও ফোন</th>
+                <th className="px-4 py-3">ডেলিভারি ঠিকানা ও জেলা</th>
+                <th className="px-4 py-3">মোট বিল (Total)</th>
+                <th className="px-4 py-3">স্ট্যাটাস (Status)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              {filteredOrders.map((o) => (
+                <tr key={o.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
+                  <td className="px-4 py-3 font-mono font-bold text-[#2271b1] dark:text-blue-400">
+                    #{o.id}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-bold text-neutral-900 dark:text-white">{o.customer_name}</p>
+                    <p className="text-emerald-700 dark:text-emerald-400">📞 {o.customer_phone}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="line-clamp-2 text-neutral-600 dark:text-neutral-300">{o.address}</p>
+                    <span className="mt-0.5 inline-block rounded bg-neutral-100 px-1.5 py-0.5 font-semibold text-neutral-600 text-[10px] dark:bg-neutral-800 dark:text-neutral-400">
+                      জেলা: {o.district}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                    ৳ {Number(o.total_amount || 0).toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={o.status}
+                      onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                      className="rounded border border-neutral-300 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-800 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    >
+                      <option value="Pending">🟡 পেন্ডিং (Pending)</option>
+                      <option value="Processing">🔵 প্রসেসিং (Processing)</option>
+                      <option value="Completed">🟢 সম্পন্ন (Completed)</option>
+                      <option value="Cancelled">🔴 বাতিল (Cancelled)</option>
+                    </select>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                {orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30">
-                    <td className="px-6 py-4 font-mono font-bold text-neutral-900 dark:text-white">
-                      {o.id}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-neutral-900 dark:text-white">{o.customer_name}</p>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400">📞 {o.customer_phone}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="line-clamp-2 text-xs">{o.address}</p>
-                      <span className="mt-0.5 inline-block rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-                        জেলা: {o.district}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">
-                      ৳ {Number(o.total_amount || 0).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={o.status}
-                        onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                        className="rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-1.5 text-xs font-semibold focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800"
-                      >
-                        <option value="Pending">🟡 পেন্ডিং (Pending)</option>
-                        <option value="Processing">🔵 প্রসেসিং (Processing)</option>
-                        <option value="Completed">🟢 সম্পন্ন (Completed)</option>
-                        <option value="Cancelled">🔴 বাতিল (Cancelled)</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
