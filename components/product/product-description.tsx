@@ -1,5 +1,4 @@
 import { AddToCart } from "components/cart/add-to-cart";
-import Prose from "components/prose";
 import { PriceTag } from "components/ui/price-tag";
 import { Product } from "lib/shopify/types";
 import { VariantSelector } from "./variant-selector";
@@ -7,6 +6,11 @@ import { VariantSelector } from "./variant-selector";
 export function ProductDescription({ product }: { product: Product }) {
   const price = Number(product.priceRange.maxVariantPrice.amount);
   const discountPrice = product.discountPrice;
+
+  // Short description: first 150 chars of plain text
+  const shortDescription = product.description
+    ? product.description.slice(0, 150) + (product.description.length > 150 ? "..." : "")
+    : "";
 
   return (
     <div className="space-y-5">
@@ -36,13 +40,12 @@ export function ProductDescription({ product }: { product: Product }) {
         </span>
       </div>
 
-      {/* Description */}
-      {product.descriptionHtml ? (
-        <Prose
-          className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-300"
-          html={product.descriptionHtml}
-        />
-      ) : null}
+      {/* Short Description */}
+      {shortDescription && (
+        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          {shortDescription}
+        </p>
+      )}
     </div>
   );
 }

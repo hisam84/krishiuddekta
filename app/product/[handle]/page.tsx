@@ -1,4 +1,5 @@
 import Footer from "components/layout/footer";
+import Prose from "components/prose";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
 import { ProductReviewsSection } from "components/product/product-reviews";
@@ -111,6 +112,19 @@ export default async function ProductPage(props: {
             </Suspense>
           </div>
         </div>
+
+        {/* Full Product Description — below the product card */}
+        {product.descriptionHtml ? (
+          <div className="mt-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
+            <h2 className="mb-4 text-lg font-bold text-neutral-900 dark:text-white">
+              বিস্তারিত বিবরণ | Product Description
+            </h2>
+            <Prose
+              className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300"
+              html={product.descriptionHtml}
+            />
+          </div>
+        ) : null}
 
         {/* Customer Reviews Section */}
         <ProductReviewsSection productId={product.id} initialReviews={initialReviews as any[]} />
