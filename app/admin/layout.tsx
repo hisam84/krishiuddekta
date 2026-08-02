@@ -25,27 +25,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             target="_blank"
             className="hidden items-center gap-1 text-neutral-300 hover:text-white sm:flex"
           >
-            <span>🏠 ওয়েবসাইট দেখুন ↗</span>
+            <span>🏠 Visit Site ↗</span>
           </Link>
 
           <Link
             href="/admin/products"
             className="hidden items-center gap-1 rounded bg-[#2271b1] px-2 py-0.5 font-medium text-white hover:bg-[#135e96] sm:flex"
           >
-            <span>+ নতুন পণ্য</span>
+            <span>+ Add New Product</span>
           </Link>
         </div>
 
         <div className="flex items-center gap-4">
           <span className="text-neutral-300">
-            সালাম, <strong className="text-white">এডমিন 👤</strong>
+            Howdy, <strong className="text-white">Admin 👤</strong>
           </span>
           <form action="/api/admin/login" method="DELETE">
             <button
               type="submit"
               className="text-neutral-400 hover:text-rose-400 hover:underline"
             >
-              লগআউট (Logout)
+              Logout
             </button>
           </form>
         </div>

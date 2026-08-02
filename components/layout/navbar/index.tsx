@@ -13,12 +13,29 @@ export async function Navbar() {
   const menu = await getMenu("next-js-frontend-header-menu");
 
   return (
-    <nav className="relative flex items-center justify-between p-4 lg:px-6">
-      <div className="block flex-none md:hidden">
-        <Suspense fallback={null}>
-          <MobileMenu menu={menu} />
-        </Suspense>
+    <>
+      {/* Ghorer Bazar Style Top Announcement Bar */}
+      <div className="bg-emerald-700 text-white text-xs py-2 px-4 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between font-medium">
+          <div className="flex items-center gap-4">
+            <span>📞 হটলাইন: <strong className="font-bold">01700-000000</strong></span>
+            <span className="hidden sm:inline">|</span>
+            <span className="hidden sm:inline">🚚 সারাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery)</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="rounded bg-emerald-800 px-2 py-0.5 text-[11px] hover:bg-emerald-900 transition font-semibold">
+              Admin Login ➔
+            </Link>
+          </div>
+        </div>
       </div>
+
+      <nav className="relative flex items-center justify-between p-4 lg:px-6 border-b border-emerald-100 bg-white/95 dark:bg-neutral-900 dark:border-neutral-800 backdrop-blur">
+        <div className="block flex-none md:hidden">
+          <Suspense fallback={null}>
+            <MobileMenu menu={menu} />
+          </Suspense>
+        </div>
       <div className="flex w-full items-center">
         <div className="flex w-full md:w-1/3">
           <Link
@@ -57,5 +74,6 @@ export async function Navbar() {
         </div>
       </div>
     </nav>
+    </>
   );
 }

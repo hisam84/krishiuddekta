@@ -43,7 +43,7 @@ export default async function AdminCategoriesPage() {
                     target="_blank"
                     className="text-[#2271b1] hover:underline"
                   >
-                    ভিউ ক্যাটাগরি ↗
+                    View Category ↗
                   </Link>
                 </td>
               </tr>

@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
             href="/admin/products"
             className="inline-block rounded border border-[#2271b1] bg-[#2271b1] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#135e96]"
           >
-            + নতুন কৃষি পণ্য যোগ করুন
+            + Add New Product
           </Link>
         </div>
       </div>

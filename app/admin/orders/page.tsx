@@ -86,7 +86,7 @@ export default function AdminOrdersPage() {
               : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
           }`}
         >
-          সবকটি ({orders.length})
+          All ({orders.length})
         </button>
         <button
           onClick={() => setStatusFilter("Pending")}
@@ -96,7 +96,7 @@ export default function AdminOrdersPage() {
               : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
           }`}
         >
-          🟡 পেন্ডিং ({orders.filter((o) => o.status === "Pending").length})
+          Pending ({orders.filter((o) => o.status === "Pending").length})
         </button>
         <button
           onClick={() => setStatusFilter("Processing")}
@@ -106,7 +106,7 @@ export default function AdminOrdersPage() {
               : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
           }`}
         >
-          🔵 প্রসেসিং ({orders.filter((o) => o.status === "Processing").length})
+          Processing ({orders.filter((o) => o.status === "Processing").length})
         </button>
         <button
           onClick={() => setStatusFilter("Completed")}
@@ -116,7 +116,7 @@ export default function AdminOrdersPage() {
               : "bg-white text-neutral-700 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300"
           }`}
         >
-          🟢 সম্পন্ন ({orders.filter((o) => o.status === "Completed").length})
+          Completed ({orders.filter((o) => o.status === "Completed").length})
         </button>
       </div>
 

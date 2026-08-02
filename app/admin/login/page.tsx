@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
-            {loading ? "লগইন হচ্ছে..." : "এডমিন প্যানেলে প্রবেশ করুন ➔"}
+            {loading ? "Logging in..." : "Log In ➔"}
           </button>
         </form>
       </div>

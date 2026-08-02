@@ -125,7 +125,7 @@ export default function AdminProductsPage() {
             onClick={() => setShowModal(true)}
             className="rounded border border-[#2271b1] bg-[#f6f7f7] px-3 py-1 text-xs font-semibold text-[#2271b1] transition hover:bg-[#2271b1] hover:text-white dark:bg-neutral-800 dark:text-blue-400"
           >
-            + নতুন যোগ করুন (Add New)
+            + Add New
           </button>
         </div>
 
@@ -218,7 +218,7 @@ export default function AdminProductsPage() {
                       onClick={() => handleDelete(p.id, p.title)}
                       className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
                     >
-                      Trash (মুছুন)
+                      Trash
                     </button>
                   </td>
                 </tr>
@@ -321,14 +321,14 @@ export default function AdminProductsPage() {
                   onClick={() => setShowModal(false)}
                   className="w-1/2 rounded border border-neutral-300 py-2 font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
                 >
-                  বাতিল (Cancel)
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-semibold text-white transition hover:bg-[#135e96] disabled:opacity-50"
                 >
-                  {submitting ? "প্রকাশিত হচ্ছে..." : "প্রকাশ করুন (Publish) ➔"}
+                  {submitting ? "Publishing..." : "Publish Product ➔"}
                 </button>
               </div>
             </form>
