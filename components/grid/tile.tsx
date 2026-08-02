@@ -1,22 +1,36 @@
 import clsx from "clsx";
-import Image from "next/image";
 import Label from "../label";
 
-export function GridTileImage({
-  isInteractive = true,
-  active,
-  label,
-  ...props
-}: {
+type GridTileImageProps = {
   isInteractive?: boolean;
   active?: boolean;
+  priority?: boolean;
+  fill?: boolean;
+  sizes?: string;
   label?: {
     title: string;
     amount: string;
     currencyCode: string;
     position?: "bottom" | "center";
   };
-} & React.ComponentProps<typeof Image>) {
+  src?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  className?: string;
+};
+
+export function GridTileImage({
+  isInteractive = true,
+  active,
+  priority,
+  label,
+  src,
+  alt,
+  width,
+  height,
+  className,
+}: GridTileImageProps) {
   return (
     <div
       className={clsx(
@@ -28,13 +42,23 @@ export function GridTileImage({
         },
       )}
     >
-      {props.src ? (
-        <Image
-          className={clsx("relative h-full w-full object-contain", {
-            "transition duration-300 ease-in-out group-hover:scale-105":
-              isInteractive,
-          })}
-          {...props}
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={alt || ""}
+          width={width}
+          height={height}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          className={clsx(
+            "relative h-full w-full object-contain",
+            {
+              "transition duration-300 ease-in-out group-hover:scale-105":
+                isInteractive,
+            },
+            className,
+          )}
         />
       ) : null}
       {label ? (

@@ -104,6 +104,9 @@ export async function shopifyFetch<T>({
         ...(query && { query }),
         ...(variables && { variables }),
       }),
+      // The Shopify API is only a fallback when the DB has no data;
+      // fail fast instead of blocking the page on an unreachable host.
+      signal: AbortSignal.timeout(5000),
     });
 
     const body = await result.json();
@@ -150,7 +153,7 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
 };
 
 const reshapeCollection = (
-  collection?: ShopifyCollection | null
+  collection?: ShopifyCollection | null,
 ): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -193,7 +196,7 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
 
 const reshapeProduct = (
   product?: ShopifyProduct | null,
-  filterHiddenProducts: boolean = true
+  filterHiddenProducts: boolean = true,
 ) => {
   if (
     !product ||
@@ -237,7 +240,7 @@ export async function createCart(): Promise<Cart> {
 }
 
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await getCartCookie())!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
@@ -264,7 +267,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 }
 
 export async function updateCart(
-  lines: { id: string; merchandiseId: string; quantity: number }[]
+  lines: { id: string; merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await getCartCookie())!;
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
@@ -299,9 +302,8 @@ export async function getCart(): Promise<Cart | undefined> {
 }
 
 export async function getCollection(
-  handle: string
+  handle: string,
 ): Promise<Collection | undefined> {
-
   const res = await shopifyFetch<ShopifyCollectionOperation>({
     query: getCollectionQuery,
     variables: {
@@ -321,7 +323,6 @@ export async function getCollectionProducts({
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
-
   const dbProducts = await getDbCollectionProducts(collection);
   if (dbProducts.length > 0) {
     return dbProducts;
@@ -341,12 +342,11 @@ export async function getCollectionProducts({
   }
 
   return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products)
+    removeEdgesAndNodes(res.body.data.collection.products),
   );
 }
 
 export async function getCollections(): Promise<Collection[]> {
-
   const dbCollections = await getDbCollections();
   if (dbCollections.length > 0) {
     return dbCollections;
@@ -369,7 +369,7 @@ export async function getCollections(): Promise<Collection[]> {
       updatedAt: new Date().toISOString(),
     },
     ...reshapeCollections(shopifyCollections).filter(
-      (collection) => !collection.handle.startsWith("hidden")
+      (collection) => !collection.handle.startsWith("hidden"),
     ),
   ];
 
@@ -377,7 +377,6 @@ export async function getCollections(): Promise<Collection[]> {
 }
 
 export async function getMenu(handle: string): Promise<Menu[]> {
-
   const defaultMenu = [
     { title: "All Products", path: "/search" },
     { title: "Seeds & Saplings", path: "/search/seeds" },
@@ -422,7 +421,6 @@ export async function getPages(): Promise<Page[]> {
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
-
   const dbProduct = await getDbProduct(handle);
   if (dbProduct) {
     return dbProduct;
@@ -439,9 +437,8 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
 }
 
 export async function getProductRecommendations(
-  productId: string
+  productId: string,
 ): Promise<Product[]> {
-
   const dbProducts = await getDbProducts();
   if (dbProducts.length > 0) {
     return dbProducts.filter((p) => p.id !== productId).slice(0, 4);
@@ -466,7 +463,6 @@ export async function getProducts({
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
-
   const dbProducts = await getDbProducts(query);
   if (dbProducts.length > 0) {
     return dbProducts;

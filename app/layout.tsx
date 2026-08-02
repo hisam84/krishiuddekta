@@ -3,7 +3,6 @@ import { Navbar } from "components/layout/navbar";
 import { NavbarWrapper } from "components/layout/navbar-wrapper";
 import { WelcomeToast } from "components/welcome-toast";
 import { GeistSans } from "geist/font/sans";
-import { getCart } from "lib/shopify";
 import { ReactNode } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -28,13 +27,14 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // Don't await the fetch, pass the Promise to the context provider
-  const cart = getCart();
+  // The cart is managed client-side (persisted in localStorage),
+  // so there is no server cart to fetch on every request.
+  const cartPromise = Promise.resolve(undefined);
 
   return (
     <html lang="en" className={GeistSans.variable}>
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        <CartProvider cartPromise={cart}>
+        <CartProvider cartPromise={cartPromise}>
           <NavbarWrapper>
             <Navbar />
           </NavbarWrapper>

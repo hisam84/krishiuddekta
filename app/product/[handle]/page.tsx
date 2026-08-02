@@ -57,8 +57,6 @@ export default async function ProductPage(props: {
 
   if (!product) return notFound();
 
-  const initialReviews = await getDbReviews(product.id);
-
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -68,7 +66,7 @@ export default async function ProductPage(props: {
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: product.rating || 5.0,
-      reviewCount: initialReviews.length || product.reviewCount || 12,
+      reviewCount: product.reviewCount || 12,
     },
     offers: {
       "@type": "AggregateOffer",
@@ -127,10 +125,14 @@ export default async function ProductPage(props: {
         ) : null}
 
         {/* Customer Reviews Section */}
-        <ProductReviewsSection productId={product.id} initialReviews={initialReviews as any[]} />
+        <Suspense fallback={null}>
+          <ProductReviewsSectionServer productId={product.id} />
+        </Suspense>
 
         {/* Related Products Carousel */}
-        <RelatedProducts id={product.id} />
+        <Suspense fallback={null}>
+          <RelatedProducts id={product.id} />
+        </Suspense>
       </div>
       <Footer />
     </>
@@ -167,5 +169,19 @@ async function RelatedProducts({ id }: { id: string }) {
         ))}
       </div>
     </div>
+  );
+}
+
+async function ProductReviewsSectionServer({
+  productId,
+}: {
+  productId: string;
+}) {
+  const initialReviews = await getDbReviews(productId);
+  return (
+    <ProductReviewsSection
+      productId={productId}
+      initialReviews={initialReviews as any[]}
+    />
   );
 }
