@@ -291,3 +291,36 @@ export async function updateDbOrderStatus(id: string, status: string): Promise<b
     return false;
   }
 }
+
+export async function getDbReviews(productId: string) {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM reviews WHERE product_id = ${productId} ORDER BY created_at DESC;`;
+    return rows;
+  } catch (error) {
+    console.error(`Error fetching reviews for ${productId}:`, error);
+    return [];
+  }
+}
+
+export async function addDbReview(data: {
+  product_id: string;
+  reviewer_name: string;
+  rating: number;
+  comment: string;
+}): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const id = `rev-${Date.now()}`;
+    await sql`
+      INSERT INTO reviews (id, product_id, reviewer_name, rating, comment)
+      VALUES (${id}, ${data.product_id}, ${data.reviewer_name}, ${data.rating}, ${data.comment});
+    `;
+    return true;
+  } catch (error) {
+    console.error("Failed to add review:", error);
+    return false;
+  }
+}

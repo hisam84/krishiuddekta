@@ -38,6 +38,15 @@ export interface DbOrder {
   created_at?: string;
 }
 
+export interface DbReview {
+  id: string;
+  product_id: string;
+  reviewer_name: string;
+  rating: number;
+  comment: string;
+  created_at?: string;
+}
+
 export async function initDatabase() {
   const sql = getDb();
 
@@ -97,6 +106,18 @@ export async function initDatabase() {
         total_amount NUMERIC(10, 2) NOT NULL,
         status VARCHAR(50) DEFAULT 'Pending',
         items TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    // 5. Create Reviews Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id VARCHAR(100) PRIMARY KEY,
+        product_id VARCHAR(100) NOT NULL,
+        reviewer_name VARCHAR(255) NOT NULL,
+        rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -175,6 +196,19 @@ export async function initDatabase() {
           4.9,
           30
         );
+      `;
+    }
+
+    // Insert Default Sample Reviews if empty
+    const existingReviews = await sql`SELECT COUNT(*) as count FROM reviews;`;
+    if (Number(existingReviews[0]?.count || 0) === 0) {
+      await sql`
+        INSERT INTO reviews (id, product_id, reviewer_name, rating, comment)
+        VALUES 
+        ('rev-1', 'prod-1', 'Abul Hossain', 5, 'Germination rate was over 95%. Excellent yield of hybrid tomatoes!'),
+        ('rev-2', 'prod-1', 'Jasim Uddin', 5, 'Best seeds I have bought online. Super fast delivery.'),
+        ('rev-3', 'prod-2', 'Dr. Nazmul Islam', 5, 'Soil fertility improved remarkably within two weeks of using this vermicompost.'),
+        ('rev-4', 'prod-3', 'Kabir Mahmud', 4, 'Heavy duty battery sprayer. Saved hours of labor on my orchard.');
       `;
     }
 
