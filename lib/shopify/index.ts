@@ -1,4 +1,10 @@
 import {
+  getDbProducts,
+  getDbProduct,
+  getDbCollections,
+  getDbCollectionProducts,
+} from "lib/db/products";
+import {
   HIDDEN_PRODUCT_TAG,
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
@@ -324,11 +330,9 @@ export async function getCollectionProducts({
   cacheTag(TAGS.collections, TAGS.products);
   cacheLife("days");
 
-  if (!endpoint) {
-    console.log(
-      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`
-    );
-    return [];
+  const dbProducts = await getDbCollectionProducts(collection);
+  if (dbProducts.length > 0) {
+    return dbProducts;
   }
 
   const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
@@ -341,7 +345,6 @@ export async function getCollectionProducts({
   });
 
   if (!res.body?.data?.collection) {
-    console.log(`No collection found for \`${collection}\``);
     return [];
   }
 
@@ -355,21 +358,9 @@ export async function getCollections(): Promise<Collection[]> {
   cacheTag(TAGS.collections);
   cacheLife("days");
 
-  if (!endpoint) {
-    console.log("Skipping getCollections - Shopify not configured");
-    return [
-      {
-        handle: "",
-        title: "All",
-        description: "All products",
-        seo: {
-          title: "All",
-          description: "All products",
-        },
-        path: "/search",
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+  const dbCollections = await getDbCollections();
+  if (dbCollections.length > 0) {
+    return dbCollections;
   }
 
   const res = await shopifyFetch<ShopifyCollectionsOperation>({
@@ -388,8 +379,6 @@ export async function getCollections(): Promise<Collection[]> {
       path: "/search",
       updatedAt: new Date().toISOString(),
     },
-    // Filter out the `hidden` collections.
-    // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(shopifyCollections).filter(
       (collection) => !collection.handle.startsWith("hidden")
     ),
@@ -403,10 +392,12 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   cacheTag(TAGS.collections);
   cacheLife("days");
 
-  if (!endpoint) {
-    console.log(`Skipping getMenu for '${handle}' - Shopify not configured`);
-    return [];
-  }
+  const defaultMenu = [
+    { title: "সকল পণ্য", path: "/search" },
+    { title: "বীজ ও চারা", path: "/search/seeds" },
+    { title: "সার", path: "/search/fertilizer" },
+    { title: "যন্ত্রপাতি", path: "/search/tools" },
+  ];
 
   const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,
@@ -415,15 +406,16 @@ export async function getMenu(handle: string): Promise<Menu[]> {
     },
   });
 
-  return (
+  const shopifyMenuItems =
     res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
       title: item.title,
       path: item.url
         .replace(domain, "")
         .replace("/collections", "/search")
         .replace("/pages", ""),
-    })) || []
-  );
+    })) || [];
+
+  return shopifyMenuItems.length > 0 ? shopifyMenuItems : defaultMenu;
 }
 
 export async function getPage(handle: string): Promise<Page> {
@@ -448,9 +440,9 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
   cacheTag(TAGS.products);
   cacheLife("days");
 
-  if (!endpoint) {
-    console.log(`Skipping getProduct for '${handle}' - Shopify not configured`);
-    return undefined;
+  const dbProduct = await getDbProduct(handle);
+  if (dbProduct) {
+    return dbProduct;
   }
 
   const res = await shopifyFetch<ShopifyProductOperation>({
@@ -469,6 +461,11 @@ export async function getProductRecommendations(
   "use cache";
   cacheTag(TAGS.products);
   cacheLife("days");
+
+  const dbProducts = await getDbProducts();
+  if (dbProducts.length > 0) {
+    return dbProducts.filter((p) => p.id !== productId).slice(0, 4);
+  }
 
   const res = await shopifyFetch<ShopifyProductRecommendationsOperation>({
     query: getProductRecommendationsQuery,
@@ -492,6 +489,11 @@ export async function getProducts({
   "use cache";
   cacheTag(TAGS.products);
   cacheLife("days");
+
+  const dbProducts = await getDbProducts(query);
+  if (dbProducts.length > 0) {
+    return dbProducts;
+  }
 
   const res = await shopifyFetch<ShopifyProductsOperation>({
     query: getProductsQuery,
