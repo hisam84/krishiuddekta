@@ -10,8 +10,8 @@ import React, {
   createContext,
   use,
   useContext,
-  useMemo,
-  useOptimistic,
+  useEffect,
+  useState,
 } from "react";
 
 type UpdateType = "plus" | "minus" | "delete";
@@ -31,6 +31,8 @@ type CartContextType = {
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const STORAGE_KEY = "krishi-udokta-cart";
 
 function calculateItemCost(quantity: number, price: string): string {
   return (Number(price) * quantity).toString();
@@ -210,29 +212,59 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const initialCart = use(context.cartPromise);
-  const [optimisticCart, updateOptimisticCart] = useOptimistic(
-    initialCart,
-    cartReducer,
-  );
+  const serverCart = use(context.cartPromise);
+  const [localCart, setLocalCart] = useState<Cart | undefined>(undefined);
+
+  // Restore cart from localStorage on first mount
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.lines)) {
+          setLocalCart(parsed);
+        }
+      }
+    } catch (e) {
+      // Ignore corrupted storage data
+    }
+  }, []);
+
+  // The local (client-side) cart takes precedence over the server cart
+  const cart = localCart ?? serverCart ?? createEmptyCart();
+
+  // Persist the cart whenever it changes
+  useEffect(() => {
+    if (localCart) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(localCart));
+      } catch (e) {
+        // Ignore storage write failures
+      }
+    }
+  }, [localCart]);
 
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    updateOptimisticCart({
-      type: "UPDATE_ITEM",
-      payload: { merchandiseId, updateType },
-    });
+    setLocalCart((prev) =>
+      cartReducer(prev ?? serverCart, {
+        type: "UPDATE_ITEM",
+        payload: { merchandiseId, updateType },
+      }),
+    );
   };
 
   const addCartItem = (variant: ProductVariant, product: Product) => {
-    updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
+    setLocalCart((prev) =>
+      cartReducer(prev ?? serverCart, {
+        type: "ADD_ITEM",
+        payload: { variant, product },
+      }),
+    );
   };
 
-  return useMemo(
-    () => ({
-      cart: optimisticCart,
-      updateCartItem,
-      addCartItem,
-    }),
-    [optimisticCart],
-  );
+  return {
+    cart,
+    updateCartItem,
+    addCartItem,
+  };
 }
