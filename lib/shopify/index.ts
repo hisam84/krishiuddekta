@@ -126,9 +126,7 @@ const removeEdgesAndNodes = <T>(array?: Connection<T> | null): T[] => {
   return array.edges.map((edge) => edge?.node).filter(Boolean) as T[];
 };
 
-const reshapeCart = (cart?: ShopifyCart | null): Cart | undefined => {
-  if (!cart) return undefined;
-
+const reshapeCart = (cart: ShopifyCart): Cart => {
   if (!cart.cost?.totalTaxAmount) {
     cart.cost = cart.cost || {};
     cart.cost.totalTaxAmount = {
