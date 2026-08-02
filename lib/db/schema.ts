@@ -6,10 +6,16 @@ export interface DbProduct {
   title: string;
   description: string;
   price: number;
+  discount_price?: number;
   currency: string;
   image_url: string;
   category: string;
   available: boolean;
+  badge?: string;
+  is_bestseller?: boolean;
+  is_new_arrival?: boolean;
+  rating?: number;
+  review_count?: number;
   created_at?: string;
 }
 
@@ -44,15 +50,33 @@ export async function initDatabase() {
         title VARCHAR(255) NOT NULL,
         description TEXT,
         price NUMERIC(10, 2) NOT NULL,
+        discount_price NUMERIC(10, 2),
         currency VARCHAR(10) DEFAULT 'BDT',
         image_url TEXT,
         category VARCHAR(100) DEFAULT 'general',
         available BOOLEAN DEFAULT TRUE,
+        badge VARCHAR(50),
+        is_bestseller BOOLEAN DEFAULT FALSE,
+        is_new_arrival BOOLEAN DEFAULT FALSE,
+        rating NUMERIC(3, 2) DEFAULT 5.0,
+        review_count INT DEFAULT 12,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
 
-    // 2. Create Collections/Categories Table
+    // 2. Add Missing Columns dynamically if existing table lacks them
+    try {
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC(10, 2);`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_bestseller BOOLEAN DEFAULT FALSE;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 2) DEFAULT 5.0;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 12;`;
+    } catch (e) {
+      // Ignore if columns already exist
+    }
+
+    // 3. Create Collections/Categories Table
     await sql`
       CREATE TABLE IF NOT EXISTS collections (
         id VARCHAR(100) PRIMARY KEY,
@@ -62,7 +86,7 @@ export async function initDatabase() {
       );
     `;
 
-    // 3. Create Orders Table
+    // 4. Create Orders Table
     await sql`
       CREATE TABLE IF NOT EXISTS orders (
         id VARCHAR(100) PRIMARY KEY,
@@ -81,7 +105,7 @@ export async function initDatabase() {
     const existingProducts = await sql`SELECT COUNT(*) as count FROM products;`;
     if (Number(existingProducts[0]?.count || 0) === 0) {
       await sql`
-        INSERT INTO products (id, handle, title, description, price, currency, image_url, category, available)
+        INSERT INTO products (id, handle, title, description, price, discount_price, currency, image_url, category, available, badge, is_bestseller, is_new_arrival, rating, review_count)
         VALUES 
         (
           'prod-1', 
@@ -89,10 +113,16 @@ export async function initDatabase() {
           'High Yield Hybrid Tomato Seeds (50g)', 
           'Disease-resistant high yielding hybrid tomato seeds. Provides excellent harvest under diverse weather conditions.', 
           350.00, 
+          290.00,
           'BDT', 
           'https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800', 
           'seeds', 
-          true
+          true,
+          'Best Seller',
+          true,
+          false,
+          4.9,
+          24
         ),
         (
           'prod-2', 
@@ -100,10 +130,16 @@ export async function initDatabase() {
           'Organic Vermicompost Fertilizer (10kg)', 
           '100% natural and eco-friendly vermicompost fertilizer. Enhances soil fertility and root growth.', 
           450.00, 
+          380.00,
           'BDT', 
           'https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&q=80&w=800', 
           'fertilizer', 
-          true
+          true,
+          '100% Organic',
+          true,
+          true,
+          5.0,
+          18
         ),
         (
           'prod-3', 
@@ -111,10 +147,16 @@ export async function initDatabase() {
           'Battery Operated Agriculture Sprayer (16L)', 
           'Heavy duty battery powered sprayer for automatic pesticide and fertilizer application.', 
           3200.00, 
+          2850.00,
           'BDT', 
           'https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800', 
           'tools', 
-          true
+          true,
+          'Top Equipment',
+          false,
+          true,
+          4.8,
+          15
         ),
         (
           'prod-4', 
@@ -122,10 +164,16 @@ export async function initDatabase() {
           'Thai All-Season Grafted Mango Sapling', 
           'Grafted premium Thai Katimon mango plant suitable for rooftop gardening and tubs.', 
           550.00, 
+          490.00,
           'BDT', 
           'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=80&w=800', 
           'plants', 
-          true
+          true,
+          'Popular',
+          true,
+          false,
+          4.9,
+          30
         );
       `;
     }

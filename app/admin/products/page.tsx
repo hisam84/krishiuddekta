@@ -9,8 +9,10 @@ interface ProductItem {
   title: string;
   description: string;
   priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+  discountPrice?: number;
   featuredImage: { url: string; altText: string };
   tags: string[];
+  badge?: string;
   availableForSale: boolean;
   updatedAt?: string;
 }
@@ -25,6 +27,8 @@ export default function AdminProductsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [discountPrice, setDiscountPrice] = useState("");
+  const [badge, setBadge] = useState("Best Seller");
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("seeds");
   const [submitting, setSubmitting] = useState(false);
@@ -64,6 +68,8 @@ export default function AdminProductsPage() {
           title,
           description,
           price: Number(price),
+          discount_price: discountPrice ? Number(discountPrice) : undefined,
+          badge,
           image_url: imageUrl,
           category,
         }),
@@ -76,6 +82,7 @@ export default function AdminProductsPage() {
         setTitle("");
         setDescription("");
         setPrice("");
+        setDiscountPrice("");
         setImageUrl("");
         fetchProducts();
       } else {
@@ -166,6 +173,7 @@ export default function AdminProductsPage() {
                 <th className="px-4 py-3">Product Title</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Badge</th>
                 <th className="px-4 py-3">Stock Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -203,6 +211,11 @@ export default function AdminProductsPage() {
                     BDT {Number(p.priceRange?.minVariantPrice?.amount || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-2.5">
+                    <span className="rounded bg-amber-100 px-2 py-0.5 font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                      {p.badge || "100% Organic"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5">
                     {p.availableForSale ? (
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                         In Stock
@@ -231,7 +244,7 @@ export default function AdminProductsPage() {
       {/* WordPress Add Product Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
               <h2 className="text-base font-bold text-[#1d2327] dark:text-white">
                 🌱 Add New Product
@@ -259,34 +272,64 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  Price (in BDT) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  placeholder="e.g. 350"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
+                    Original Price (BDT) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="e.g. 350"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
+                    Discount Price (BDT)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 290"
+                    value={discountPrice}
+                    onChange={(e) => setDiscountPrice(e.target.value)}
+                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  Category
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                >
-                  <option value="seeds">Seeds & Saplings</option>
-                  <option value="fertilizer">Fertilizers</option>
-                  <option value="tools">Agro Tools</option>
-                  <option value="general">General</option>
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  >
+                    <option value="seeds">Seeds & Saplings</option>
+                    <option value="fertilizer">Fertilizers</option>
+                    <option value="tools">Agro Tools</option>
+                    <option value="general">General</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-neutral-700 dark:text-neutral-300">
+                    Badge Tag
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Best Seller / 100% Organic"
+                    value={badge}
+                    onChange={(e) => setBadge(e.target.value)}
+                    className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  />
+                </div>
               </div>
 
               <div>

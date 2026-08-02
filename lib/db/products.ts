@@ -63,6 +63,11 @@ export function formatDbProductToProduct(item: DbProduct): Product {
       description: item.description || "",
     },
     tags: [item.category || "general"],
+    discountPrice: item.discount_price ? Number(item.discount_price) : undefined,
+    badge: item.badge || undefined,
+    isBestSeller: Boolean(item.is_bestseller),
+    rating: item.rating ? Number(item.rating) : 5.0,
+    reviewCount: item.review_count ? Number(item.review_count) : 12,
     updatedAt: item.created_at || new Date().toISOString(),
   };
 }
@@ -167,6 +172,8 @@ export async function addDbProduct(data: {
   title: string;
   description: string;
   price: number;
+  discount_price?: number;
+  badge?: string;
   image_url: string;
   category: string;
 }): Promise<boolean> {
@@ -181,8 +188,8 @@ export async function addDbProduct(data: {
       .replace(/[\s_]+/g, "-") + `-${Date.now().toString().slice(-4)}`;
 
     await sql`
-      INSERT INTO products (id, handle, title, description, price, currency, image_url, category, available)
-      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.price}, 'BDT', ${data.image_url}, ${data.category}, true);
+      INSERT INTO products (id, handle, title, description, price, discount_price, currency, image_url, category, badge, available)
+      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.price}, ${data.discount_price || null}, 'BDT', ${data.image_url}, ${data.category}, ${data.badge || 'Best Seller'}, true);
     `;
     return true;
   } catch (error) {
@@ -197,6 +204,8 @@ export async function updateDbProduct(
     title?: string;
     description?: string;
     price?: number;
+    discount_price?: number;
+    badge?: string;
     image_url?: string;
     category?: string;
     available?: boolean;
@@ -209,6 +218,8 @@ export async function updateDbProduct(
     if (data.title !== undefined) await sql`UPDATE products SET title = ${data.title} WHERE id = ${id}`;
     if (data.description !== undefined) await sql`UPDATE products SET description = ${data.description} WHERE id = ${id}`;
     if (data.price !== undefined) await sql`UPDATE products SET price = ${data.price} WHERE id = ${id}`;
+    if (data.discount_price !== undefined) await sql`UPDATE products SET discount_price = ${data.discount_price} WHERE id = ${id}`;
+    if (data.badge !== undefined) await sql`UPDATE products SET badge = ${data.badge} WHERE id = ${id}`;
     if (data.image_url !== undefined) await sql`UPDATE products SET image_url = ${data.image_url} WHERE id = ${id}`;
     if (data.category !== undefined) await sql`UPDATE products SET category = ${data.category} WHERE id = ${id}`;
     if (data.available !== undefined) await sql`UPDATE products SET available = ${data.available} WHERE id = ${id}`;
