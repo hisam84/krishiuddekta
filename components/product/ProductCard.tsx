@@ -85,7 +85,7 @@ export function ProductCard({
           href={`/product/${handle}`}
           className="block w-full rounded-xl bg-emerald-600 py-2.5 text-center text-xs font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800 shadow-md"
         >
-          {availableForSale ? "Order Now ➔" : "Out of Stock"}
+          {availableForSale ? "Order Now" : "Out of Stock"}
         </Link>
       </div>
     </div>

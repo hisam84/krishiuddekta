@@ -83,7 +83,7 @@ export function ProductReviewsSection({
           <p className="text-xs text-neutral-500 mt-0.5">Real feedback from verified buyers</p>
         </div>
         <Button size="sm" variant="outline" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Cancel" : "✍️ Write a Review"}
+          {showForm ? "Cancel" : "Write a Review"}
         </Button>
       </div>
 
@@ -112,11 +112,11 @@ export function ProductReviewsSection({
               onChange={(e) => setRating(Number(e.target.value))}
               className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-white font-bold text-amber-500"
             >
-              <option value="5">★★★★★ (5/5 Exceptional)</option>
-              <option value="4">★★★★☆ (4/5 Very Good)</option>
-              <option value="3">★★★☆☆ (3/5 Average)</option>
-              <option value="2">★★☆☆☆ (2/5 Below Average)</option>
-              <option value="1">★☆☆☆☆ (1/5 Poor)</option>
+              <option value="5">5/5 (Exceptional)</option>
+              <option value="4">4/5 (Very Good)</option>
+              <option value="3">3/5 (Average)</option>
+              <option value="2">2/5 (Below Average)</option>
+              <option value="1">1/5 (Poor)</option>
             </select>
           </div>
 
@@ -135,7 +135,7 @@ export function ProductReviewsSection({
           </div>
 
           <Button type="submit" disabled={submitting} size="sm">
-            {submitting ? "Submitting..." : "Submit Review ➔"}
+            {submitting ? "Submitting..." : "Submit Review"}
           </Button>
         </form>
       )}

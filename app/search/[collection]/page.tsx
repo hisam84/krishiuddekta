@@ -43,7 +43,6 @@ export default async function CategoryPage(props: {
     <section>
       {products.length === 0 ? (
         <div className="my-12 flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-800">
-          <div className="text-4xl mb-3">🌱</div>
           <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
             No products found in this category
           </h2>
@@ -51,7 +50,7 @@ export default async function CategoryPage(props: {
             Check back soon or explore other agricultural product categories.
           </p>
           <Link href="/search" className="mt-5">
-            <Button size="sm">View All Categories ➔</Button>
+            <Button size="sm">View All Categories</Button>
           </Link>
         </div>
       ) : (

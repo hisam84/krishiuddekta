@@ -3,13 +3,13 @@ import { ReactNode } from "react";
 import LogoIcon from "components/icons/logo";
 
 export const metadata = {
-  title: "WordPress Dashboard | Krishi Uddokta",
+  title: "Admin Dashboard | Krishi Uddokta",
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f0f0f1] text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
-      {/* WordPress Classic Top Admin Bar */}
+      {/* Top Admin Bar */}
       <header className="sticky top-0 z-50 flex h-10 w-full items-center justify-between bg-[#1d2327] px-4 text-xs text-white shadow">
         <div className="flex items-center gap-4">
           <Link
@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             target="_blank"
             className="hidden items-center gap-1 text-neutral-300 hover:text-white sm:flex"
           >
-            <span>🏠 Visit Site ↗</span>
+            <span>Visit Site</span>
           </Link>
 
           <Link
@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
         <div className="flex items-center gap-4">
           <span className="text-neutral-300">
-            Howdy, <strong className="text-white">Admin 👤</strong>
+            Howdy, <strong className="text-white">Admin</strong>
           </span>
           <form action="/api/admin/login" method="DELETE">
             <button
@@ -52,11 +52,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex min-h-[calc(100vh-40px)]">
-        {/* WordPress Classic Dark Left Sidebar */}
+        {/* Dark Left Sidebar */}
         <aside className="w-56 flex-none border-r border-[#2c3338] bg-[#1d2327] text-sm text-[#f0f6fc]">
           <div className="py-2">
             <div className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-              WordPress Navigation
+              Navigation
             </div>
 
             <nav className="space-y-0.5">
@@ -64,7 +64,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 href="/admin"
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
-                <span className="text-base">📊</span>
                 <span>Dashboard</span>
               </Link>
 
@@ -72,7 +71,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 href="/admin/products"
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
-                <span className="text-base">📦</span>
                 <span>Products</span>
               </Link>
 
@@ -80,15 +78,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 href="/admin/orders"
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
-                <span className="text-base">🛒</span>
-                <span>WooCommerce Orders</span>
+                <span>Orders</span>
               </Link>
 
               <Link
                 href="/admin/categories"
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
-                <span className="text-base">🏷️</span>
                 <span>Categories</span>
               </Link>
 
@@ -96,19 +92,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 href="/admin/settings"
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
-                <span className="text-base">⚙️</span>
                 <span>Settings</span>
               </Link>
             </nav>
           </div>
 
           <div className="mt-8 border-t border-[#2c3338] p-4 text-xs text-neutral-400">
-            <p>Version: WordPress 6.7 / Neon</p>
-            <p className="mt-1">Krishi Uddokta v2.0</p>
+            <p>Krishi Uddokta v2.0</p>
           </div>
         </aside>
 
-        {/* Main WordPress Content Area */}
+        {/* Main Content Area */}
         <main className="flex-1 bg-[#f0f0f1] p-6 text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>

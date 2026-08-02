@@ -5,21 +5,13 @@ import { toast } from "sonner";
 
 export function WelcomeToast() {
   useEffect(() => {
-    // ignore if screen height is too small
-    if (window.innerHeight < 650) return;
-    if (!document.cookie.includes("welcome-toast=2")) {
-      toast("🌱 Welcome to Krishi Uddokta!", {
-        id: "welcome-toast",
+    // Show toast only once per session
+    if (!sessionStorage.getItem("welcome-toast-shown")) {
+      toast("Welcome to Krishi Uddokta!", {
+        description: "Your trusted online agro store for seeds, fertilizers, and tools.",
         duration: 5000,
-        onDismiss: () => {
-          document.cookie = "welcome-toast=2; max-age=31536000; path=/";
-        },
-        description: (
-          <>
-            Premium organic agro products and high-yield seeds storefront.
-          </>
-        ),
       });
+      sessionStorage.setItem("welcome-toast-shown", "true");
     }
   }, []);
 

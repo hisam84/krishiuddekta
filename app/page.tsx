@@ -29,7 +29,7 @@ export default async function HomePage() {
         <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-3 dark:border-neutral-800">
           <div>
             <h2 className="text-xl font-extrabold text-neutral-900 dark:text-white">
-              🌾 Featured Categories
+              Featured Categories
             </h2>
             <p className="text-xs text-neutral-500">Explore high quality agricultural product categories</p>
           </div>
@@ -37,7 +37,7 @@ export default async function HomePage() {
             href="/search"
             className="rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300"
           >
-            View All Categories ➔
+            View All Categories
           </Link>
         </div>
 
@@ -46,9 +46,6 @@ export default async function HomePage() {
             href="/search/seeds"
             className="group flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-5 text-center shadow-xs transition hover:-translate-y-1 hover:border-emerald-500 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
-              🌱
-            </div>
             <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Seeds & Saplings</h3>
             <p className="text-[11px] text-neutral-400">High Yield Variety</p>
           </Link>
@@ -57,9 +54,6 @@ export default async function HomePage() {
             href="/search/fertilizer"
             className="group flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-5 text-center shadow-xs transition hover:-translate-y-1 hover:border-emerald-500 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
-              🧪
-            </div>
             <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Organic Fertilizers</h3>
             <p className="text-[11px] text-neutral-400">Soil Boosters</p>
           </Link>
@@ -68,9 +62,6 @@ export default async function HomePage() {
             href="/search/tools"
             className="group flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-5 text-center shadow-xs transition hover:-translate-y-1 hover:border-emerald-500 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
-              🛠️
-            </div>
             <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Agro Tools</h3>
             <p className="text-[11px] text-neutral-400">Modern Equipment</p>
           </Link>
@@ -79,9 +70,6 @@ export default async function HomePage() {
             href="/search"
             className="group flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-5 text-center shadow-xs transition hover:-translate-y-1 hover:border-emerald-500 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
-              🍎
-            </div>
             <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Organic Produce</h3>
             <p className="text-[11px] text-neutral-400">Pure & Fresh</p>
           </Link>
@@ -93,7 +81,7 @@ export default async function HomePage() {
         <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-3 dark:border-neutral-800">
           <div>
             <h2 className="text-xl font-extrabold text-neutral-900 dark:text-white">
-              🔥 Top Selling Agro Products
+              Top Selling Agro Products
             </h2>
             <p className="text-xs text-neutral-500">Most ordered products by commercial farmers nationwide</p>
           </div>
@@ -101,7 +89,7 @@ export default async function HomePage() {
             href="/search"
             className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-xs"
           >
-            View All ➔
+            View All
           </Link>
         </div>
 

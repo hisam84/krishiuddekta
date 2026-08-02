@@ -18,13 +18,13 @@ export async function Navbar() {
       <div className="bg-emerald-700 text-white text-xs py-2 px-4 shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between font-medium">
           <div className="flex items-center gap-4">
-            <span>📞 Helpline: <strong className="font-bold">01700-000000</strong></span>
+            <span>Helpline: <strong className="font-bold">01700-000000</strong></span>
             <span className="hidden sm:inline">|</span>
-            <span className="hidden sm:inline">🚚 Nationwide Cash on Delivery Available</span>
+            <span className="hidden sm:inline">Nationwide Cash on Delivery Available</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/admin" className="rounded bg-emerald-800 px-2 py-0.5 text-[11px] hover:bg-emerald-900 transition font-semibold">
-              Admin Login ➔
+              Admin Login
             </Link>
           </div>
         </div>

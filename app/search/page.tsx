@@ -38,7 +38,6 @@ export default async function SearchPage(props: {
         </Grid>
       ) : (
         <div className="my-12 flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-800">
-          <div className="text-4xl mb-3">🔍</div>
           <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
             No products match your search
           </h2>
@@ -46,7 +45,7 @@ export default async function SearchPage(props: {
             Try checking for spelling errors or search for broad terms like "seeds", "fertilizer", or "tools".
           </p>
           <Link href="/search" className="mt-5">
-            <Button size="sm">Explore All Products ➔</Button>
+            <Button size="sm">Explore All Products</Button>
           </Link>
         </div>
       )}

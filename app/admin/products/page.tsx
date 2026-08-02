@@ -247,7 +247,7 @@ export default function AdminProductsPage() {
           <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
               <h2 className="text-base font-bold text-[#1d2327] dark:text-white">
-                🌱 Add New Product
+                Add New Product
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -371,7 +371,7 @@ export default function AdminProductsPage() {
                   disabled={submitting}
                   className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-semibold text-white transition hover:bg-[#135e96] disabled:opacity-50"
                 >
-                  {submitting ? "Publishing..." : "Publish Product ➔"}
+                  {submitting ? "Publishing..." : "Publish Product"}
                 </button>
               </div>
             </form>

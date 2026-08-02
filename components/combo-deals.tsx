@@ -29,7 +29,7 @@ export function ComboDealsSection() {
       <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-3 dark:border-neutral-800">
         <div>
           <h2 className="text-xl font-extrabold text-neutral-900 dark:text-white">
-            🎁 Special Combo Deals & Savings
+            Special Combo Deals & Savings
           </h2>
           <p className="text-xs text-neutral-500">Curated agricultural bundles at discounted rates</p>
         </div>
@@ -37,7 +37,7 @@ export function ComboDealsSection() {
           href="/search"
           className="rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-amber-600 shadow-xs"
         >
-          Explore All Combos ➔
+          Explore All Combos
         </Link>
       </div>
 
@@ -64,7 +64,7 @@ export function ComboDealsSection() {
                   href="/search"
                   className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-md"
                 >
-                  View Details ➔
+                  View Details
                 </Link>
               </div>
             </div>

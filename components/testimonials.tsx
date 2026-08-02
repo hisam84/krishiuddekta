@@ -8,7 +8,6 @@ export function TestimonialsSection() {
       role: "Commercial Tomato Farmer, Bogura",
       rating: 5,
       comment: "I purchased high-yield hybrid tomato seeds from Krishi Uddokta. The germination rate was over 95%! Exceptional quality and fast delivery.",
-      avatar: "👨‍🌾",
     },
     {
       id: 2,
@@ -16,7 +15,6 @@ export function TestimonialsSection() {
       role: "Rooftop Agro Enthusiast, Dhaka",
       rating: 5,
       comment: "The organic vermicompost fertilizer transformed my rooftop garden. Truly 100% organic and eco-friendly products.",
-      avatar: "🪴",
     },
     {
       id: 3,
@@ -24,7 +22,6 @@ export function TestimonialsSection() {
       role: "Fruit Orchard Owner, Rajshahi",
       rating: 5,
       comment: "The battery-operated agriculture sprayer is extremely durable and saved hours of manual labor. Highly recommended!",
-      avatar: "🌾",
     },
   ];
 
@@ -32,7 +29,7 @@ export function TestimonialsSection() {
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-extrabold text-neutral-900 dark:text-white">
-          💬 What Our Farmers Say
+          What Our Farmers Say
         </h2>
         <p className="text-xs text-neutral-500 mt-1">
           Trusted by over 10,000+ commercial farmers and gardening enthusiasts across Bangladesh
@@ -52,7 +49,6 @@ export function TestimonialsSection() {
               </p>
             </div>
             <div className="mt-4 flex items-center gap-3 border-t border-neutral-100 pt-3 dark:border-neutral-800">
-              <span className="text-2xl">{t.avatar}</span>
               <div>
                 <p className="text-xs font-bold text-neutral-900 dark:text-white">{t.name}</p>
                 <p className="text-[11px] text-emerald-600 dark:text-emerald-400">{t.role}</p>

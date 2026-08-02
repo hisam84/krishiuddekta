@@ -66,17 +66,17 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-4">
-      {/* WooCommerce Page Header */}
+      {/* Orders Page Header */}
       <div className="border-b border-neutral-300 pb-3 dark:border-neutral-800">
         <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
-          WooCommerce Orders
+          Orders
         </h1>
         <p className="text-xs text-neutral-500">
           Manage customer Cash on Delivery (COD) orders
         </p>
       </div>
 
-      {/* WooCommerce Status Filter Tabs */}
+      {/* Status Filter Tabs */}
       <div className="flex gap-2 text-xs font-semibold">
         <button
           onClick={() => setStatusFilter("All")}
@@ -120,7 +120,7 @@ export default function AdminOrdersPage() {
         </button>
       </div>
 
-      {/* WooCommerce Orders Table */}
+      {/* Orders Table */}
       {loading ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           Loading orders...
@@ -149,7 +149,7 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-bold text-neutral-900 dark:text-white">{o.customer_name}</p>
-                    <p className="text-emerald-700 dark:text-emerald-400">📞 {o.customer_phone}</p>
+                    <p className="text-emerald-700 dark:text-emerald-400">{o.customer_phone}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="line-clamp-2 text-neutral-600 dark:text-neutral-300">{o.address}</p>
@@ -166,10 +166,10 @@ export default function AdminOrdersPage() {
                       onChange={(e) => handleStatusChange(o.id, e.target.value)}
                       className="rounded border border-neutral-300 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-800 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                     >
-                      <option value="Pending">🟡 Pending</option>
-                      <option value="Processing">🔵 Processing</option>
-                      <option value="Completed">🟢 Completed</option>
-                      <option value="Cancelled">🔴 Cancelled</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Processing">Processing</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Cancelled">Cancelled</option>
                     </select>
                   </td>
                 </tr>

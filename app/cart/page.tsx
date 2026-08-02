@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useCart } from "components/cart/cart-context";
-import Price from "components/price";
 import Footer from "components/layout/footer";
-import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
 import { DeleteItemButton } from "components/cart/delete-item-button";
 import { Button } from "components/ui/button";
@@ -21,7 +20,7 @@ export default function CartPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full">
         <div className="mb-6 border-b border-emerald-100 pb-4 dark:border-neutral-800">
           <h1 className="text-2xl font-extrabold text-neutral-900 dark:text-white">
-            🛒 Shopping Cart ({cart?.totalQuantity || 0} Items)
+            Shopping Cart ({cart?.totalQuantity || 0} Items)
           </h1>
           <p className="text-xs text-neutral-500">Review your selected items before checkout</p>
         </div>
@@ -31,7 +30,7 @@ export default function CartPage() {
           <div className="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2">
             <span>
               {remainingForFreeDelivery === 0
-                ? "🎉 You have unlocked Free Nationwide Delivery!"
+                ? "You have unlocked Free Nationwide Delivery!"
                 : `Add BDT ${remainingForFreeDelivery.toFixed(2)} more to get Free Shipping!`}
             </span>
             <span>{Math.round(deliveryProgress)}%</span>
@@ -56,7 +55,7 @@ export default function CartPage() {
               Explore our fresh seeds, fertilizers, and agro tools to start shopping.
             </p>
             <Link href="/search" className="mt-6">
-              <Button size="lg">Continue Shopping ➔</Button>
+              <Button size="lg">Continue Shopping</Button>
             </Link>
           </div>
         ) : (
@@ -137,7 +136,7 @@ export default function CartPage() {
 
               <Link href="/checkout" className="block pt-2">
                 <Button size="lg" className="w-full">
-                  Proceed to Checkout ➔
+                  Proceed to Checkout
                 </Button>
               </Link>
             </div>

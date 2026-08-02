@@ -131,7 +131,7 @@ async function RelatedProducts({ id }: { id: string }) {
   return (
     <div className="py-12 border-t border-neutral-200 mt-12 dark:border-neutral-800">
       <h2 className="mb-6 text-xl font-extrabold text-neutral-900 dark:text-white">
-        🌾 Related Agro Products
+        Related Agro Products
       </h2>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {relatedProducts.slice(0, 4).map((p) => (

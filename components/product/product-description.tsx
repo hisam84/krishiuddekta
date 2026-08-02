@@ -34,25 +34,19 @@ export function ProductDescription({ product }: { product: Product }) {
           className="text-xl"
         />
         <p className="mt-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-          ✓ Inclusive of all taxes. Free shipping on orders over BDT 1,000.
+          Inclusive of all taxes. Free shipping on orders over BDT 1,000.
         </p>
       </div>
 
       {/* Delivery & Trust Info Box */}
       <div className="grid grid-cols-2 gap-3 rounded-xl border border-neutral-200 p-3.5 text-xs dark:border-neutral-800">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🚚</span>
-          <div>
-            <p className="font-bold text-neutral-900 dark:text-white">Home Delivery</p>
-            <p className="text-[11px] text-neutral-500">24-48 Hours</p>
-          </div>
+        <div>
+          <p className="font-bold text-neutral-900 dark:text-white">Home Delivery</p>
+          <p className="text-[11px] text-neutral-500">24-48 Hours</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💵</span>
-          <div>
-            <p className="font-bold text-neutral-900 dark:text-white">Cash on Delivery</p>
-            <p className="text-[11px] text-neutral-500">Inspect before pay</p>
-          </div>
+        <div>
+          <p className="font-bold text-neutral-900 dark:text-white">Cash on Delivery</p>
+          <p className="text-[11px] text-neutral-500">Inspect before pay</p>
         </div>
       </div>
 

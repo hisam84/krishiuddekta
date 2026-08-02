@@ -15,10 +15,10 @@ export default async function AdminDashboard() {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-              Welcome to WordPress Dashboard! 🌾
+              Welcome to Dashboard
             </h1>
             <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-              We have assembled all the tools to manage your **Krishi Uddokta** e-commerce store.
+              We have assembled all the tools to manage your Krishi Uddokta e-commerce store.
             </p>
           </div>
           <Link
@@ -35,38 +35,30 @@ export default async function AdminDashboard() {
         {/* Widget 1: At a Glance */}
         <div className="rounded-lg border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <div className="border-b border-neutral-200 bg-neutral-50 px-5 py-3 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-            📊 At a Glance
+            At a Glance
           </div>
           <div className="p-5">
             <ul className="space-y-3 text-sm">
               <li className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-neutral-800">
-                <span className="flex items-center gap-2">
-                  <span>📦</span> <strong>Total Products:</strong>
-                </span>
+                <span><strong>Total Products:</strong></span>
                 <span className="rounded bg-emerald-100 px-2.5 py-0.5 font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                   {products.length} Items
                 </span>
               </li>
               <li className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-neutral-800">
-                <span className="flex items-center gap-2">
-                  <span>🛒</span> <strong>Total Orders:</strong>
-                </span>
+                <span><strong>Total Orders:</strong></span>
                 <span className="rounded bg-blue-100 px-2.5 py-0.5 font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                   {orders.length} Orders
                 </span>
               </li>
               <li className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-neutral-800">
-                <span className="flex items-center gap-2">
-                  <span>🟡</span> <strong>Pending Orders:</strong>
-                </span>
+                <span><strong>Pending Orders:</strong></span>
                 <span className="rounded bg-amber-100 px-2.5 py-0.5 font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                   {pendingOrders} Pending
                 </span>
               </li>
               <li className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <span>💰</span> <strong>Total Revenue:</strong>
-                </span>
+                <span><strong>Total Revenue:</strong></span>
                 <span className="font-mono text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                   BDT {totalRevenue.toFixed(2)}
                 </span>
@@ -78,7 +70,7 @@ export default async function AdminDashboard() {
         {/* Widget 2: Recent Activity */}
         <div className="rounded-lg border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <div className="border-b border-neutral-200 bg-neutral-50 px-5 py-3 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-            ⚡ Recent Activity (Recent Orders)
+            Recent Activity (Recent Orders)
           </div>
           <div className="p-5">
             {orders.length === 0 ? (

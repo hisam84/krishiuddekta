@@ -61,9 +61,6 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-md rounded-3xl border border-emerald-100 bg-white p-8 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 space-y-4">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-            🎉
-          </div>
           <h1 className="text-2xl font-extrabold text-neutral-900 dark:text-white">
             Order Placed Successfully!
           </h1>
@@ -78,7 +75,7 @@ export default function CheckoutPage() {
           </p>
           <Link href="/" className="block pt-4">
             <Button size="lg" className="w-full">
-              Return to Store ➔
+              Return to Store
             </Button>
           </Link>
         </div>
@@ -98,7 +95,7 @@ export default function CheckoutPage() {
             </span>
           </Link>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-            🔒 Secure Checkout
+            Secure Checkout
           </span>
         </div>
       </header>
@@ -154,15 +151,15 @@ export default function CheckoutPage() {
                     onChange={(e) => setDistrict(e.target.value)}
                     className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                   >
-                    <option value="Dhaka">Dhaka (ঢাকা)</option>
-                    <option value="Chittagong">Chittagong (চট্টগ্রাম)</option>
-                    <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
-                    <option value="Khulna">Khulna (খুলনা)</option>
-                    <option value="Sylhet">Sylhet (সিলেট)</option>
-                    <option value="Barisal">Barisal (বরিশাল)</option>
-                    <option value="Rangpur">Rangpur (রংপুর)</option>
-                    <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
-                    <option value="Bogura">Bogura (বগুড়া)</option>
+                    <option value="Dhaka">Dhaka</option>
+                    <option value="Chittagong">Chittagong</option>
+                    <option value="Rajshahi">Rajshahi</option>
+                    <option value="Khulna">Khulna</option>
+                    <option value="Sylhet">Sylhet</option>
+                    <option value="Barisal">Barisal</option>
+                    <option value="Rangpur">Rangpur</option>
+                    <option value="Mymensingh">Mymensingh</option>
+                    <option value="Bogura">Bogura</option>
                   </select>
                 </div>
 
@@ -197,8 +194,8 @@ export default function CheckoutPage() {
                       : "border-neutral-200 dark:border-neutral-800"
                   }`}
                 >
-                  <div className="flex items-center gap-2 font-bold text-neutral-900 dark:text-white">
-                    <span>💵</span> Cash on Delivery
+                  <div className="font-bold text-neutral-900 dark:text-white">
+                    Cash on Delivery
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-1">Pay with cash when package is delivered</p>
                 </div>
@@ -211,8 +208,8 @@ export default function CheckoutPage() {
                       : "border-neutral-200 dark:border-neutral-800"
                   }`}
                 >
-                  <div className="flex items-center gap-2 font-bold text-pink-600">
-                    <span>📱</span> bKash Online
+                  <div className="font-bold text-pink-600">
+                    bKash Online
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-1">Pay via bKash Merchant Gateway</p>
                 </div>
@@ -225,8 +222,8 @@ export default function CheckoutPage() {
                       : "border-neutral-200 dark:border-neutral-800"
                   }`}
                 >
-                  <div className="flex items-center gap-2 font-bold text-amber-600">
-                    <span>🟠</span> Nagad Online
+                  <div className="font-bold text-amber-600">
+                    Nagad Online
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-1">Pay via Nagad Merchant Gateway</p>
                 </div>
@@ -288,7 +285,7 @@ export default function CheckoutPage() {
               onClick={handlePlaceOrder}
               disabled={submitting}
             >
-              {submitting ? "Placing Order..." : "Confirm & Place Order ➔"}
+              {submitting ? "Placing Order..." : "Confirm & Place Order"}
             </Button>
           </div>
         </div>
