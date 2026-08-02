@@ -55,8 +55,8 @@ export function AddToCart({ product }: { product: Product }) {
   const price = Number(product.priceRange.maxVariantPrice.amount);
   const productName = product.title;
   const whatsappMessage = `Hi, I want to order *${productName}* (Qty: ${quantity}) - ৳${(price * quantity).toLocaleString("en-BD", { minimumFractionDigits: 2 })}`;
-  const whatsappUrl = `https://wa.me/8801234567890?text=${encodeURIComponent(whatsappMessage)}`;
-  const phoneNumber = "tel:+8801234567890";
+  const whatsappUrl = `https://wa.me/8801604649648?text=${encodeURIComponent(whatsappMessage)}`;
+  const phoneNumber = "tel:+8801604649648";
 
   const handleQuantityChange = (type: "plus" | "minus") => {
     if (type === "plus") {
