@@ -86,9 +86,9 @@ export async function initDatabase() {
         (
           'prod-1', 
           'high-yield-tomato-seeds', 
-          'উন্নত জাতের হাইব্রিড টমেটো বীজ (৫০ গ্রাম)', 
-          'উচ্চ ফলনশীল রোগ প্রতিরোধক হাইব্রিড টমেটো বীজ। প্রতিকূল আবহাওয়ায় প্রচুর ফলন দিতে সক্ষম।', 
-          ৩৫০.০০, 
+          'High Yield Hybrid Tomato Seeds (50g)', 
+          'Disease-resistant high yielding hybrid tomato seeds. Provides excellent harvest under diverse weather conditions.', 
+          350.00, 
           'BDT', 
           'https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800', 
           'seeds', 
@@ -97,9 +97,9 @@ export async function initDatabase() {
         (
           'prod-2', 
           'organic-vermicompost-fertilizer', 
-          'জৈব কেঁচো সার / ভার্মিকম্পোস্ট (১০ কেজি)', 
-          '১০০% প্রাকৃতিক ও পরিবেশবান্ধব কেঁচো সার। মাটির উর্বরতা বৃদ্ধি করে ও শিকড়ের বৃদ্ধি ত্বরান্বিত করে।', 
-          ৪৫০.০০, 
+          'Organic Vermicompost Fertilizer (10kg)', 
+          '100% natural and eco-friendly vermicompost fertilizer. Enhances soil fertility and root growth.', 
+          450.00, 
           'BDT', 
           'https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&q=80&w=800', 
           'fertilizer', 
@@ -108,9 +108,9 @@ export async function initDatabase() {
         (
           'prod-3', 
           'battery-operated-agriculture-sprayer', 
-          'ব্যাটারি চালিত কৃষি স্প্রেয়ার (১৬ লিটার)', 
-          'স্বয়ংক্রিয় কেমিক্যাল ও কীটনাশক স্প্রে করার জন্য অত্যন্ত শক্তিশালী ও দীর্ঘস্থায়ী ব্যাটারি চালিত মেশিন।', 
-          ৩২০০.০০, 
+          'Battery Operated Agriculture Sprayer (16L)', 
+          'Heavy duty battery powered sprayer for automatic pesticide and fertilizer application.', 
+          3200.00, 
           'BDT', 
           'https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800', 
           'tools', 
@@ -119,9 +119,9 @@ export async function initDatabase() {
         (
           'prod-4', 
           'thai-baramasi-mango-sapling', 
-          'থাই ১২ মাসি কলমের আম চারা', 
-          'টব ও ছাদে রোপণ উপযোগী উন্নত মানের থাই বারোমাসি কাটিমন আম গাছের কলম চারা।', 
-          ৫৫০.০০, 
+          'Thai All-Season Grafted Mango Sapling', 
+          'Grafted premium Thai Katimon mango plant suitable for rooftop gardening and tubs.', 
+          550.00, 
           'BDT', 
           'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=80&w=800', 
           'plants', 
@@ -136,9 +136,9 @@ export async function initDatabase() {
       await sql`
         INSERT INTO collections (id, handle, title, description)
         VALUES 
-        ('col-1', 'seeds', 'বীজ ও চারা', 'উচ্চ ফলনশীল বিভিন্ন ফসলের বীজ ও চারাগাছ'),
-        ('col-2', 'fertilizer', 'জৈব ও রাসায়নিক সার', 'মাটির গুণাগুণ বৃদ্ধিতে প্রয়োজনীয় সার'),
-        ('col-3', 'tools', 'কৃষি যন্ত্রপাতি', 'আধুনিক ও সহজলভ্য কৃষি সরঞ্জাম');
+        ('col-1', 'seeds', 'Seeds & Saplings', 'High-yielding crop seeds and plant saplings'),
+        ('col-2', 'fertilizer', 'Organic & Bio Fertilizers', 'Essential organic fertilizers for soil nutrition'),
+        ('col-3', 'tools', 'Agro Tools & Equipment', 'Modern and durable agricultural equipment');
       `;
     }
 

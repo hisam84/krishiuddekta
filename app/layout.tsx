@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { baseUrl } from "lib/utils";
 
-const SITE_NAME = process.env.SITE_NAME || "কৃষি উদ্যোক্তা";
+const SITE_NAME = process.env.SITE_NAME || "Krishi Uddokta";
 
 export const metadata = {
   metadataBase: new URL(baseUrl),

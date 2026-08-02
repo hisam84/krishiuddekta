@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
     if (!customer_name || !customer_phone || !address) {
       return NextResponse.json(
-        { success: false, message: "নাম, ফোন নম্বর এবং ঠিকানা দেয়া আবশ্যক" },
+        { success: false, message: "Customer name, phone number, and address are required" },
         { status: 400 }
       );
     }
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       customer_name,
       customer_phone,
       address,
-      district: district || "ঢাকা",
+      district: district || "Dhaka",
       total_amount: Number(total_amount || 0),
       items: items || [],
     });
@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         orderId,
-        message: "আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!",
+        message: "Your order has been placed successfully!",
       });
     }
 
-    return NextResponse.json({ success: false, message: "অর্ডার সম্পন্ন করতে ব্যর্থ হয়েছে" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to place order" }, { status: 500 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }

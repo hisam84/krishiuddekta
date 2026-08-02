@@ -7,13 +7,13 @@ export function HeroBanner() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-800 p-8 text-white shadow-xl md:p-12">
         <div className="relative z-10 max-w-2xl space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-emerald-700/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-200 backdrop-blur-md">
-            🌿 ১০০% নির্ভেজাল ও অরিজিনাল কৃষি পণ্য
+            🌿 100% Pure & Organic Agro Products
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl leading-tight">
-            কৃষি উদ্যোক্তা — সেরা বীজ, সার ও কৃষি যন্ত্রপাতি
+            Krishi Uddokta — Premium Seeds, Fertilizers & Agro Tools
           </h1>
           <p className="text-sm text-emerald-100/90 sm:text-base leading-relaxed">
-            সরাসরি বিশ্বস্ত প্রস্তুতকারক থেকে উন্নত জাতের হাইব্রিড বীজ, কেঁচো সার, এবং আধুনিক কৃষি সরঞ্জাম কিনুন আপনার দরজায় ক্যাশ অন ডেলিভারিতে।
+            Directly source high-yield hybrid seeds, organic vermicompost, and modern agricultural equipment with nationwide Cash on Delivery.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -37,29 +37,29 @@ export function HeroBanner() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">🚚</span>
             <div>
-              <p className="text-xs font-bold">ক্যাশ অন ডেলিভারি</p>
-              <p className="text-[11px] text-emerald-200">সারাদেশে হোম ডেলিভারি</p>
+              <p className="text-xs font-bold">Cash on Delivery</p>
+              <p className="text-[11px] text-emerald-200">Nationwide Home Delivery</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-2xl">🍃</span>
             <div>
-              <p className="text-xs font-bold">১০০% প্রাকৃতিক</p>
-              <p className="text-[11px] text-emerald-200">গুণগত মান শতভাগ খাঁটি</p>
+              <p className="text-xs font-bold">100% Organic</p>
+              <p className="text-[11px] text-emerald-200">Guaranteed Premium Quality</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-2xl">📞</span>
             <div>
-              <p className="text-xs font-bold">২৪/৭ হটলাইন সাপোর্ট</p>
-              <p className="text-[11px] text-emerald-200">যেকোনো তথ্যে পাশে আছি</p>
+              <p className="text-xs font-bold">24/7 Helpline Support</p>
+              <p className="text-[11px] text-emerald-200">Always Ready to Help</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-2xl">🔒</span>
             <div>
-              <p className="text-xs font-bold">নিরাপদ কেনাকাটা</p>
-              <p className="text-[11px] text-emerald-200">পণ্য দেখে মূল্য পরিশোধ</p>
+              <p className="text-xs font-bold">Secure Shopping</p>
+              <p className="text-[11px] text-emerald-200">Inspect Before Payment</p>
             </div>
           </div>
         </div>

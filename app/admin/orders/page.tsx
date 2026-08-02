@@ -29,7 +29,7 @@ export default function AdminOrdersPage() {
         setOrders(data.orders || []);
       }
     } catch (err) {
-      toast.error("অর্ডার রিড করতে সমস্যা হয়েছে");
+      toast.error("Failed to load orders");
     } finally {
       setLoading(false);
     }
@@ -49,13 +49,13 @@ export default function AdminOrdersPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+        toast.success("Order status updated successfully");
         fetchOrders();
       } else {
-        toast.error("স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে");
+        toast.error("Failed to update status");
       }
     } catch (err) {
-      toast.error("সার্ভার এরর");
+      toast.error("Server error");
     }
   };
 
@@ -69,10 +69,10 @@ export default function AdminOrdersPage() {
       {/* WooCommerce Page Header */}
       <div className="border-b border-neutral-300 pb-3 dark:border-neutral-800">
         <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
-          অর্ডারসমূহ (WooCommerce Orders)
+          WooCommerce Orders
         </h1>
         <p className="text-xs text-neutral-500">
-          গ্রাহকদের ডিরেক্ট ক্যাশ অন ডেলিভারি (COD) অর্ডার পরিচালনা করুন
+          Manage customer Cash on Delivery (COD) orders
         </p>
       </div>
 
@@ -123,22 +123,22 @@ export default function AdminOrdersPage() {
       {/* WooCommerce Orders Table */}
       {loading ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          অর্ডারসমূহ লোড হচ্ছে...
+          Loading orders...
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-neutral-600 dark:text-neutral-300">কোনো অর্ডার পাওয়া যায়নি</p>
+          <p className="text-neutral-600 dark:text-neutral-300">No orders found</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
             <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
               <tr>
-                <th className="px-4 py-3">অর্ডার #</th>
-                <th className="px-4 py-3">গ্রাহকের নাম ও ফোন</th>
-                <th className="px-4 py-3">ডেলিভারি ঠিকানা ও জেলা</th>
-                <th className="px-4 py-3">মোট বিল (Total)</th>
-                <th className="px-4 py-3">স্ট্যাটাস (Status)</th>
+                <th className="px-4 py-3">Order #</th>
+                <th className="px-4 py-3">Customer & Phone</th>
+                <th className="px-4 py-3">Address & District</th>
+                <th className="px-4 py-3">Total Amount</th>
+                <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
@@ -154,11 +154,11 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3">
                     <p className="line-clamp-2 text-neutral-600 dark:text-neutral-300">{o.address}</p>
                     <span className="mt-0.5 inline-block rounded bg-neutral-100 px-1.5 py-0.5 font-semibold text-neutral-600 text-[10px] dark:bg-neutral-800 dark:text-neutral-400">
-                      জেলা: {o.district}
+                      District: {o.district}
                     </span>
                   </td>
                   <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                    ৳ {Number(o.total_amount || 0).toFixed(2)}
+                    BDT {Number(o.total_amount || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     <select
@@ -166,10 +166,10 @@ export default function AdminOrdersPage() {
                       onChange={(e) => handleStatusChange(o.id, e.target.value)}
                       className="rounded border border-neutral-300 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-800 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                     >
-                      <option value="Pending">🟡 পেন্ডিং (Pending)</option>
-                      <option value="Processing">🔵 প্রসেসিং (Processing)</option>
-                      <option value="Completed">🟢 সম্পন্ন (Completed)</option>
-                      <option value="Cancelled">🔴 বাতিল (Cancelled)</option>
+                      <option value="Pending">🟡 Pending</option>
+                      <option value="Processing">🔵 Processing</option>
+                      <option value="Completed">🟢 Completed</option>
+                      <option value="Cancelled">🔴 Cancelled</option>
                     </select>
                   </td>
                 </tr>

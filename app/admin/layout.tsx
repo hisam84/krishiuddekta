@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import LogoIcon from "components/icons/logo";
 
 export const metadata = {
-  title: "ওয়ার্ডপ্রেস ড্যাশবোর্ড | কৃষি উদ্যোক্তা",
+  title: "WordPress Dashboard | Krishi Uddokta",
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             className="flex items-center gap-2 font-bold text-white hover:text-emerald-400"
           >
             <LogoIcon className="h-4 w-4 text-emerald-400" />
-            <span>কৃষি উদ্যোক্তা</span>
+            <span>Krishi Uddokta</span>
           </Link>
 
           <Link
@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <aside className="w-56 flex-none border-r border-[#2c3338] bg-[#1d2327] text-sm text-[#f0f6fc]">
           <div className="py-2">
             <div className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-              ওয়ার্ডপ্রেস নেভিগেশন
+              WordPress Navigation
             </div>
 
             <nav className="space-y-0.5">
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
                 <span className="text-base">📊</span>
-                <span>ড্যাশবোর্ড</span>
+                <span>Dashboard</span>
               </Link>
 
               <Link
@@ -73,7 +73,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
                 <span className="text-base">📦</span>
-                <span>পণ্যসমূহ (Products)</span>
+                <span>Products</span>
               </Link>
 
               <Link
@@ -81,7 +81,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
                 <span className="text-base">🛒</span>
-                <span>অর্ডারসমূহ (WooCommerce)</span>
+                <span>WooCommerce Orders</span>
               </Link>
 
               <Link
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
                 <span className="text-base">🏷️</span>
-                <span>ক্যাটাগরি (Categories)</span>
+                <span>Categories</span>
               </Link>
 
               <Link
@@ -97,14 +97,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-3 px-4 py-2.5 font-medium text-neutral-200 transition hover:bg-[#2271b1] hover:text-white"
               >
                 <span className="text-base">⚙️</span>
-                <span>সেটিংস (Settings)</span>
+                <span>Settings</span>
               </Link>
             </nav>
           </div>
 
           <div className="mt-8 border-t border-[#2c3338] p-4 text-xs text-neutral-400">
-            <p>ভার্সন: WordPress 6.7 / Neon Engine</p>
-            <p className="mt-1">কৃষি উদ্যোক্তা v2.0</p>
+            <p>Version: WordPress 6.7 / Neon</p>
+            <p className="mt-1">Krishi Uddokta v2.0</p>
           </div>
         </aside>
 

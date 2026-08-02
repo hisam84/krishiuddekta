@@ -393,10 +393,10 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   cacheLife("days");
 
   const defaultMenu = [
-    { title: "সকল পণ্য", path: "/search" },
-    { title: "বীজ ও চারা", path: "/search/seeds" },
-    { title: "সার", path: "/search/fertilizer" },
-    { title: "যন্ত্রপাতি", path: "/search/tools" },
+    { title: "All Products", path: "/search" },
+    { title: "Seeds & Saplings", path: "/search/seeds" },
+    { title: "Fertilizers", path: "/search/fertilizer" },
+    { title: "Agro Tools", path: "/search/tools" },
   ];
 
   const res = await shopifyFetch<ShopifyMenuOperation>({

@@ -27,8 +27,8 @@ export function formatDbProductToProduct(item: DbProduct): Product {
     options: [
       {
         id: "opt-default",
-        name: "প্যাকেজ / টাইপ",
-        values: ["স্ট্যান্ডার্ড"],
+        name: "Type",
+        values: ["Standard"],
       },
     ],
     priceRange: {
@@ -54,7 +54,7 @@ export function formatDbProductToProduct(item: DbProduct): Product {
         id: `var-${item.id}`,
         title: "Default",
         availableForSale: Boolean(item.available),
-        selectedOptions: [{ name: "প্যাকেজ", value: "স্ট্যান্ডার্ড" }],
+        selectedOptions: [{ name: "Type", value: "Standard" }],
         price: { amount: priceAmount, currencyCode: item.currency || "BDT" },
       },
     ],
@@ -126,9 +126,9 @@ export async function getDbCollections(): Promise<Collection[]> {
     return [
       {
         handle: "",
-        title: "সব পণ্য (All)",
-        description: "কৃষি উদ্যোক্তার সকল উন্নত মানের পণ্য",
-        seo: { title: "সব পণ্য", description: "কৃষি পণ্য" },
+        title: "All Products",
+        description: "All premium agricultural products",
+        seo: { title: "All Products", description: "Agricultural products" },
         path: "/search",
         updatedAt: new Date().toISOString(),
       },
@@ -139,9 +139,9 @@ export async function getDbCollections(): Promise<Collection[]> {
     return [
       {
         handle: "",
-        title: "সব পণ্য (All)",
-        description: "কৃষি পণ্য",
-        seo: { title: "সব পণ্য", description: "কৃষি পণ্য" },
+        title: "All Products",
+        description: "Agricultural products",
+        seo: { title: "All Products", description: "Agricultural products" },
         path: "/search",
         updatedAt: new Date().toISOString(),
       },
@@ -177,7 +177,7 @@ export async function addDbProduct(data: {
     const handle = data.title
       .toLowerCase()
       .trim()
-      .replace(/[^\w\u0980-\u09FF\s-]/g, "")
+      .replace(/[^\w\s-]/g, "")
       .replace(/[\s_]+/g, "-") + `-${Date.now().toString().slice(-4)}`;
 
     await sql`

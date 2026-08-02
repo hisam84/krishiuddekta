@@ -1,13 +1,12 @@
 import { HeroBanner } from "components/hero-banner";
 import { Carousel } from "components/carousel";
-import { ThreeItemGrid } from "components/grid/three-items";
 import Footer from "components/layout/footer";
 import Link from "next/link";
 import { getProducts } from "lib/shopify";
 
 export const metadata = {
-  title: "কৃষি উদ্যোক্তা | ১০০% খাঁটি ও নির্ভেজাল কৃষি পণ্য",
-  description: "উন্নত জাতের হাইব্রিড বীজ, জৈব সার ও আধুনিক কৃষি সরঞ্জাম কেনাকাটার বিশ্বস্ত ই-কমার্স প্ল্যাটফর্ম।",
+  title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
+  description: "High-yielding seeds, organic fertilizers, and modern agricultural tools storefront.",
 };
 
 export default async function HomePage() {
@@ -23,9 +22,9 @@ export default async function HomePage() {
         <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-3 dark:border-neutral-800">
           <div>
             <h2 className="text-xl font-extrabold text-neutral-900 dark:text-white">
-              🌾 জনপ্রিয় ক্যাটাগরিসমূহ (Popular Categories)
+              🌾 Popular Categories
             </h2>
-            <p className="text-xs text-neutral-500">আপনার প্রয়োজনীয় কৃষি পণ্য নির্বাচন করুন</p>
+            <p className="text-xs text-neutral-500">Select your required agricultural category</p>
           </div>
           <Link
             href="/search"
@@ -43,8 +42,8 @@ export default async function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
               🌱
             </div>
-            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">বীজ ও চারাগাছ</h3>
-            <p className="text-[11px] text-neutral-400">Seeds & Saplings</p>
+            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Seeds & Saplings</h3>
+            <p className="text-[11px] text-neutral-400">High Yield Variety</p>
           </Link>
 
           <Link
@@ -54,8 +53,8 @@ export default async function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
               🧪
             </div>
-            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">জৈব ও সার</h3>
-            <p className="text-[11px] text-neutral-400">Organic Fertilizers</p>
+            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Organic Fertilizers</h3>
+            <p className="text-[11px] text-neutral-400">Soil Boosters</p>
           </Link>
 
           <Link
@@ -65,8 +64,8 @@ export default async function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
               🛠️
             </div>
-            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">কৃষি যন্ত্রপাতি</h3>
-            <p className="text-[11px] text-neutral-400">Agro Equipment</p>
+            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Agro Tools</h3>
+            <p className="text-[11px] text-neutral-400">Modern Equipment</p>
           </Link>
 
           <Link
@@ -76,8 +75,8 @@ export default async function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl transition group-hover:scale-110 dark:bg-emerald-950">
               🍎
             </div>
-            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">ফলজ ও প্রাকৃতিক</h3>
-            <p className="text-[11px] text-neutral-400">Organic Produce</p>
+            <h3 className="mt-3 text-sm font-bold text-neutral-900 dark:text-white">Organic Produce</h3>
+            <p className="text-[11px] text-neutral-400">Pure & Fresh</p>
           </Link>
         </div>
       </section>
@@ -87,9 +86,9 @@ export default async function HomePage() {
         <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-3 dark:border-neutral-800">
           <div>
             <h2 className="text-xl font-extrabold text-neutral-900 dark:text-white">
-              ✨ সেরা কৃষি পণ্যসমূহ (Featured Agro Products)
+              ✨ Featured Agro Products
             </h2>
-            <p className="text-xs text-neutral-500">দেশজুড়ে চাষীদের সবচেয়ে পছন্দের পণ্যসমূহ</p>
+            <p className="text-xs text-neutral-500">Top rated products for farmers nationwide</p>
           </div>
           <Link
             href="/search"
@@ -113,7 +112,7 @@ export default async function HomePage() {
                     className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                   <span className="absolute top-3 left-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
-                    ১০০% অরিজিনাল
+                    100% Original
                   </span>
                 </div>
 
@@ -125,10 +124,10 @@ export default async function HomePage() {
                   
                   <div className="pt-2 flex items-center justify-between">
                     <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
-                      ৳ {Number(product.priceRange.maxVariantPrice.amount).toFixed(2)}
+                      BDT {Number(product.priceRange.maxVariantPrice.amount).toFixed(2)}
                     </p>
                     <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded dark:bg-emerald-950 dark:text-emerald-300">
-                      Stock Ready
+                      In Stock
                     </span>
                   </div>
                 </div>

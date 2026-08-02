@@ -38,7 +38,7 @@ export default function AdminProductsPage() {
         setProducts(data.products || []);
       }
     } catch (err) {
-      toast.error("পণ্য রিড করতে সমস্যা হয়েছে");
+      toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function AdminProductsPage() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price) {
-      toast.error("পণ্যের নাম ও দাম লিখুন");
+      toast.error("Product title and price are required");
       return;
     }
 
@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
 
       const data = await res.json();
       if (data.success) {
-        toast.success("নতুন পণ্য সফলভাবে প্রকাশিত হয়েছে!");
+        toast.success("New product published successfully!");
         setShowModal(false);
         setTitle("");
         setDescription("");
@@ -79,17 +79,17 @@ export default function AdminProductsPage() {
         setImageUrl("");
         fetchProducts();
       } else {
-        toast.error(data.message || "পণ্য সেভ করা সম্ভব হয়নি");
+        toast.error(data.message || "Failed to save product");
       }
     } catch (err) {
-      toast.error("সার্ভার এরর");
+      toast.error("Server error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string, productTitle: string) => {
-    if (!confirm(`আপনি কি সত্যিই "${productTitle}" মুছে ফেলতে চান?`)) return;
+    if (!confirm(`Are you sure you want to delete "${productTitle}"?`)) return;
 
     try {
       const res = await fetch(`/api/admin/products?id=${id}`, {
@@ -97,13 +97,13 @@ export default function AdminProductsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("পণ্য ট্র্যাশে পাঠানো হয়েছে");
+        toast.success("Product moved to trash");
         fetchProducts();
       } else {
-        toast.error("মুছে ফেলতে ব্যর্থ হয়েছে");
+        toast.error("Failed to delete product");
       }
     } catch (err) {
-      toast.error("সার্ভার এরর");
+      toast.error("Server error");
     }
   };
 
@@ -119,7 +119,7 @@ export default function AdminProductsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-300 pb-3 dark:border-neutral-800">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
-            পণ্যসমূহ (Products)
+            Products
           </h1>
           <button
             onClick={() => setShowModal(true)}
@@ -133,7 +133,7 @@ export default function AdminProductsPage() {
         <div className="flex items-center gap-2">
           <input
             type="text"
-            placeholder="পণ্য খুঁজুন..."
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-800 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
@@ -143,31 +143,31 @@ export default function AdminProductsPage() {
 
       {/* WordPress Subsubsub Navigation */}
       <div className="text-xs text-neutral-500">
-        <span className="font-bold text-neutral-900 dark:text-white">সবকটি ({products.length})</span> |{" "}
-        <span className="text-[#2271b1]">প্রকাশিত ({products.length})</span> |{" "}
-        <span className="text-neutral-400">ট্র্যাশ (0)</span>
+        <span className="font-bold text-neutral-900 dark:text-white">All ({products.length})</span> |{" "}
+        <span className="text-[#2271b1]">Published ({products.length})</span> |{" "}
+        <span className="text-neutral-400">Trash (0)</span>
       </div>
 
       {/* WordPress Data Table */}
       {loading ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          ওয়ার্ডপ্রেস ডাটাবেজ থেকে পণ্য লোড হচ্ছে...
+          Loading products from database...
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-neutral-600 dark:text-neutral-300">কোনো পণ্য পাওয়া যায়নি</p>
+          <p className="text-neutral-600 dark:text-neutral-300">No products found</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
             <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
               <tr>
-                <th className="px-4 py-3">ছবি</th>
-                <th className="px-4 py-3">পণ্যের নাম (Title)</th>
-                <th className="px-4 py-3">ক্যাটাগরি</th>
-                <th className="px-4 py-3">মূল্য (Price)</th>
-                <th className="px-4 py-3">স্টক স্ট্যাটাস</th>
-                <th className="px-4 py-3 text-right">অ্যাকশন (Actions)</th>
+                <th className="px-4 py-3">Image</th>
+                <th className="px-4 py-3">Product Title</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Stock Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
@@ -200,12 +200,12 @@ export default function AdminProductsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2.5 font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                    ৳ {Number(p.priceRange?.minVariantPrice?.amount || 0).toFixed(2)}
+                    BDT {Number(p.priceRange?.minVariantPrice?.amount || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-2.5">
                     {p.availableForSale ? (
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        In Stock (মজুদ আছে)
+                        In Stock
                       </span>
                     ) : (
                       <span className="font-semibold text-rose-600 dark:text-rose-400">
@@ -234,7 +234,7 @@ export default function AdminProductsPage() {
           <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
             <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-3 dark:border-neutral-800">
               <h2 className="text-base font-bold text-[#1d2327] dark:text-white">
-                🌱 নতুন পণ্য যোগ করুন (Add New Product)
+                🌱 Add New Product
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -247,12 +247,12 @@ export default function AdminProductsPage() {
             <form onSubmit={handleAddProduct} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  পণ্যের নাম (Product Title) *
+                  Product Title *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="যেমন: হাইব্রিড টমেটো বীজ (৫০ গ্রাম)"
+                  placeholder="e.g. High Yield Tomato Seeds (50g)"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
@@ -261,12 +261,12 @@ export default function AdminProductsPage() {
 
               <div>
                 <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  মূল্য (Price in BDT ৳) *
+                  Price (in BDT) *
                 </label>
                 <input
                   type="number"
                   required
-                  placeholder="যেমন: ৩৫০"
+                  placeholder="e.g. 350"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
@@ -275,23 +275,23 @@ export default function AdminProductsPage() {
 
               <div>
                 <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  ক্যাটাগরি (Category)
+                  Category
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                 >
-                  <option value="seeds">বীজ ও চারা (Seeds)</option>
-                  <option value="fertilizer">সার (Fertilizers)</option>
-                  <option value="tools">কৃষি যন্ত্রপাতি (Tools)</option>
-                  <option value="general">সাধারণ (General)</option>
+                  <option value="seeds">Seeds & Saplings</option>
+                  <option value="fertilizer">Fertilizers</option>
+                  <option value="tools">Agro Tools</option>
+                  <option value="general">General</option>
                 </select>
               </div>
 
               <div>
                 <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  ছবি (Image URL)
+                  Image URL
                 </label>
                 <input
                   type="url"
@@ -304,11 +304,11 @@ export default function AdminProductsPage() {
 
               <div>
                 <label className="block font-bold text-neutral-700 dark:text-neutral-300">
-                  বিবরণ (Description)
+                  Description
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="পণ্যের বৈশিষ্ট্য ও বিবরণ..."
+                  placeholder="Product specifications and features..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"

@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const adminPass = process.env.ADMIN_PASSWORD || "admin123";
 
     if (password === adminPass) {
-      const response = NextResponse.json({ success: true, message: "লগইন সফল হয়েছে" });
+      const response = NextResponse.json({ success: true, message: "Login successful" });
       response.cookies.set("admin_session", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -17,14 +17,14 @@ export async function POST(req: NextRequest) {
       return response;
     }
 
-    return NextResponse.json({ success: false, message: "ভুল পাসওয়ার্ড দেওয়া হয়েছে" }, { status: 401 });
+    return NextResponse.json({ success: false, message: "Invalid password" }, { status: 401 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
 
 export async function DELETE() {
-  const response = NextResponse.json({ success: true, message: "লগআউট সফল হয়েছে" });
+  const response = NextResponse.json({ success: true, message: "Logout successful" });
   response.cookies.set("admin_session", "", {
     httpOnly: true,
     path: "/",

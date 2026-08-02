@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     if (!title || !price) {
       return NextResponse.json(
-        { success: false, message: "পণ্যের নাম এবং দাম দেয়া আবশ্যক" },
+        { success: false, message: "Product title and price are required" },
         { status: 400 }
       );
     }
@@ -29,11 +29,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (success) {
-      return NextResponse.json({ success: true, message: "পণ্য সফলভাবে যুক্ত করা হয়েছে" });
+      return NextResponse.json({ success: true, message: "Product added successfully" });
     }
-    return NextResponse.json({ success: false, message: "পণ্য যোগ করতে ব্যর্থ হয়েছে" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to add product" }, { status: 500 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
 
@@ -56,11 +56,11 @@ export async function PUT(req: NextRequest) {
     });
 
     if (success) {
-      return NextResponse.json({ success: true, message: "পণ্য আপডেট করা হয়েছে" });
+      return NextResponse.json({ success: true, message: "Product updated successfully" });
     }
-    return NextResponse.json({ success: false, message: "আপডেট করতে ব্যর্থ হয়েছে" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to update product" }, { status: 500 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
 
@@ -75,10 +75,10 @@ export async function DELETE(req: NextRequest) {
 
     const success = await deleteDbProduct(id);
     if (success) {
-      return NextResponse.json({ success: true, message: "পণ্য মুছে ফেলা হয়েছে" });
+      return NextResponse.json({ success: true, message: "Product deleted successfully" });
     }
-    return NextResponse.json({ success: false, message: "ডিলেট করতে ব্যর্থ হয়েছে" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to delete product" }, { status: 500 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }

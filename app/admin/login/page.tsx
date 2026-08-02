@@ -13,7 +13,7 @@ export default function AdminLoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
-      toast.error("পাসওয়ার্ড লিখুন");
+      toast.error("Please enter admin password");
       return;
     }
 
@@ -27,14 +27,14 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("সফলভাবে এডমিন প্যানেলে লগইন হয়েছে!");
+        toast.success("Admin login successful!");
         router.push("/admin/products");
         router.refresh();
       } else {
-        toast.error(data.message || "ভুল পাসওয়ার্ড!");
+        toast.error(data.message || "Invalid password!");
       }
     } catch (err) {
-      toast.error("লগইন করতে সমস্যা হয়েছে");
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
@@ -48,21 +48,21 @@ export default function AdminLoginPage() {
             <LogoIcon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
           </div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-            কৃষি উদ্যোক্তা এডমিন লগইন
+            Krishi Uddokta Admin Login
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            পণ্য ও অর্ডার পরিচালনা করতে এডমিন পাসওয়ার্ড দিন
+            Enter admin password to manage products & orders
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase text-neutral-600 dark:text-neutral-400">
-              এডমিন পাসওয়ার্ড
+              Admin Password
             </label>
             <input
               type="password"
-              placeholder="ডিফল্ট পাসওয়ার্ড: admin123"
+              placeholder="Default password: admin123"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800"

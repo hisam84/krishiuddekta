@@ -16,10 +16,10 @@ export async function PUT(req: NextRequest) {
 
     const success = await updateDbOrderStatus(id, status);
     if (success) {
-      return NextResponse.json({ success: true, message: "অর্ডার স্ট্যাটাস আপডেট করা হয়েছে" });
+      return NextResponse.json({ success: true, message: "Order status updated successfully" });
     }
-    return NextResponse.json({ success: false, message: "আপডেট করতে ব্যর্থ হয়েছে" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to update order status" }, { status: 500 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "সার্ভার এরর" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
