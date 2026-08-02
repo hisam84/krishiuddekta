@@ -22,6 +22,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
 
   // WordPress-style Form State
   const [title, setTitle] = useState("");
@@ -127,6 +128,72 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleEdit = (product: ProductItem) => {
+    setEditingProduct(product);
+    setTitle(product.title);
+    setDescription(product.description);
+    setPrice(product.priceRange?.minVariantPrice?.amount || "");
+    setDiscountPrice(product.discountPrice ? String(product.discountPrice) : "");
+    setBadge(product.badge || "Best Seller");
+    setImageUrl(product.featuredImage?.url || "");
+    setCategory(product.tags?.[0] || "general");
+    setAvailable(product.availableForSale);
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setEditingProduct(null);
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setDiscountPrice("");
+    setBadge("Best Seller");
+    setImageUrl("");
+    setCategory("seeds");
+    setAvailable(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct || !title || !price) {
+      toast.error("Product title and price are required");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingProduct.id,
+          title,
+          description,
+          price: Number(price),
+          discount_price: discountPrice ? Number(discountPrice) : undefined,
+          badge,
+          image_url: imageUrl,
+          category,
+          available,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Product updated successfully!");
+        setShowModal(false);
+        resetForm();
+        fetchProducts();
+      } else {
+        toast.error(data.message || "Failed to update product");
+      }
+    } catch (err) {
+      toast.error("Server error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const filteredProducts = products.filter(
     (p) =>
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -142,7 +209,7 @@ export default function AdminProductsPage() {
             Products
           </h1>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => { resetForm(); setShowModal(true); }}
             className="rounded border border-[#2271b1] bg-[#f6f7f7] px-3 py-1 text-xs font-semibold text-[#2271b1] transition hover:bg-[#2271b1] hover:text-white dark:bg-neutral-800 dark:text-blue-400"
           >
             + Add New
@@ -240,12 +307,20 @@ export default function AdminProductsPage() {
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <button
-                      onClick={() => handleDelete(p.id, p.title)}
-                      className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
-                    >
-                      Trash
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(p)}
+                        className="rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-400"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p.id, p.title)}
+                        className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
+                      >
+                        Trash
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -261,17 +336,17 @@ export default function AdminProductsPage() {
             {/* Modal Top Bar */}
             <div className="mb-4 flex items-center justify-between border-b border-neutral-300 pb-3 dark:border-neutral-800">
               <h2 className="text-xl font-bold text-[#1d2327] dark:text-white">
-                Add New Product — WordPress Post Editor
+                {editingProduct ? "Edit Product" : "Add New Product"} — WordPress Post Editor
               </h2>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); resetForm(); }}
                 className="text-[#1d2327] font-bold text-lg hover:text-rose-600 dark:text-neutral-300"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddProduct} className="grid grid-cols-1 gap-6 lg:grid-cols-3 text-xs">
+            <form onSubmit={editingProduct ? handleUpdate : handleAddProduct} className="grid grid-cols-1 gap-6 lg:grid-cols-3 text-xs">
               {/* Left Column: Title, Description, Product Data Box */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Title Box */}
@@ -379,7 +454,7 @@ export default function AdminProductsPage() {
                     <div className="border-t pt-3 flex gap-2 dark:border-neutral-800">
                       <button
                         type="button"
-                        onClick={() => setShowModal(false)}
+                        onClick={() => { setShowModal(false); resetForm(); }}
                         className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
                       >
                         Cancel
@@ -389,7 +464,7 @@ export default function AdminProductsPage() {
                         disabled={submitting}
                         className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow transition hover:bg-[#135e96] disabled:opacity-50"
                       >
-                        {submitting ? "Publishing..." : "Publish"}
+                        {submitting ? (editingProduct ? "Updating..." : "Publishing...") : (editingProduct ? "Update" : "Publish")}
                       </button>
                     </div>
                   </div>
