@@ -121,15 +121,19 @@ export async function shopifyFetch<T>({
   }
 }
 
-const removeEdgesAndNodes = <T>(array: Connection<T>): T[] => {
-  return array.edges.map((edge) => edge?.node);
+const removeEdgesAndNodes = <T>(array?: Connection<T> | null): T[] => {
+  if (!array || !array.edges) return [];
+  return array.edges.map((edge) => edge?.node).filter(Boolean) as T[];
 };
 
-const reshapeCart = (cart: ShopifyCart): Cart => {
+const reshapeCart = (cart?: ShopifyCart | null): Cart | undefined => {
+  if (!cart) return undefined;
+
   if (!cart.cost?.totalTaxAmount) {
+    cart.cost = cart.cost || {};
     cart.cost.totalTaxAmount = {
       amount: "0.0",
-      currencyCode: cart.cost.totalAmount.currencyCode,
+      currencyCode: cart.cost.totalAmount?.currencyCode || "USD",
     };
   }
 
@@ -140,7 +144,7 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
 };
 
 const reshapeCollection = (
-  collection: ShopifyCollection
+  collection?: ShopifyCollection | null
 ): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -152,8 +156,9 @@ const reshapeCollection = (
   };
 };
 
-const reshapeCollections = (collections: ShopifyCollection[]) => {
+const reshapeCollections = (collections?: ShopifyCollection[] | null) => {
   const reshapedCollections = [];
+  if (!collections) return [];
 
   for (const collection of collections) {
     if (collection) {
@@ -172,21 +177,21 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
   const flattened = removeEdgesAndNodes(images);
 
   return flattened.map((image) => {
-    const filename = image.url.match(/.*\/(.*)\..*/)?.[1];
+    const filename = image?.url?.match(/.*\/(.*)\..*/)?.[1] || "image";
     return {
       ...image,
-      altText: image.altText || `${productTitle} - ${filename}`,
+      altText: image?.altText || `${productTitle} - ${filename}`,
     };
   });
 };
 
 const reshapeProduct = (
-  product: ShopifyProduct,
+  product?: ShopifyProduct | null,
   filterHiddenProducts: boolean = true
 ) => {
   if (
     !product ||
-    (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))
+    (filterHiddenProducts && product.tags?.includes(HIDDEN_PRODUCT_TAG))
   ) {
     return undefined;
   }
@@ -200,8 +205,9 @@ const reshapeProduct = (
   };
 };
 
-const reshapeProducts = (products: ShopifyProduct[]) => {
+const reshapeProducts = (products?: ShopifyProduct[] | null) => {
   const reshapedProducts = [];
+  if (!products) return [];
 
   for (const product of products) {
     if (product) {
@@ -304,7 +310,7 @@ export async function getCollection(
     },
   });
 
-  return reshapeCollection(res.body.data.collection);
+  return reshapeCollection(res.body?.data?.collection);
 }
 
 export async function getCollectionProducts({
@@ -336,7 +342,7 @@ export async function getCollectionProducts({
     },
   });
 
-  if (!res.body.data.collection) {
+  if (!res.body?.data?.collection) {
     console.log(`No collection found for \`${collection}\``);
     return [];
   }
@@ -428,7 +434,7 @@ export async function getPage(handle: string): Promise<Page> {
     variables: { handle },
   });
 
-  return res.body.data.pageByHandle;
+  return res.body?.data?.pageByHandle;
 }
 
 export async function getPages(): Promise<Page[]> {
@@ -436,7 +442,7 @@ export async function getPages(): Promise<Page[]> {
     query: getPagesQuery,
   });
 
-  return removeEdgesAndNodes(res.body.data.pages);
+  return removeEdgesAndNodes(res.body?.data?.pages);
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
@@ -456,7 +462,7 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
     },
   });
 
-  return reshapeProduct(res.body.data.product, false);
+  return reshapeProduct(res.body?.data?.product, false);
 }
 
 export async function getProductRecommendations(
@@ -473,7 +479,7 @@ export async function getProductRecommendations(
     },
   });
 
-  return reshapeProducts(res.body.data.productRecommendations);
+  return reshapeProducts(res.body?.data?.productRecommendations);
 }
 
 export async function getProducts({
@@ -498,7 +504,7 @@ export async function getProducts({
     },
   });
 
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  return reshapeProducts(removeEdgesAndNodes(res.body?.data?.products));
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.
