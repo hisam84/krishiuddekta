@@ -37,16 +37,18 @@ export function ProductCard({
   return (
     <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xs transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
       <div>
-        {/* Product Image Container */}
+        {/* Product Image Container (Clickable) */}
         <div className="relative aspect-square w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-          <img
-            src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-          />
+          <Link href={`/product/${handle}`} className="block h-full w-full cursor-pointer">
+            <img
+              src={imageUrl}
+              alt={title}
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            />
+          </Link>
 
           {/* Badges Overlay */}
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
             {!availableForSale ? (
               <Badge variant="outofstock">Out of Stock</Badge>
             ) : isDiscounted ? (
@@ -64,7 +66,7 @@ export function ProductCard({
           <StarRating rating={rating} reviewCount={reviewCount} />
 
           <Link href={`/product/${handle}`}>
-            <h3 className="font-bold text-neutral-900 line-clamp-1 dark:text-white group-hover:text-emerald-600 transition">
+            <h3 className="font-bold text-neutral-900 line-clamp-1 dark:text-white group-hover:text-emerald-600 transition cursor-pointer">
               {title}
             </h3>
           </Link>
@@ -83,7 +85,7 @@ export function ProductCard({
       <div className="p-4 pt-0">
         <Link
           href={`/product/${handle}`}
-          className="block w-full rounded-xl bg-emerald-600 py-2.5 text-center text-xs font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800 shadow-md"
+          className="block w-full rounded-xl bg-emerald-600 py-2.5 text-center text-xs font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800 shadow-md cursor-pointer"
         >
           {availableForSale ? "Order Now" : "Out of Stock"}
         </Link>

@@ -117,7 +117,7 @@ export function AddToCart({ product }: { product: Product }) {
             type="button"
             onClick={() => handleQuantityChange("minus")}
             disabled={quantity <= 1}
-            className="flex h-9 w-9 items-center justify-center text-lg font-medium text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="flex h-9 w-9 items-center justify-center text-lg font-medium text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-800 cursor-pointer"
             aria-label="Decrease quantity"
           >
             −
@@ -128,7 +128,7 @@ export function AddToCart({ product }: { product: Product }) {
           <button
             type="button"
             onClick={() => handleQuantityChange("plus")}
-            className="flex h-9 w-9 items-center justify-center text-lg font-medium text-neutral-600 transition hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="flex h-9 w-9 items-center justify-center text-lg font-medium text-neutral-600 transition hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800 cursor-pointer"
             aria-label="Increase quantity"
           >
             +
@@ -144,7 +144,7 @@ export function AddToCart({ product }: { product: Product }) {
           onClick={handleAddToCart}
           disabled={isDisabled}
           className={clsx(
-            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all cursor-pointer",
             isDisabled
               ? "cursor-not-allowed bg-neutral-400 opacity-60"
               : "bg-orange-500 hover:bg-orange-600 active:scale-[0.98] shadow-md hover:shadow-lg",
@@ -161,7 +161,7 @@ export function AddToCart({ product }: { product: Product }) {
           onClick={handleBuyNow}
           disabled={isDisabled}
           className={clsx(
-            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all",
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all cursor-pointer",
             isDisabled
               ? "cursor-not-allowed bg-neutral-400 opacity-60"
               : "bg-[#1a3c34] hover:bg-[#15322c] active:scale-[0.98] shadow-md hover:shadow-lg",
@@ -177,7 +177,7 @@ export function AddToCart({ product }: { product: Product }) {
           target="_blank"
           rel="noopener noreferrer"
           className={clsx(
-            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold tracking-wide text-white transition-all",
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold tracking-wide text-white transition-all cursor-pointer",
             isDisabled
               ? "pointer-events-none bg-neutral-400 opacity-60"
               : "bg-green-500 hover:bg-green-600 active:scale-[0.98] shadow-md hover:shadow-lg",
@@ -192,7 +192,7 @@ export function AddToCart({ product }: { product: Product }) {
         <a
           href={phoneNumber}
           className={clsx(
-            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold tracking-wide text-white transition-all",
+            "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-bold tracking-wide text-white transition-all cursor-pointer",
             isDisabled
               ? "pointer-events-none bg-neutral-400 opacity-60"
               : "bg-[#1b2a4a] hover:bg-[#152240] active:scale-[0.98] shadow-md hover:shadow-lg",

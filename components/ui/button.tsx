@@ -16,7 +16,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseClasses =
-    "inline-flex items-center justify-center font-bold rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs";
+    "inline-flex items-center justify-center font-bold rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer";
 
   const variants = {
     primary: "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-md",
