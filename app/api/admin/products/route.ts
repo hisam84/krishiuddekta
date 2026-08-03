@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addDbProduct, deleteDbProduct, getDbProducts, updateDbProduct } from "lib/db/products";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const products = await getDbProducts();
   return NextResponse.json({ success: true, products });
