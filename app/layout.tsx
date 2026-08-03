@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CartProvider } from "components/cart/cart-context";
 import { Navbar } from "components/layout/navbar";
 import { NavbarWrapper } from "components/layout/navbar-wrapper";
@@ -10,7 +11,7 @@ import { baseUrl } from "lib/utils";
 
 const SITE_NAME = process.env.SITE_NAME || "Krishi Uddokta";
 
-export const metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
     default: SITE_NAME,
