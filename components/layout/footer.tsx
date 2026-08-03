@@ -1,55 +1,94 @@
 import Link from "next/link";
 
-import FooterMenu from "components/layout/footer-menu";
-import LogoSquare from "components/logo-square";
-import { getMenu } from "lib/shopify";
-import { Suspense } from "react";
-
-const COMPANY_NAME = process.env.COMPANY_NAME || "Krishi Uddokta";
-const SITE_NAME = process.env.SITE_NAME || "Krishi Uddokta";
-
-export default async function Footer() {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
-  const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : "");
-  const skeleton =
-    "w-full h-6 animate-pulse rounded-sm bg-neutral-200 dark:bg-neutral-700";
-  const menu = await getMenu("next-js-frontend-footer-menu");
-  const copyrightName = COMPANY_NAME || SITE_NAME || "";
 
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 border-t border-neutral-200 px-6 py-12 text-sm md:flex-row md:gap-12 md:px-4 min-[1320px]:px-0 dark:border-neutral-700">
-        <div>
-          <Link
-            className="flex items-center gap-2 text-black md:pt-1 dark:text-white"
-            href="/"
-          >
-            <LogoSquare size="sm" />
-            <span className="uppercase">{SITE_NAME}</span>
-          </Link>
-        </div>
-        <Suspense
-          fallback={
-            <div className="flex h-[188px] w-[200px] flex-col gap-2">
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
+    <div className="ku-footer-wrapper">
+      <footer className="ku-footer">
+        <div className="ku-footer-container">
+          {/* Column 1: Brand */}
+          <div className="ku-brand">
+            <h2 className="ku-brand-text">Krishi Uddekta</h2>
+            <p className="ku-desc">
+              আমরা একজন কৃষি উদ্যোক্তা হিসেবে বাংলাদেশের কৃষকদের উন্নয়নে কাজ
+              করছি। উন্নত মানের কৃষি উপকরণ, পরামর্শ এবং প্রযুক্তি সেবা প্রদান
+              করে কৃষকদের সহায়তা করা আমাদের লক্ষ্য।
+            </p>
+            <h3 className="ku-social-title">Social Links</h3>
+            <div className="ku-social-icons">
+              <a href="#" aria-label="Facebook">
+                <i className="fab fa-facebook-f" />
+              </a>
+              <a href="#" aria-label="YouTube">
+                <i className="fab fa-youtube" />
+              </a>
+              <a href="#" aria-label="TikTok">
+                <i className="fab fa-tiktok" />
+              </a>
+              <a href="#" aria-label="WhatsApp">
+                <i className="fab fa-whatsapp" />
+              </a>
             </div>
-          }
-        >
-          <FooterMenu menu={menu} />
-        </Suspense>
-      </div>
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-1 px-4 md:flex-row md:gap-0 md:px-4 min-[1320px]:px-0">
-          <p>
-            &copy; {copyrightDate} {copyrightName}. All rights reserved.
-          </p>
+          </div>
+
+          {/* Column 2: Company */}
+          <div className="ku-company">
+            <h3 className="ku-col-title">Company</h3>
+            <ul className="ku-links">
+              <li>
+                <Link href="/about">
+                  <i className="fas fa-chevron-right" /> About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/refund-policy">
+                  <i className="fas fa-chevron-right" /> রিফান্ড পলিসি
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/delivery-charge">
+                  <i className="fas fa-chevron-right" /> ডেলিভারি চার্জ
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Contact */}
+          <div className="ku-contact">
+            <h3 className="ku-col-title">Contact Us</h3>
+            <ul className="ku-contact-info">
+              <li>
+                <i className="fas fa-phone-alt" /> <span>01604-649648</span>
+              </li>
+              <li>
+                <i className="fas fa-phone-alt" /> <span>01604-649648</span>
+              </li>
+              <li>
+                <i className="fas fa-envelope" />{" "}
+                <span>abulkasem@gmail.com</span>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </footer>
+
+        {/* Footer Bottom Bar */}
+        <div className="ku-footer-bottom">
+          <div className="ku-footer-bottom-container">
+            <p>&copy; {currentYear} Krishi Uddekta. All Rights Reserved.</p>
+            <p>
+              Developed by:{" "}
+              <a
+                href="https://hisam-omega.vercel.app/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Hisam Uddin
+              </a>
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
