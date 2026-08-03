@@ -4,6 +4,8 @@ import Prose from "components/prose";
 import { getPage } from "lib/shopify";
 import { notFound } from "next/navigation";
 
+export const revalidate = 60;
+
 export async function generateMetadata(props: {
   params: Promise<{ page: string }>;
 }): Promise<Metadata> {

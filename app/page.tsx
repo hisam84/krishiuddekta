@@ -8,6 +8,8 @@ import { getProducts } from "lib/shopify";
 import Link from "next/link";
 import { Suspense } from "react";
 
+export const revalidate = 60;
+
 export const metadata = {
   title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
   description:

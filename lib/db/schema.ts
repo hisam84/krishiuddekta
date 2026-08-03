@@ -89,136 +89,120 @@ export async function initDatabase() {
   const sql = getDb();
 
   try {
-    // 1. Create Products Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS products (
-        id VARCHAR(100) PRIMARY KEY,
-        handle VARCHAR(150) UNIQUE NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        short_description TEXT,
-        price NUMERIC(10, 2) NOT NULL,
-        discount_price NUMERIC(10, 2),
-        currency VARCHAR(10) DEFAULT 'BDT',
-        image_url TEXT,
-        thumbnail_url TEXT,
-        gallery_images TEXT,
-        category VARCHAR(100) DEFAULT 'general',
-        shipping_class_id VARCHAR(100) DEFAULT 'sc-standard',
-        stock_quantity INT DEFAULT 50,
-        min_stock_level INT DEFAULT 5,
-        available BOOLEAN DEFAULT TRUE,
-        badge VARCHAR(50),
-        is_bestseller BOOLEAN DEFAULT FALSE,
-        is_new_arrival BOOLEAN DEFAULT FALSE,
-        rating NUMERIC(3, 2) DEFAULT 5.0,
-        review_count INT DEFAULT 12,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
+    // Run table schema creation concurrently to eliminate DB cold-start latency
+    await Promise.all([
+      sql`
+        CREATE TABLE IF NOT EXISTS products (
+          id VARCHAR(100) PRIMARY KEY,
+          handle VARCHAR(150) UNIQUE NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          short_description TEXT,
+          price NUMERIC(10, 2) NOT NULL,
+          discount_price NUMERIC(10, 2),
+          currency VARCHAR(10) DEFAULT 'BDT',
+          image_url TEXT,
+          thumbnail_url TEXT,
+          gallery_images TEXT,
+          category VARCHAR(100) DEFAULT 'general',
+          shipping_class_id VARCHAR(100) DEFAULT 'sc-standard',
+          stock_quantity INT DEFAULT 50,
+          min_stock_level INT DEFAULT 5,
+          available BOOLEAN DEFAULT TRUE,
+          badge VARCHAR(50),
+          is_bestseller BOOLEAN DEFAULT FALSE,
+          is_new_arrival BOOLEAN DEFAULT FALSE,
+          rating NUMERIC(3, 2) DEFAULT 5.0,
+          review_count INT DEFAULT 12,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS media (
+          id VARCHAR(100) PRIMARY KEY,
+          filename VARCHAR(255) NOT NULL,
+          url TEXT NOT NULL,
+          thumbnail_url TEXT NOT NULL,
+          size_bytes INT DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS collections (
+          id VARCHAR(100) PRIMARY KEY,
+          handle VARCHAR(150) UNIQUE NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          description TEXT
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS pages (
+          id VARCHAR(100) PRIMARY KEY,
+          handle VARCHAR(150) UNIQUE NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          body TEXT NOT NULL,
+          body_summary TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS shipping_classes (
+          id VARCHAR(100) PRIMARY KEY,
+          name VARCHAR(150) NOT NULL,
+          slug VARCHAR(150) UNIQUE NOT NULL,
+          cost NUMERIC(10, 2) NOT NULL DEFAULT 60.00,
+          description TEXT
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS orders (
+          id VARCHAR(100) PRIMARY KEY,
+          customer_name VARCHAR(255) NOT NULL,
+          customer_phone VARCHAR(50) NOT NULL,
+          address TEXT NOT NULL,
+          district VARCHAR(100) NOT NULL,
+          total_amount NUMERIC(10, 2) NOT NULL,
+          status VARCHAR(50) DEFAULT 'Pending',
+          items TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS reviews (
+          id VARCHAR(100) PRIMARY KEY,
+          product_id VARCHAR(100) NOT NULL,
+          reviewer_name VARCHAR(255) NOT NULL,
+          rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          comment TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS settings (
+          key VARCHAR(100) PRIMARY KEY,
+          value TEXT NOT NULL
+        );
+      `,
+    ]);
 
-    // 2. Add Missing Columns dynamically if existing table lacks them
+    // Add missing columns dynamically if needed (concurrently)
     try {
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_class_id VARCHAR(100) DEFAULT 'sc-standard';`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery_images TEXT;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity INT DEFAULT 50;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock_level INT DEFAULT 5;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC(10, 2);`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_bestseller BOOLEAN DEFAULT FALSE;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 2) DEFAULT 5.0;`;
-      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 12;`;
-    } catch (e) {
-      // Ignore if columns already exist
-    }
-
-    // 2b. Create Media Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS media (
-        id VARCHAR(100) PRIMARY KEY,
-        filename VARCHAR(255) NOT NULL,
-        url TEXT NOT NULL,
-        thumbnail_url TEXT NOT NULL,
-        size_bytes INT DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-
-    // 3. Create Collections/Categories Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS collections (
-        id VARCHAR(100) PRIMARY KEY,
-        handle VARCHAR(150) UNIQUE NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        description TEXT
-      );
-    `;
-
-    // 4. Create Pages Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS pages (
-        id VARCHAR(100) PRIMARY KEY,
-        handle VARCHAR(150) UNIQUE NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        body TEXT NOT NULL,
-        body_summary TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-
-    // 5. Create Shipping Classes Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS shipping_classes (
-        id VARCHAR(100) PRIMARY KEY,
-        name VARCHAR(150) NOT NULL,
-        slug VARCHAR(150) UNIQUE NOT NULL,
-        cost NUMERIC(10, 2) NOT NULL DEFAULT 60.00,
-        description TEXT
-      );
-    `;
-
-    // Insert Default Shipping Classes if empty
-    const existingShipping = await sql`SELECT COUNT(*) as count FROM shipping_classes;`;
-    if (Number(existingShipping[0]?.count || 0) === 0) {
-      await sql`
-        INSERT INTO shipping_classes (id, name, slug, cost, description)
-        VALUES 
-        ('sc-standard', 'Standard Delivery', 'standard-delivery', 60.00, 'Standard nationwide courier shipping fee'),
-        ('sc-heavy', 'Heavy Equipment / Machinery', 'heavy-equipment', 250.00, 'Special handling for heavy agriculture tools and sprayers'),
-        ('sc-free', 'Free Shipping', 'free-shipping', 0.00, 'Free delivery for promotional items');
-      `;
-    }
-
-    // 6. Create Orders Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS orders (
-        id VARCHAR(100) PRIMARY KEY,
-        customer_name VARCHAR(255) NOT NULL,
-        customer_phone VARCHAR(50) NOT NULL,
-        address TEXT NOT NULL,
-        district VARCHAR(100) NOT NULL,
-        total_amount NUMERIC(10, 2) NOT NULL,
-        status VARCHAR(50) DEFAULT 'Pending',
-        items TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-
-    // 7. Create Reviews Table
-    await sql`
-      CREATE TABLE IF NOT EXISTS reviews (
-        id VARCHAR(100) PRIMARY KEY,
-        product_id VARCHAR(100) NOT NULL,
-        reviewer_name VARCHAR(255) NOT NULL,
-        rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-        comment TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
+      await Promise.all([
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_class_id VARCHAR(100) DEFAULT 'sc-standard';`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery_images TEXT;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity INT DEFAULT 50;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock_level INT DEFAULT 5;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC(10, 2);`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_bestseller BOOLEAN DEFAULT FALSE;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 2) DEFAULT 5.0;`,
+        sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 12;`,
+      ]);
+    } catch (e) {}
 
     // 8. Create Settings Table
     await sql`

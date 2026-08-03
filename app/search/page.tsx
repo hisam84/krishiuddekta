@@ -5,6 +5,8 @@ import { getProducts } from "lib/shopify";
 import Link from "next/link";
 import { Button } from "components/ui/button";
 
+export const revalidate = 60;
+
 export const metadata = {
   title: "Search Products | Krishi Uddokta",
   description: "Search agricultural seeds, organic fertilizers, and tools.",
