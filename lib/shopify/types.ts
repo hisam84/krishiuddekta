@@ -68,9 +68,19 @@ export type Page = {
   updatedAt: string;
 };
 
+export type ShippingClass = {
+  id: string;
+  name: string;
+  slug: string;
+  cost: number;
+  description?: string;
+};
+
 export type Product = Omit<ShopifyProduct, "variants" | "images"> & {
   variants: ProductVariant[];
   images: Image[];
+  shortDescription?: string;
+  shippingClassId?: string;
   discountPrice?: number;
   badge?: string;
   isBestSeller?: boolean;

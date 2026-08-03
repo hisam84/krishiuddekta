@@ -9,7 +9,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, description, price, discount_price, badge, image_url, category } = body;
+    const { title, description, short_description, price, discount_price, badge, image_url, category, shipping_class_id } = body;
 
     if (!title || !price) {
       return NextResponse.json(
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const success = await addDbProduct({
       title,
       description: description || "",
+      short_description: short_description || "",
       price: Number(price),
       discount_price: discount_price ? Number(discount_price) : undefined,
       badge: badge || "Best Seller",
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
         image_url ||
         "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800",
       category: category || "general",
+      shipping_class_id: shipping_class_id || "sc-standard",
     });
 
     if (success) {
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, title, description, price, discount_price, badge, image_url, category, available } = body;
+    const { id, title, description, short_description, price, discount_price, badge, image_url, category, shipping_class_id, available } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, message: "Product ID required" }, { status: 400 });
@@ -51,11 +53,13 @@ export async function PUT(req: NextRequest) {
     const success = await updateDbProduct(id, {
       title,
       description,
+      short_description,
       price: price !== undefined ? Number(price) : undefined,
       discount_price: discount_price !== undefined ? Number(discount_price) : undefined,
       badge,
       image_url,
       category,
+      shipping_class_id,
       available,
     });
 

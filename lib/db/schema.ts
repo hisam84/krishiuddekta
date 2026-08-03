@@ -5,11 +5,13 @@ export interface DbProduct {
   handle: string;
   title: string;
   description: string;
+  short_description?: string;
   price: number;
   discount_price?: number;
   currency: string;
   image_url: string;
   category: string;
+  shipping_class_id?: string;
   available: boolean;
   badge?: string;
   is_bestseller?: boolean;
@@ -24,6 +26,24 @@ export interface DbCollection {
   handle: string;
   title: string;
   description: string;
+}
+
+export interface DbPage {
+  id: string;
+  handle: string;
+  title: string;
+  body: string;
+  body_summary?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DbShippingClass {
+  id: string;
+  name: string;
+  slug: string;
+  cost: number;
+  description?: string;
 }
 
 export interface DbOrder {
@@ -63,11 +83,13 @@ export async function initDatabase() {
         handle VARCHAR(150) UNIQUE NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT,
+        short_description TEXT,
         price NUMERIC(10, 2) NOT NULL,
         discount_price NUMERIC(10, 2),
         currency VARCHAR(10) DEFAULT 'BDT',
         image_url TEXT,
         category VARCHAR(100) DEFAULT 'general',
+        shipping_class_id VARCHAR(100) DEFAULT 'sc-standard',
         available BOOLEAN DEFAULT TRUE,
         badge VARCHAR(50),
         is_bestseller BOOLEAN DEFAULT FALSE,
@@ -80,6 +102,8 @@ export async function initDatabase() {
 
     // 2. Add Missing Columns dynamically if existing table lacks them
     try {
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_class_id VARCHAR(100) DEFAULT 'sc-standard';`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC(10, 2);`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_bestseller BOOLEAN DEFAULT FALSE;`;
@@ -100,7 +124,43 @@ export async function initDatabase() {
       );
     `;
 
-    // 4. Create Orders Table
+    // 4. Create Pages Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS pages (
+        id VARCHAR(100) PRIMARY KEY,
+        handle VARCHAR(150) UNIQUE NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        body TEXT NOT NULL,
+        body_summary TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    // 5. Create Shipping Classes Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS shipping_classes (
+        id VARCHAR(100) PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        slug VARCHAR(150) UNIQUE NOT NULL,
+        cost NUMERIC(10, 2) NOT NULL DEFAULT 60.00,
+        description TEXT
+      );
+    `;
+
+    // Insert Default Shipping Classes if empty
+    const existingShipping = await sql`SELECT COUNT(*) as count FROM shipping_classes;`;
+    if (Number(existingShipping[0]?.count || 0) === 0) {
+      await sql`
+        INSERT INTO shipping_classes (id, name, slug, cost, description)
+        VALUES 
+        ('sc-standard', 'Standard Delivery', 'standard-delivery', 60.00, 'Standard nationwide courier shipping fee'),
+        ('sc-heavy', 'Heavy Equipment / Machinery', 'heavy-equipment', 250.00, 'Special handling for heavy agriculture tools and sprayers'),
+        ('sc-free', 'Free Shipping', 'free-shipping', 0.00, 'Free delivery for promotional items');
+      `;
+    }
+
+    // 6. Create Orders Table
     await sql`
       CREATE TABLE IF NOT EXISTS orders (
         id VARCHAR(100) PRIMARY KEY,
@@ -115,7 +175,7 @@ export async function initDatabase() {
       );
     `;
 
-    // 5. Create Reviews Table
+    // 7. Create Reviews Table
     await sql`
       CREATE TABLE IF NOT EXISTS reviews (
         id VARCHAR(100) PRIMARY KEY,
@@ -127,7 +187,7 @@ export async function initDatabase() {
       );
     `;
 
-    // 6. Create Settings Table
+    // 8. Create Settings Table
     await sql`
       CREATE TABLE IF NOT EXISTS settings (
         key VARCHAR(100) PRIMARY KEY,

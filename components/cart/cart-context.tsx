@@ -23,7 +23,7 @@ type CartAction =
     }
   | {
       type: "ADD_ITEM";
-      payload: { variant: ProductVariant; product: Product };
+      payload: { variant: ProductVariant; product: Product; quantity?: number };
     };
 
 type CartContextType = {
@@ -71,8 +71,9 @@ function createOrUpdateCartItem(
   existingItem: CartItem | undefined,
   variant: ProductVariant,
   product: Product,
+  quantityToAdd: number = 1,
 ): CartItem {
-  const quantity = existingItem ? existingItem.quantity + 1 : 1;
+  const quantity = existingItem ? existingItem.quantity + quantityToAdd : quantityToAdd;
   const totalAmount = calculateItemCost(quantity, variant.price.amount);
 
   return {
@@ -106,7 +107,7 @@ function updateCartTotals(
     (sum, item) => sum + Number(item.cost.totalAmount.amount),
     0,
   );
-  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "USD";
+  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "BDT";
 
   return {
     totalQuantity,
@@ -125,9 +126,9 @@ function createEmptyCart(): Cart {
     totalQuantity: 0,
     lines: [],
     cost: {
-      subtotalAmount: { amount: "0", currencyCode: "USD" },
-      totalAmount: { amount: "0", currencyCode: "USD" },
-      totalTaxAmount: { amount: "0", currencyCode: "USD" },
+      subtotalAmount: { amount: "0", currencyCode: "BDT" },
+      totalAmount: { amount: "0", currencyCode: "BDT" },
+      totalTaxAmount: { amount: "0", currencyCode: "BDT" },
     },
   };
 }
@@ -165,7 +166,7 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
       };
     }
     case "ADD_ITEM": {
-      const { variant, product } = action.payload;
+      const { variant, product, quantity = 1 } = action.payload;
       const existingItem = currentCart.lines.find(
         (item) => item.merchandise.id === variant.id,
       );
@@ -173,6 +174,7 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
         existingItem,
         variant,
         product,
+        quantity,
       );
 
       const updatedLines = existingItem
@@ -245,21 +247,29 @@ export function useCart() {
   }, [localCart]);
 
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    setLocalCart((prev) =>
-      cartReducer(prev ?? serverCart, {
+    setLocalCart((prev) => {
+      const nextCart = cartReducer(prev ?? serverCart, {
         type: "UPDATE_ITEM",
         payload: { merchandiseId, updateType },
-      }),
-    );
+      });
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCart));
+      } catch (e) {}
+      return nextCart;
+    });
   };
 
-  const addCartItem = (variant: ProductVariant, product: Product) => {
-    setLocalCart((prev) =>
-      cartReducer(prev ?? serverCart, {
+  const addCartItem = (variant: ProductVariant, product: Product, quantity: number = 1) => {
+    setLocalCart((prev) => {
+      const nextCart = cartReducer(prev ?? serverCart, {
         type: "ADD_ITEM",
-        payload: { variant, product },
-      }),
-    );
+        payload: { variant, product, quantity },
+      });
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCart));
+      } catch (e) {}
+      return nextCart;
+    });
   };
 
   return {

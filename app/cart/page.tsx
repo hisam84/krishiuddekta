@@ -101,7 +101,7 @@ export default function CartPage() {
                       />
                     </div>
 
-                    <DeleteItemButton item={item} optimisticUpdate={updateCartItem} />
+                    <DeleteItemButton item={item} optimisticUpdate={updateCartItem} showText={true} />
                   </div>
                 </div>
               ))}

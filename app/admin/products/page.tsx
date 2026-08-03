@@ -8,6 +8,8 @@ interface ProductItem {
   handle: string;
   title: string;
   description: string;
+  shortDescription?: string;
+  shippingClassId?: string;
   priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
   discountPrice?: number;
   featuredImage: { url: string; altText: string };
@@ -17,41 +19,68 @@ interface ProductItem {
   updatedAt?: string;
 }
 
+interface CategoryItem {
+  id: string;
+  handle: string;
+  title: string;
+  description?: string;
+}
+
+interface ShippingClassItem {
+  id: string;
+  name: string;
+  slug: string;
+  cost: number;
+  description?: string;
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [shippingClasses, setShippingClasses] = useState<ShippingClassItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
 
-  // WordPress-style Form State
+  // Form State
   const [title, setTitle] = useState("");
+  const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
   const [badge, setBadge] = useState("Best Seller");
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("seeds");
+  const [shippingClassId, setShippingClassId] = useState("sc-standard");
   const [available, setAvailable] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/products");
-      const data = await res.json();
-      if (data.success) {
-        setProducts(data.products || []);
-      }
+      const [prodRes, catRes, shipRes] = await Promise.all([
+        fetch("/api/admin/products"),
+        fetch("/api/admin/categories"),
+        fetch("/api/admin/shipping"),
+      ]);
+
+      const prodData = await prodRes.json();
+      const catData = await catRes.json();
+      const shipData = await shipRes.json();
+
+      if (prodData.success) setProducts(prodData.products || []);
+      if (catData.success) setCategories(catData.categories || []);
+      if (shipData.success) setShippingClasses(shipData.shippingClasses || []);
     } catch (err) {
-      toast.error("Failed to load products");
+      toast.error("Failed to load products and settings data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +92,20 @@ export default function AdminProductsPage() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const resetForm = () => {
+    setEditingProduct(null);
+    setTitle("");
+    setShortDescription("");
+    setDescription("");
+    setPrice("");
+    setDiscountPrice("");
+    setBadge("Best Seller");
+    setImageUrl("");
+    setCategory(categories[0]?.handle || "seeds");
+    setShippingClassId(shippingClasses[0]?.id || "sc-standard");
+    setAvailable(true);
   };
 
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -80,11 +123,13 @@ export default function AdminProductsPage() {
         body: JSON.stringify({
           title,
           description,
+          short_description: shortDescription,
           price: Number(price),
           discount_price: discountPrice ? Number(discountPrice) : undefined,
           badge,
           image_url: imageUrl,
           category,
+          shipping_class_id: shippingClassId,
           available,
         }),
       });
@@ -93,12 +138,8 @@ export default function AdminProductsPage() {
       if (data.success) {
         toast.success("New product published successfully!");
         setShowModal(false);
-        setTitle("");
-        setDescription("");
-        setPrice("");
-        setDiscountPrice("");
-        setImageUrl("");
-        fetchProducts();
+        resetForm();
+        fetchData();
       } else {
         toast.error(data.message || "Failed to save product");
       }
@@ -109,48 +150,19 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDelete = async (id: string, productTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${productTitle}"?`)) return;
-
-    try {
-      const res = await fetch(`/api/admin/products?id=${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success("Product moved to trash");
-        fetchProducts();
-      } else {
-        toast.error("Failed to delete product");
-      }
-    } catch (err) {
-      toast.error("Server error");
-    }
-  };
-
   const handleEdit = (product: ProductItem) => {
     setEditingProduct(product);
     setTitle(product.title);
-    setDescription(product.description);
+    setShortDescription(product.shortDescription || "");
+    setDescription(product.description || "");
     setPrice(product.priceRange?.minVariantPrice?.amount || "");
     setDiscountPrice(product.discountPrice ? String(product.discountPrice) : "");
     setBadge(product.badge || "Best Seller");
     setImageUrl(product.featuredImage?.url || "");
     setCategory(product.tags?.[0] || "general");
+    setShippingClassId(product.shippingClassId || "sc-standard");
     setAvailable(product.availableForSale);
     setShowModal(true);
-  };
-
-  const resetForm = () => {
-    setEditingProduct(null);
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setDiscountPrice("");
-    setBadge("Best Seller");
-    setImageUrl("");
-    setCategory("seeds");
-    setAvailable(true);
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -169,11 +181,13 @@ export default function AdminProductsPage() {
           id: editingProduct.id,
           title,
           description,
+          short_description: shortDescription,
           price: Number(price),
           discount_price: discountPrice ? Number(discountPrice) : undefined,
           badge,
           image_url: imageUrl,
           category,
+          shipping_class_id: shippingClassId,
           available,
         }),
       });
@@ -183,7 +197,7 @@ export default function AdminProductsPage() {
         toast.success("Product updated successfully!");
         setShowModal(false);
         resetForm();
-        fetchProducts();
+        fetchData();
       } else {
         toast.error(data.message || "Failed to update product");
       }
@@ -194,15 +208,35 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleDelete = async (id: string, productTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${productTitle}"?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/products?id=${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Product moved to trash");
+        fetchData();
+      } else {
+        toast.error("Failed to delete product");
+      }
+    } catch (err) {
+      toast.error("Server error");
+    }
+  };
+
   const filteredProducts = products.filter(
     (p) =>
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchTerm.toLowerCase())
+      p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.shortDescription && p.shortDescription.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
     <div className="space-y-4">
-      {/* WordPress Page Header */}
+      {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-300 pb-3 dark:border-neutral-800">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
@@ -210,13 +244,13 @@ export default function AdminProductsPage() {
           </h1>
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="rounded border border-[#2271b1] bg-[#f6f7f7] px-3 py-1 text-xs font-semibold text-[#2271b1] transition hover:bg-[#2271b1] hover:text-white dark:bg-neutral-800 dark:text-blue-400"
+            className="rounded border border-[#2271b1] bg-[#f6f7f7] px-3 py-1 text-xs font-semibold text-[#2271b1] transition hover:bg-[#2271b1] hover:text-white dark:bg-neutral-800 dark:text-blue-400 cursor-pointer"
           >
-            + Add New
+            + Add New Product
           </button>
         </div>
 
-        {/* WordPress Search Box */}
+        {/* Search Box */}
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -231,8 +265,7 @@ export default function AdminProductsPage() {
       {/* Subsubsub Navigation */}
       <div className="text-xs text-neutral-500">
         <span className="font-bold text-neutral-900 dark:text-white">All ({products.length})</span> |{" "}
-        <span className="text-[#2271b1]">Published ({products.length})</span> |{" "}
-        <span className="text-neutral-400">Trash (0)</span>
+        <span className="text-[#2271b1]">Published ({products.length})</span>
       </div>
 
       {/* Products Data Table */}
@@ -250,7 +283,7 @@ export default function AdminProductsPage() {
             <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
               <tr>
                 <th className="px-4 py-3">Image</th>
-                <th className="px-4 py-3">Product Title</th>
+                <th className="px-4 py-3">Product Title & Short Description</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Price</th>
                 <th className="px-4 py-3">Badge</th>
@@ -280,6 +313,11 @@ export default function AdminProductsPage() {
                     <p className="font-bold text-[#2271b1] hover:underline dark:text-blue-400">
                       {p.title}
                     </p>
+                    {p.shortDescription && (
+                      <p className="line-clamp-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+                        {p.shortDescription}
+                      </p>
+                    )}
                     <p className="line-clamp-1 text-[11px] text-neutral-500">{p.description}</p>
                   </td>
                   <td className="px-4 py-2.5 capitalize">
@@ -310,13 +348,13 @@ export default function AdminProductsPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleEdit(p)}
-                        className="rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-400"
+                        className="rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-400 cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(p.id, p.title)}
-                        className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
+                        className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400 cursor-pointer"
                       >
                         Trash
                       </button>
@@ -329,28 +367,30 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* WordPress Classic Add Product Modal */}
+      {/* WordPress-Style Product Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
           <div className="w-full max-w-4xl rounded-lg border border-neutral-300 bg-[#f0f0f1] p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[92vh] overflow-y-auto">
-            {/* Modal Top Bar */}
             <div className="mb-4 flex items-center justify-between border-b border-neutral-300 pb-3 dark:border-neutral-800">
               <h2 className="text-xl font-bold text-[#1d2327] dark:text-white">
-                {editingProduct ? "Edit Product" : "Add New Product"} — WordPress Post Editor
+                {editingProduct ? "Edit Product" : "Add New Product"} — WordPress Editor
               </h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
-                className="text-[#1d2327] font-bold text-lg hover:text-rose-600 dark:text-neutral-300"
+                className="text-[#1d2327] font-bold text-lg hover:text-rose-600 dark:text-neutral-300 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={editingProduct ? handleUpdate : handleAddProduct} className="grid grid-cols-1 gap-6 lg:grid-cols-3 text-xs">
-              {/* Left Column: Title, Description, Product Data Box */}
+              {/* Left Column: Title, Short Description, Main Description, Product Data Box */}
               <div className="lg:col-span-2 space-y-4">
-                {/* Title Box */}
+                {/* Title Input */}
                 <div>
+                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                    Product Title *
+                  </label>
                   <input
                     type="text"
                     required
@@ -361,13 +401,30 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
+                {/* Product Short Description Input */}
+                <div className="rounded border border-neutral-300 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                  <label className="block font-bold text-emerald-800 dark:text-emerald-400 mb-1">
+                    Product Short Description (Quick Highlights)
+                  </label>
+                  <p className="text-[11px] text-neutral-500 mb-2">
+                    Appears directly below product title on main product pages & search listings.
+                  </p>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. 100% Organic, high germination rate above 95%, suitable for roof gardening..."
+                    value={shortDescription}
+                    onChange={(e) => setShortDescription(e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  />
+                </div>
+
                 {/* Main Product Description Editor Box */}
                 <div className="rounded border border-neutral-300 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
                   <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-2">
-                    Product Description
+                    Detailed Product Description
                   </label>
                   <textarea
-                    rows={6}
+                    rows={5}
                     placeholder="Add detailed product description, usage instructions, specifications..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -378,7 +435,7 @@ export default function AdminProductsPage() {
                 {/* Product Data Meta Box */}
                 <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
                   <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-                    Product Data
+                    Product Pricing & Shipping Settings
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
@@ -410,6 +467,24 @@ export default function AdminProductsPage() {
                       </div>
                     </div>
 
+                    {/* Shipping Class Selection Dropdown */}
+                    <div>
+                      <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
+                        Shipping Class (Delivery Fee Rule) *
+                      </label>
+                      <select
+                        value={shippingClassId}
+                        onChange={(e) => setShippingClassId(e.target.value)}
+                        className="w-full rounded border border-neutral-300 bg-white px-3 py-2 font-semibold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      >
+                        {shippingClasses.map((sc) => (
+                          <option key={sc.id} value={sc.id}>
+                            {sc.name} — BDT {sc.cost.toFixed(2)} ({sc.description || "Custom fee"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
                         Badge Tag Label
@@ -431,7 +506,7 @@ export default function AdminProductsPage() {
                 {/* 1. Publish Box */}
                 <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
                   <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-                    Publish
+                    Publish Status
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between text-neutral-600 dark:text-neutral-400">
@@ -455,14 +530,14 @@ export default function AdminProductsPage() {
                       <button
                         type="button"
                         onClick={() => { setShowModal(false); resetForm(); }}
-                        className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                        className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800 cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow transition hover:bg-[#135e96] disabled:opacity-50"
+                        className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow transition hover:bg-[#135e96] disabled:opacity-50 cursor-pointer"
                       >
                         {submitting ? (editingProduct ? "Updating..." : "Publishing...") : (editingProduct ? "Update" : "Publish")}
                       </button>
@@ -470,60 +545,35 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                {/* 2. Product Categories Box */}
+                {/* 2. Product Categories Box (Dynamic from DB) */}
                 <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
                   <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-                    Product Categories
+                    Product Category
                   </div>
-                  <div className="p-4 space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value="seeds"
-                        checked={category === "seeds"}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="text-blue-600"
-                      />
-                      <span>Seeds & Saplings</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value="fertilizer"
-                        checked={category === "fertilizer"}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="text-blue-600"
-                      />
-                      <span>Organic Fertilizers</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value="tools"
-                        checked={category === "tools"}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="text-blue-600"
-                      />
-                      <span>Agro Tools & Equipment</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value="general"
-                        checked={category === "general"}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="text-blue-600"
-                      />
-                      <span>General Products</span>
-                    </label>
+                  <div className="p-4 space-y-2 max-h-48 overflow-y-auto">
+                    {categories.length === 0 ? (
+                      <p className="text-neutral-400 italic">No categories created yet.</p>
+                    ) : (
+                      categories.map((c) => (
+                        <label key={c.handle} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="category"
+                            value={c.handle}
+                            checked={category === c.handle}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="text-blue-600"
+                          />
+                          <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                            {c.title}
+                          </span>
+                        </label>
+                      ))
+                    )}
                   </div>
                 </div>
 
-                {/* 3. Featured Image Meta Box with Native Local File Picker */}
+                {/* 3. Featured Image Box */}
                 <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
                   <div className="border-b border-neutral-200 bg-[#f6f7f7] px-4 py-2.5 font-bold text-neutral-800 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
                     Product Image (File Select)

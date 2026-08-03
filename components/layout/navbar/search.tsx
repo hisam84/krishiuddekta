@@ -74,7 +74,7 @@ export default function Search() {
 
       {/* Real-time Autocomplete Suggestions Dropdown */}
       {showDropdown && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-2 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 space-y-1">
+        <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-[75vh] overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-2 shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 space-y-1">
           <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Suggested Products ({suggestions.length})
           </div>

@@ -1,24 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "components/cart/cart-context";
 import LogoSquare from "components/logo-square";
 import { Button } from "components/ui/button";
 import { toast } from "sonner";
+import { BD_DIVISIONS } from "lib/bd-locations";
+
+interface ShippingClass {
+  id: string;
+  name: string;
+  slug: string;
+  cost: number;
+}
 
 export default function CheckoutPage() {
   const { cart } = useCart();
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState("");
+  
+  // Bangladesh Division & District State
+  const [division, setDivision] = useState("Dhaka");
   const [district, setDistrict] = useState("Dhaka");
+  
+  const [shippingClasses, setShippingClasses] = useState<ShippingClass[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<{ orderId: string } | null>(null);
 
+  // Available districts based on selected division
+  const currentDivisionObj = BD_DIVISIONS.find((d) => d.name === division) || BD_DIVISIONS[0]!;
+  const availableDistricts = currentDivisionObj.districts;
+
+  useEffect(() => {
+    // Fetch shipping classes for dynamic fee calculation
+    fetch("/api/admin/shipping")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.shippingClasses)) {
+          setShippingClasses(data.shippingClasses);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleDivisionChange = (newDivision: string) => {
+    setDivision(newDivision);
+    const divObj = BD_DIVISIONS.find((d) => d.name === newDivision);
+    if (divObj && divObj.districts.length > 0) {
+      setDistrict(divObj.districts[0]!);
+    }
+  };
+
   const totalAmount = Number(cart?.cost?.totalAmount?.amount || 0);
-  const deliveryFee = totalAmount >= 1000 ? 0 : 60;
+
+  // Compute dynamic delivery fee based on product shipping classes & cart total
+  const computeDeliveryFee = (): number => {
+    if (totalAmount >= 1000) return 0; // Free delivery for orders over BDT 1000
+
+    if (!cart?.lines || cart.lines.length === 0) return 60;
+
+    let maxClassFee = 60; // Base default delivery fee
+
+    cart.lines.forEach((line) => {
+      const prodShippingId = (line.merchandise.product as any)?.shippingClassId || "sc-standard";
+      const sc = shippingClasses.find((item) => item.id === prodShippingId);
+      if (sc && sc.cost > maxClassFee) {
+        maxClassFee = sc.cost;
+      }
+    });
+
+    return maxClassFee;
+  };
+
+  const deliveryFee = computeDeliveryFee();
   const grandTotal = totalAmount + deliveryFee;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -30,14 +87,15 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     try {
+      const fullLocation = `${address}, ${district}, ${division} Division`;
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer_name: customerName,
           customer_phone: customerPhone,
-          address,
-          district,
+          address: fullLocation,
+          district: `${district} (${division})`,
           total_amount: grandTotal,
           items: cart?.lines || [],
         }),
@@ -74,7 +132,7 @@ export default function CheckoutPage() {
             Our delivery agent will contact you shortly on <strong>{customerPhone}</strong>.
           </p>
           <Link href="/" className="block pt-4">
-            <Button size="lg" className="w-full">
+            <Button size="lg" className="w-full cursor-pointer">
               Return to Store
             </Button>
           </Link>
@@ -108,7 +166,7 @@ export default function CheckoutPage() {
             {/* Delivery Info Box */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
               <h2 className="text-base font-bold text-neutral-900 border-b pb-3 mb-4 dark:border-neutral-800 dark:text-white">
-                1. Delivery Address & Customer Info
+                1. Delivery Address & Location Info
               </h2>
 
               <form onSubmit={handlePlaceOrder} className="space-y-4 text-xs">
@@ -123,7 +181,7 @@ export default function CheckoutPage() {
                       placeholder="e.g. Abul Hossain"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white font-medium"
                     />
                   </div>
 
@@ -137,40 +195,56 @@ export default function CheckoutPage() {
                       placeholder="e.g. 01700000000"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white font-medium"
                     />
+                  </div>
+                </div>
+
+                {/* Bangladesh 2-Step Location Selector: Division then District */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-emerald-800 dark:text-emerald-400 mb-1">
+                      Select Division *
+                    </label>
+                    <select
+                      value={division}
+                      onChange={(e) => handleDivisionChange(e.target.value)}
+                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 font-bold text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white cursor-pointer"
+                    >
+                      {BD_DIVISIONS.map((d) => (
+                        <option key={d.name} value={d.name}>
+                          {d.name} Division
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-emerald-800 dark:text-emerald-400 mb-1">
+                      Select District (Filtered by {division}) *
+                    </label>
+                    <select
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 font-bold text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white cursor-pointer"
+                    >
+                      {availableDistricts.map((dst) => (
+                        <option key={dst} value={dst}>
+                          {dst} District
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                    District *
-                  </label>
-                  <select
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  >
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Chittagong">Chittagong</option>
-                    <option value="Rajshahi">Rajshahi</option>
-                    <option value="Khulna">Khulna</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Barisal">Barisal</option>
-                    <option value="Rangpur">Rangpur</option>
-                    <option value="Mymensingh">Mymensingh</option>
-                    <option value="Bogura">Bogura</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                    Full Delivery Address *
+                    Full Delivery Address (House/Village, Upazila/Thana, Road) *
                   </label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="House / Village, Road, Upazila / Area details..."
+                    placeholder="e.g. House #12, Road #4, Upazila, Village/Area details..."
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
@@ -265,8 +339,11 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span className="font-mono font-bold">BDT {totalAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Delivery Charge</span>
+              <div className="flex justify-between items-center">
+                <div>
+                  <span>Delivery Charge</span>
+                  <p className="text-[10px] text-neutral-400">Calculated from product shipping class</p>
+                </div>
                 <span className="font-mono font-bold text-emerald-600">
                   {deliveryFee === 0 ? "FREE" : `BDT ${deliveryFee.toFixed(2)}`}
                 </span>
@@ -281,7 +358,7 @@ export default function CheckoutPage() {
 
             <Button
               size="lg"
-              className="w-full mt-4"
+              className="w-full mt-4 cursor-pointer"
               onClick={handlePlaceOrder}
               disabled={submitting}
             >

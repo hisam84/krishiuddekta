@@ -7,10 +7,12 @@ export function ProductDescription({ product }: { product: Product }) {
   const price = Number(product.priceRange.maxVariantPrice.amount);
   const discountPrice = product.discountPrice;
 
-  // Short description: first 150 chars of plain text
-  const shortDescription = product.description
-    ? product.description.slice(0, 150) + (product.description.length > 150 ? "..." : "")
-    : "";
+  // Short description: custom short description or fallback
+  const shortDescription =
+    product.shortDescription ||
+    (product.description
+      ? product.description.slice(0, 150) + (product.description.length > 150 ? "..." : "")
+      : "");
 
   return (
     <div className="space-y-5">

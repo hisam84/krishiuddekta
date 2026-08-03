@@ -3,6 +3,8 @@ import {
   getDbProduct,
   getDbCollections,
   getDbCollectionProducts,
+  getDbPage,
+  getDbPages,
 } from "lib/db/products";
 import {
   HIDDEN_PRODUCT_TAG,
@@ -404,6 +406,9 @@ export async function getMenu(handle: string): Promise<Menu[]> {
 }
 
 export async function getPage(handle: string): Promise<Page> {
+  const dbPage = await getDbPage(handle);
+  if (dbPage) return dbPage;
+
   const res = await shopifyFetch<ShopifyPageOperation>({
     query: getPageQuery,
     variables: { handle },
@@ -413,6 +418,9 @@ export async function getPage(handle: string): Promise<Page> {
 }
 
 export async function getPages(): Promise<Page[]> {
+  const dbPages = await getDbPages();
+  if (dbPages.length > 0) return dbPages;
+
   const res = await shopifyFetch<ShopifyPagesOperation>({
     query: getPagesQuery,
   });

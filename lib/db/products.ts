@@ -1,6 +1,6 @@
 import { getDb } from "./index";
-import { DbOrder, DbProduct, initDatabase } from "./schema";
-import { Product, Collection } from "lib/shopify/types";
+import { DbOrder, DbProduct, DbCollection, DbPage, DbShippingClass, initDatabase } from "./schema";
+import { Product, Collection, Page, ShippingClass } from "lib/shopify/types";
 
 let dbInitialized = false;
 let initPromise: Promise<unknown> | null = null;
@@ -157,6 +157,8 @@ export function formatDbProductToProduct(item: DbProduct): Product {
     availableForSale: Boolean(item.available),
     title: item.title,
     description: item.description || "",
+    shortDescription: item.short_description || "",
+    shippingClassId: item.shipping_class_id || "sc-standard",
     descriptionHtml: `<p>${item.description || ""}</p>`,
     options: [
       {
@@ -200,7 +202,7 @@ export function formatDbProductToProduct(item: DbProduct): Product {
     ],
     seo: {
       title: item.title,
-      description: item.description || "",
+      description: item.short_description || item.description || "",
     },
     tags: [item.category || "general"],
     discountPrice: item.discount_price
@@ -371,11 +373,13 @@ export async function getDbCollectionProducts(
 export async function addDbProduct(data: {
   title: string;
   description: string;
+  short_description?: string;
   price: number;
   discount_price?: number;
   badge?: string;
   image_url: string;
   category: string;
+  shipping_class_id?: string;
 }): Promise<boolean> {
   try {
     await ensureDb();
@@ -389,8 +393,8 @@ export async function addDbProduct(data: {
         .replace(/[\s_]+/g, "-") + `-${Date.now().toString().slice(-4)}`;
 
     await sql`
-      INSERT INTO products (id, handle, title, description, price, discount_price, currency, image_url, category, badge, available)
-      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.price}, ${data.discount_price || null}, 'BDT', ${data.image_url}, ${data.category}, ${data.badge || "Best Seller"}, true);
+      INSERT INTO products (id, handle, title, description, short_description, price, discount_price, currency, image_url, category, shipping_class_id, badge, available)
+      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.short_description || ""}, ${data.price}, ${data.discount_price || null}, 'BDT', ${data.image_url}, ${data.category}, ${data.shipping_class_id || "sc-standard"}, ${data.badge || "Best Seller"}, true);
     `;
     clearCache();
     return true;
@@ -405,11 +409,13 @@ export async function updateDbProduct(
   data: {
     title?: string;
     description?: string;
+    short_description?: string;
     price?: number;
     discount_price?: number;
     badge?: string;
     image_url?: string;
     category?: string;
+    shipping_class_id?: string;
     available?: boolean;
   },
 ): Promise<boolean> {
@@ -421,6 +427,8 @@ export async function updateDbProduct(
       await sql`UPDATE products SET title = ${data.title} WHERE id = ${id}`;
     if (data.description !== undefined)
       await sql`UPDATE products SET description = ${data.description} WHERE id = ${id}`;
+    if (data.short_description !== undefined)
+      await sql`UPDATE products SET short_description = ${data.short_description} WHERE id = ${id}`;
     if (data.price !== undefined)
       await sql`UPDATE products SET price = ${data.price} WHERE id = ${id}`;
     if (data.discount_price !== undefined)
@@ -431,6 +439,8 @@ export async function updateDbProduct(
       await sql`UPDATE products SET image_url = ${data.image_url} WHERE id = ${id}`;
     if (data.category !== undefined)
       await sql`UPDATE products SET category = ${data.category} WHERE id = ${id}`;
+    if (data.shipping_class_id !== undefined)
+      await sql`UPDATE products SET shipping_class_id = ${data.shipping_class_id} WHERE id = ${id}`;
     if (data.available !== undefined)
       await sql`UPDATE products SET available = ${data.available} WHERE id = ${id}`;
 
@@ -591,6 +601,242 @@ export async function updateDbSettings(
     return true;
   } catch (error) {
     console.error("Error updating settings:", error);
+    return false;
+  }
+}
+
+// Category / Collection Management
+export async function addDbCollection(data: {
+  title: string;
+  description?: string;
+}): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const handle = data.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-");
+    const id = `col-${Date.now()}`;
+
+    await sql`
+      INSERT INTO collections (id, handle, title, description)
+      VALUES (${id}, ${handle}, ${data.title}, ${data.description || ""});
+    `;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error adding collection:", error);
+    return false;
+  }
+}
+
+export async function updateDbCollection(
+  handle: string,
+  data: { title?: string; description?: string },
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    if (data.title !== undefined)
+      await sql`UPDATE collections SET title = ${data.title} WHERE handle = ${handle}`;
+    if (data.description !== undefined)
+      await sql`UPDATE collections SET description = ${data.description} WHERE handle = ${handle}`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error updating collection:", error);
+    return false;
+  }
+}
+
+export async function deleteDbCollection(handle: string): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    await sql`DELETE FROM collections WHERE handle = ${handle};`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error deleting collection:", error);
+    return false;
+  }
+}
+
+// Shipping Classes Management
+export async function getDbShippingClasses(): Promise<ShippingClass[]> {
+  return cached("shipping_classes", async () => {
+    try {
+      await ensureDb();
+      const sql = getDb();
+      const rows = (await sql`SELECT * FROM shipping_classes;`) as DbShippingClass[];
+      return rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        cost: Number(r.cost),
+        description: r.description || "",
+      }));
+    } catch (error) {
+      console.error("Error fetching shipping classes:", error);
+      return [
+        { id: "sc-standard", name: "Standard Delivery", slug: "standard-delivery", cost: 60, description: "Standard fee" },
+        { id: "sc-heavy", name: "Heavy Equipment", slug: "heavy-equipment", cost: 250, description: "Heavy fee" },
+        { id: "sc-free", name: "Free Shipping", slug: "free-shipping", cost: 0, description: "Free fee" },
+      ];
+    }
+  });
+}
+
+export async function addDbShippingClass(data: {
+  name: string;
+  cost: number;
+  description?: string;
+}): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const slug = data.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-");
+    const id = `sc-${Date.now()}`;
+
+    await sql`
+      INSERT INTO shipping_classes (id, name, slug, cost, description)
+      VALUES (${id}, ${data.name}, ${slug}, ${data.cost}, ${data.description || ""});
+    `;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error adding shipping class:", error);
+    return false;
+  }
+}
+
+export async function updateDbShippingClass(
+  id: string,
+  data: { name?: string; cost?: number; description?: string },
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    if (data.name !== undefined)
+      await sql`UPDATE shipping_classes SET name = ${data.name} WHERE id = ${id}`;
+    if (data.cost !== undefined)
+      await sql`UPDATE shipping_classes SET cost = ${data.cost} WHERE id = ${id}`;
+    if (data.description !== undefined)
+      await sql`UPDATE shipping_classes SET description = ${data.description} WHERE id = ${id}`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error updating shipping class:", error);
+    return false;
+  }
+}
+
+export async function deleteDbShippingClass(id: string): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    await sql`DELETE FROM shipping_classes WHERE id = ${id};`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error deleting shipping class:", error);
+    return false;
+  }
+}
+
+// Custom Dynamic Pages Management
+export async function getDbPages(): Promise<Page[]> {
+  return cached("pages", async () => {
+    try {
+      await ensureDb();
+      const sql = getDb();
+      const rows = (await sql`SELECT * FROM pages ORDER BY created_at DESC;`) as DbPage[];
+      return rows.map((p) => ({
+        id: p.id,
+        title: p.title,
+        handle: p.handle,
+        body: p.body,
+        bodySummary: p.body_summary || "",
+        seo: { title: p.title, description: p.body_summary || "" },
+        createdAt: p.created_at || new Date().toISOString(),
+        updatedAt: p.updated_at || new Date().toISOString(),
+      }));
+    } catch (error) {
+      console.error("Error fetching pages:", error);
+      return [];
+    }
+  });
+}
+
+export async function getDbPage(handle: string): Promise<Page | undefined> {
+  const pages = await getDbPages();
+  return pages.find((p) => p.handle === handle);
+}
+
+export async function addDbPage(data: {
+  title: string;
+  body: string;
+  body_summary?: string;
+}): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const handle = data.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-");
+    const id = `page-${Date.now()}`;
+
+    await sql`
+      INSERT INTO pages (id, handle, title, body, body_summary)
+      VALUES (${id}, ${handle}, ${data.title}, ${data.body}, ${data.body_summary || ""});
+    `;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error adding page:", error);
+    return false;
+  }
+}
+
+export async function updateDbPage(
+  id: string,
+  data: { title?: string; body?: string; body_summary?: string },
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const now = new Date().toISOString();
+    if (data.title !== undefined)
+      await sql`UPDATE pages SET title = ${data.title}, updated_at = ${now} WHERE id = ${id}`;
+    if (data.body !== undefined)
+      await sql`UPDATE pages SET body = ${data.body}, updated_at = ${now} WHERE id = ${id}`;
+    if (data.body_summary !== undefined)
+      await sql`UPDATE pages SET body_summary = ${data.body_summary}, updated_at = ${now} WHERE id = ${id}`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error updating page:", error);
+    return false;
+  }
+}
+
+export async function deleteDbPage(id: string): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    await sql`DELETE FROM pages WHERE id = ${id};`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error deleting page:", error);
     return false;
   }
 }

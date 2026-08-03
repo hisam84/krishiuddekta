@@ -35,6 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={GeistSans.variable}>
       <head>
+        <link rel="icon" href="/api/site-favicon" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"

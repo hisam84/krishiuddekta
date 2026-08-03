@@ -93,15 +93,15 @@ export function AddToCart({ product }: { product: Product }) {
   const handleAddToCart = () => {
     if (!finalVariant || !selectedVariantId) return;
 
-    addCartItem(finalVariant, product);
-    toast.success(`${productName} added to cart`);
+    addCartItem(finalVariant, product, quantity);
+    toast.success(`${productName} (Qty: ${quantity}) added to cart!`);
   };
 
   const handleBuyNow = () => {
     if (!finalVariant || !selectedVariantId) return;
 
     // Add the item to the cart, then open the checkout page
-    addCartItem(finalVariant, product);
+    addCartItem(finalVariant, product, quantity);
     router.push("/checkout");
   };
 
