@@ -162,16 +162,9 @@ export default function AdminInventoryPage() {
                 return (
                   <tr key={p.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
                     <td className="px-4 py-3 font-bold text-neutral-900 dark:text-white">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={p.featuredImage?.url}
-                          alt={p.title}
-                          className="h-10 w-10 rounded object-cover border border-neutral-200"
-                        />
-                        <div>
-                          <p className="font-bold text-[#2271b1] dark:text-blue-400">{p.title}</p>
-                          <p className="font-mono text-[10px] text-neutral-400">/{p.handle}</p>
-                        </div>
+                      <div>
+                        <p className="font-bold text-[#2271b1] dark:text-blue-400">{p.title}</p>
+                        <p className="font-mono text-[10px] text-neutral-400">/{p.handle}</p>
                       </div>
                     </td>
 
