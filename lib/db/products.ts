@@ -40,11 +40,12 @@ const CACHE_TTL_MS = 600_000;
 const DISK_CACHE_REL_DIR = ".next/cache/product-data";
 
 async function readDiskCache(key: string): Promise<any | undefined> {
+  if (typeof window !== "undefined") return undefined;
   try {
-    const { readFile } = await import("fs/promises");
+    const fs = await import("fs");
     const { join } = await import("path");
     const { cwd } = await import("process");
-    const data = await readFile(
+    const data = await fs.promises.readFile(
       join(cwd(), DISK_CACHE_REL_DIR, `${key}.json`),
       "utf-8",
     );
@@ -55,12 +56,13 @@ async function readDiskCache(key: string): Promise<any | undefined> {
 }
 
 async function writeDiskCache(key: string, value: any) {
+  if (typeof window !== "undefined") return;
   try {
-    const { writeFile, mkdir } = await import("fs/promises");
+    const fs = await import("fs");
     const { join } = await import("path");
     const { cwd } = await import("process");
-    await mkdir(join(cwd(), DISK_CACHE_REL_DIR), { recursive: true });
-    await writeFile(
+    await fs.promises.mkdir(join(cwd(), DISK_CACHE_REL_DIR), { recursive: true });
+    await fs.promises.writeFile(
       join(cwd(), DISK_CACHE_REL_DIR, `${key}.json`),
       JSON.stringify(value),
       "utf-8",
@@ -71,11 +73,12 @@ async function writeDiskCache(key: string, value: any) {
 }
 
 async function clearDiskCache() {
+  if (typeof window !== "undefined") return;
   try {
-    const { rm } = await import("fs/promises");
+    const fs = await import("fs");
     const { join } = await import("path");
     const { cwd } = await import("process");
-    await rm(join(cwd(), DISK_CACHE_REL_DIR), { recursive: true, force: true });
+    await fs.promises.rm(join(cwd(), DISK_CACHE_REL_DIR), { recursive: true, force: true });
   } catch (e) {
     // Ignore
   }
