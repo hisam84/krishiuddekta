@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import LogoIcon from "components/icons/logo";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,14 +26,13 @@ export default function AdminLoginPage() {
 
       if (data.success) {
         toast.success("Admin login successful!");
-        router.push("/admin/products");
-        router.refresh();
+        window.location.href = "/admin";
       } else {
         toast.error(data.message || "Invalid password!");
+        setLoading(false);
       }
     } catch (err) {
       toast.error("Login failed");
-    } finally {
       setLoading(false);
     }
   };
@@ -62,7 +59,7 @@ export default function AdminLoginPage() {
             </label>
             <input
               type="password"
-              placeholder="Default password: admin123"
+              placeholder="Enter admin password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800"
@@ -72,7 +69,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
