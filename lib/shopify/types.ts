@@ -76,6 +76,15 @@ export type ShippingClass = {
   description?: string;
 };
 
+export type MediaItem = {
+  id: string;
+  filename: string;
+  url: string;
+  thumbnailUrl: string;
+  sizeBytes: number;
+  createdAt: string;
+};
+
 export type Product = Omit<ShopifyProduct, "variants" | "images"> & {
   variants: ProductVariant[];
   images: Image[];
@@ -86,6 +95,10 @@ export type Product = Omit<ShopifyProduct, "variants" | "images"> & {
   isBestSeller?: boolean;
   rating?: number;
   reviewCount?: number;
+  thumbnailUrl?: string;
+  galleryImages?: string[];
+  stockQuantity?: number;
+  minStockLevel?: number;
 };
 
 export type ProductOption = {

@@ -256,7 +256,7 @@ export default function AdminPagesPage() {
           <div className="w-full max-w-4xl rounded-lg border border-neutral-300 bg-[#f0f0f1] p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[92vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between border-b border-neutral-300 pb-3 dark:border-neutral-800">
               <h2 className="text-xl font-bold text-[#1d2327] dark:text-white">
-                {editingPage ? "Edit Page" : "Add New Page"} — Summernote / Classic WordPress Editor
+                {editingPage ? "Edit Page" : "Add New Page"}
               </h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
@@ -294,7 +294,7 @@ export default function AdminPagesPage() {
                 />
               </div>
 
-              {/* Summernote / WordPress Style Rich Text Editor Box */}
+              {/* Rich Text Editor Box */}
               <div className="rounded border border-neutral-300 bg-white shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
                 {/* Editor Toolbar */}
                 <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 bg-[#f6f7f7] px-3 py-2 gap-1 dark:border-neutral-800 dark:bg-neutral-800">
@@ -384,16 +384,23 @@ export default function AdminPagesPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (isHtmlView && editorRef.current) {
-                        editorRef.current.innerHTML = body;
-                      } else if (editorRef.current) {
-                        setBody(editorRef.current.innerHTML);
+                      if (isHtmlView) {
+                        setIsHtmlView(false);
+                        setTimeout(() => {
+                          if (editorRef.current) {
+                            editorRef.current.innerHTML = body;
+                          }
+                        }, 50);
+                      } else {
+                        if (editorRef.current) {
+                          setBody(editorRef.current.innerHTML);
+                        }
+                        setIsHtmlView(true);
                       }
-                      setIsHtmlView(!isHtmlView);
                     }}
                     className="rounded border border-purple-300 bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700 hover:bg-purple-600 hover:text-white dark:bg-purple-950 dark:text-purple-300 cursor-pointer"
                   >
-                    {isHtmlView ? "Visual Editor Mode" : "</> HTML Code Mode"}
+                    {isHtmlView ? "👁️ Switch to Visual Preview" : "</> Switch to HTML Code"}
                   </button>
                 </div>
 

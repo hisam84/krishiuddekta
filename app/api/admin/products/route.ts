@@ -9,7 +9,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, description, short_description, price, discount_price, badge, image_url, category, shipping_class_id } = body;
+    const { title, description, short_description, price, discount_price, badge, image_url, thumbnail_url, gallery_images, category, shipping_class_id, stock_quantity } = body;
 
     if (!title || !price) {
       return NextResponse.json(
@@ -28,8 +28,11 @@ export async function POST(req: NextRequest) {
       image_url:
         image_url ||
         "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800",
+      thumbnail_url: thumbnail_url || image_url,
+      gallery_images: gallery_images || "[]",
       category: category || "general",
       shipping_class_id: shipping_class_id || "sc-standard",
+      stock_quantity: stock_quantity !== undefined ? Number(stock_quantity) : 50,
     });
 
     if (success) {
@@ -44,7 +47,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, title, description, short_description, price, discount_price, badge, image_url, category, shipping_class_id, available } = body;
+    const { id, title, description, short_description, price, discount_price, badge, image_url, thumbnail_url, gallery_images, category, shipping_class_id, stock_quantity, available } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, message: "Product ID required" }, { status: 400 });
@@ -58,8 +61,11 @@ export async function PUT(req: NextRequest) {
       discount_price: discount_price !== undefined ? Number(discount_price) : undefined,
       badge,
       image_url,
+      thumbnail_url,
+      gallery_images,
       category,
       shipping_class_id,
+      stock_quantity: stock_quantity !== undefined ? Number(stock_quantity) : undefined,
       available,
     });
 

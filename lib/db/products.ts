@@ -1,5 +1,5 @@
 import { getDb } from "./index";
-import { DbOrder, DbProduct, DbCollection, DbPage, DbShippingClass, initDatabase } from "./schema";
+import { DbOrder, DbProduct, DbCollection, DbPage, DbShippingClass, DbMedia, initDatabase } from "./schema";
 import { Product, Collection, Page, ShippingClass } from "lib/shopify/types";
 
 let dbInitialized = false;
@@ -142,14 +142,26 @@ function clearCache() {
 
 export function formatDbProductToProduct(item: DbProduct): Product {
   const priceAmount = Number(item.price || 0).toFixed(2);
-  // Base64 data-URI images would be inlined dozens of times into the HTML
-  // (meta tags, RSC payload, <img> tags), ballooning the page size to many MB.
-  // Serve them once through the image proxy route instead.
   const rawImageUrl = item.image_url || "";
   const imageUrl = rawImageUrl.startsWith("data:")
     ? `/api/product-image/${item.id}`
     : rawImageUrl ||
       "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+
+  const rawThumb = item.thumbnail_url || imageUrl;
+  const thumbnailUrl = rawThumb.startsWith("data:") ? `/api/product-image/${item.id}` : rawThumb;
+
+  let galleryUrls: string[] = [];
+  if (item.gallery_images) {
+    try {
+      galleryUrls = JSON.parse(item.gallery_images);
+    } catch (e) {}
+  }
+
+  const allImageObjs = [
+    { url: imageUrl, altText: item.title, width: 800, height: 800 },
+    ...galleryUrls.map((gUrl) => ({ url: gUrl, altText: item.title, width: 800, height: 800 })),
+  ];
 
   return {
     id: item.id,
@@ -159,6 +171,10 @@ export function formatDbProductToProduct(item: DbProduct): Product {
     description: item.description || "",
     shortDescription: item.short_description || "",
     shippingClassId: item.shipping_class_id || "sc-standard",
+    thumbnailUrl,
+    galleryImages: galleryUrls,
+    stockQuantity: item.stock_quantity ?? 50,
+    minStockLevel: item.min_stock_level ?? 5,
     descriptionHtml: `<p>${item.description || ""}</p>`,
     options: [
       {
@@ -183,14 +199,7 @@ export function formatDbProductToProduct(item: DbProduct): Product {
       width: 800,
       height: 800,
     },
-    images: [
-      {
-        url: imageUrl,
-        altText: item.title,
-        width: 800,
-        height: 800,
-      },
-    ],
+    images: allImageObjs,
     variants: [
       {
         id: `var-${item.id}`,
@@ -378,8 +387,11 @@ export async function addDbProduct(data: {
   discount_price?: number;
   badge?: string;
   image_url: string;
+  thumbnail_url?: string;
+  gallery_images?: string;
   category: string;
   shipping_class_id?: string;
+  stock_quantity?: number;
 }): Promise<boolean> {
   try {
     await ensureDb();
@@ -392,9 +404,13 @@ export async function addDbProduct(data: {
         .replace(/[^\w\s-]/g, "")
         .replace(/[\s_]+/g, "-") + `-${Date.now().toString().slice(-4)}`;
 
+    const thumb = data.thumbnail_url || data.image_url;
+    const gallery = data.gallery_images || "[]";
+    const stock = data.stock_quantity !== undefined ? data.stock_quantity : 50;
+
     await sql`
-      INSERT INTO products (id, handle, title, description, short_description, price, discount_price, currency, image_url, category, shipping_class_id, badge, available)
-      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.short_description || ""}, ${data.price}, ${data.discount_price || null}, 'BDT', ${data.image_url}, ${data.category}, ${data.shipping_class_id || "sc-standard"}, ${data.badge || "Best Seller"}, true);
+      INSERT INTO products (id, handle, title, description, short_description, price, discount_price, currency, image_url, thumbnail_url, gallery_images, category, shipping_class_id, stock_quantity, badge, available)
+      VALUES (${id}, ${handle}, ${data.title}, ${data.description}, ${data.short_description || ""}, ${data.price}, ${data.discount_price || null}, 'BDT', ${data.image_url}, ${thumb}, ${gallery}, ${data.category}, ${data.shipping_class_id || "sc-standard"}, ${stock}, ${data.badge || "Best Seller"}, true);
     `;
     clearCache();
     return true;
@@ -414,8 +430,11 @@ export async function updateDbProduct(
     discount_price?: number;
     badge?: string;
     image_url?: string;
+    thumbnail_url?: string;
+    gallery_images?: string;
     category?: string;
     shipping_class_id?: string;
+    stock_quantity?: number;
     available?: boolean;
   },
 ): Promise<boolean> {
@@ -437,10 +456,16 @@ export async function updateDbProduct(
       await sql`UPDATE products SET badge = ${data.badge} WHERE id = ${id}`;
     if (data.image_url !== undefined)
       await sql`UPDATE products SET image_url = ${data.image_url} WHERE id = ${id}`;
+    if (data.thumbnail_url !== undefined)
+      await sql`UPDATE products SET thumbnail_url = ${data.thumbnail_url} WHERE id = ${id}`;
+    if (data.gallery_images !== undefined)
+      await sql`UPDATE products SET gallery_images = ${data.gallery_images} WHERE id = ${id}`;
     if (data.category !== undefined)
       await sql`UPDATE products SET category = ${data.category} WHERE id = ${id}`;
     if (data.shipping_class_id !== undefined)
       await sql`UPDATE products SET shipping_class_id = ${data.shipping_class_id} WHERE id = ${id}`;
+    if (data.stock_quantity !== undefined)
+      await sql`UPDATE products SET stock_quantity = ${data.stock_quantity} WHERE id = ${id}`;
     if (data.available !== undefined)
       await sql`UPDATE products SET available = ${data.available} WHERE id = ${id}`;
 
@@ -840,3 +865,87 @@ export async function deleteDbPage(id: string): Promise<boolean> {
     return false;
   }
 }
+
+/* ==========================================================================
+   MEDIA LIBRARY CRUD HELPERS
+   ========================================================================== */
+
+export async function getDbMedia(): Promise<DbMedia[]> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const rows = (await sql`SELECT * FROM media ORDER BY created_at DESC;`) as DbMedia[];
+    return rows;
+  } catch (error) {
+    console.error("Error fetching media library:", error);
+    return [];
+  }
+}
+
+export async function addDbMedia(data: {
+  filename: string;
+  url: string;
+  thumbnail_url: string;
+  size_bytes?: number;
+}): Promise<DbMedia | null> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const id = `media-${Date.now()}`;
+    const now = new Date().toISOString();
+    await sql`
+      INSERT INTO media (id, filename, url, thumbnail_url, size_bytes, created_at)
+      VALUES (${id}, ${data.filename}, ${data.url}, ${data.thumbnail_url}, ${data.size_bytes || 0}, ${now});
+    `;
+    return {
+      id,
+      filename: data.filename,
+      url: data.url,
+      thumbnail_url: data.thumbnail_url,
+      size_bytes: data.size_bytes || 0,
+      created_at: now,
+    };
+  } catch (error) {
+    console.error("Error adding media:", error);
+    return null;
+  }
+}
+
+export async function deleteDbMedia(id: string): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    await sql`DELETE FROM media WHERE id = ${id};`;
+    return true;
+  } catch (error) {
+    console.error("Error deleting media:", error);
+    return false;
+  }
+}
+
+/* ==========================================================================
+   INVENTORY MANAGEMENT HELPERS
+   ========================================================================== */
+
+export async function updateDbProductStock(
+  id: string,
+  stock_quantity: number,
+  available?: boolean,
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const isAvailable = available !== undefined ? available : stock_quantity > 0;
+    await sql`
+      UPDATE products 
+      SET stock_quantity = ${stock_quantity}, available = ${isAvailable}
+      WHERE id = ${id};
+    `;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error updating product stock:", error);
+    return false;
+  }
+}
+

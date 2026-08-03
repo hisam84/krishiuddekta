@@ -10,14 +10,27 @@ export interface DbProduct {
   discount_price?: number;
   currency: string;
   image_url: string;
+  thumbnail_url?: string;
+  gallery_images?: string; // JSON string array of URLs
   category: string;
   shipping_class_id?: string;
+  stock_quantity?: number;
+  min_stock_level?: number;
   available: boolean;
   badge?: string;
   is_bestseller?: boolean;
   is_new_arrival?: boolean;
   rating?: number;
   review_count?: number;
+  created_at?: string;
+}
+
+export interface DbMedia {
+  id: string;
+  filename: string;
+  url: string;
+  thumbnail_url: string;
+  size_bytes?: number;
   created_at?: string;
 }
 
@@ -88,8 +101,12 @@ export async function initDatabase() {
         discount_price NUMERIC(10, 2),
         currency VARCHAR(10) DEFAULT 'BDT',
         image_url TEXT,
+        thumbnail_url TEXT,
+        gallery_images TEXT,
         category VARCHAR(100) DEFAULT 'general',
         shipping_class_id VARCHAR(100) DEFAULT 'sc-standard',
+        stock_quantity INT DEFAULT 50,
+        min_stock_level INT DEFAULT 5,
         available BOOLEAN DEFAULT TRUE,
         badge VARCHAR(50),
         is_bestseller BOOLEAN DEFAULT FALSE,
@@ -104,6 +121,10 @@ export async function initDatabase() {
     try {
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT;`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_class_id VARCHAR(100) DEFAULT 'sc-standard';`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery_images TEXT;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity INT DEFAULT 50;`;
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock_level INT DEFAULT 5;`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC(10, 2);`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);`;
       await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_bestseller BOOLEAN DEFAULT FALSE;`;
@@ -113,6 +134,18 @@ export async function initDatabase() {
     } catch (e) {
       // Ignore if columns already exist
     }
+
+    // 2b. Create Media Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS media (
+        id VARCHAR(100) PRIMARY KEY,
+        filename VARCHAR(255) NOT NULL,
+        url TEXT NOT NULL,
+        thumbnail_url TEXT NOT NULL,
+        size_bytes INT DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
 
     // 3. Create Collections/Categories Table
     await sql`
