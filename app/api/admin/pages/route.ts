@@ -6,9 +6,6 @@ import {
   updateDbPage,
 } from "lib/db/products";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export async function GET() {
   const pages = await getDbPages();
   return NextResponse.json({ success: true, pages });

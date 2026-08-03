@@ -6,9 +6,6 @@ import {
   updateDbShippingClass,
 } from "lib/db/products";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export async function GET() {
   const shippingClasses = await getDbShippingClasses();
   return NextResponse.json({ success: true, shippingClasses });

@@ -8,9 +8,6 @@ import { getProducts } from "lib/shopify";
 import Link from "next/link";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export const metadata = {
   title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
   description:

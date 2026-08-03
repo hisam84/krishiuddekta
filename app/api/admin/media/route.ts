@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addDbMedia, deleteDbMedia, getDbMedia } from "lib/db/products";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export async function GET() {
   try {
     const media = await getDbMedia();

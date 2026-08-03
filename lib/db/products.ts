@@ -95,8 +95,44 @@ function isEmptyValue(value: any): boolean {
 }
 
 async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
-  // Always query fresh live data from the database server on every request
-  return await fn();
+  const hit = cache.get(key);
+  if (hit && hit.expiresAt > Date.now()) {
+    return hit.value as T;
+  }
+
+  // Last-known-good disk data: serve it immediately instead of waiting out a
+  // slow/timing-out DB connection, and refresh from the DB in the background.
+  const disk = await readDiskCache(key);
+  if (disk !== undefined) {
+    cache.set(key, { value: disk, expiresAt: Date.now() + CACHE_TTL_MS });
+    void fn()
+      .then((fresh) => {
+        if (!isEmptyValue(fresh)) {
+          cache.set(key, {
+            value: fresh,
+            expiresAt: Date.now() + CACHE_TTL_MS,
+          });
+          void writeDiskCache(key, fresh);
+        }
+      })
+      .catch(() => {
+        // Background refresh failed; last-known-good data is still served.
+      });
+    return disk as T;
+  }
+
+  const value = await fn();
+
+  // Don't cache empty results so transient DB failures aren't sticky.
+  const isEmpty = isEmptyValue(value);
+
+  if (!isEmpty) {
+    cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+    void writeDiskCache(key, value);
+    return value;
+  }
+
+  return value;
 }
 
 function clearCache() {

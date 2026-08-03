@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDbSettings } from "lib/db/products";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export async function GET() {
   const settings = await getDbSettings();
   const favicon = settings.site_favicon;
