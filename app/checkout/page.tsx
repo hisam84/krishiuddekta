@@ -27,6 +27,9 @@ interface ShippingMethod {
 
 export default function CheckoutPage() {
   const { cart } = useCart();
+  const [siteName, setSiteName] = useState("Krishi Uddokta");
+  const [siteLogo, setSiteLogo] = useState("");
+
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -46,13 +49,19 @@ export default function CheckoutPage() {
   const availableDistricts = currentDivisionObj.districts;
 
   useEffect(() => {
-    // Fetch shipping classes & location shipping methods for dynamic fee calculation
-    fetch("/api/admin/shipping")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          if (Array.isArray(data.shippingClasses)) setShippingClasses(data.shippingClasses);
-          if (Array.isArray(data.shippingMethods)) setShippingMethods(data.shippingMethods);
+    // Fetch settings & shipping classes/methods
+    Promise.all([
+      fetch("/api/admin/settings").then((res) => res.json()),
+      fetch("/api/admin/shipping").then((res) => res.json()),
+    ])
+      .then(([settingsData, shippingData]) => {
+        if (settingsData?.success && settingsData?.settings) {
+          if (settingsData.settings.site_name) setSiteName(settingsData.settings.site_name);
+          if (settingsData.settings.site_logo) setSiteLogo(settingsData.settings.site_logo);
+        }
+        if (shippingData?.success) {
+          if (Array.isArray(shippingData.shippingClasses)) setShippingClasses(shippingData.shippingClasses);
+          if (Array.isArray(shippingData.shippingMethods)) setShippingMethods(shippingData.shippingMethods);
         }
       })
       .catch(() => {});
@@ -166,12 +175,17 @@ export default function CheckoutPage() {
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-full max-w-md rounded-3xl border border-emerald-100 bg-white p-8 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 space-y-4">
+        <div className="w-full max-w-md rounded-3xl border border-emerald-100 bg-white p-8 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 space-y-4 flex flex-col items-center">
+          {siteLogo ? (
+            <div className="h-10 w-auto max-w-[200px] overflow-hidden flex items-center justify-center mb-2">
+              <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
+            </div>
+          ) : null}
           <h1 className="text-2xl font-extrabold text-neutral-900 dark:text-white">
             Order Placed Successfully!
           </h1>
           <p className="text-xs text-neutral-500">
-            Thank you for shopping with <strong>Krishi Uddokta</strong>. Your order ID is:
+            Thank you for shopping with <strong>{siteName}</strong>. Your order ID is:
           </p>
           <div className="rounded-xl bg-emerald-50 py-3 text-lg font-mono font-extrabold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
             #{orderSuccess.orderId}
@@ -195,10 +209,18 @@ export default function CheckoutPage() {
       <header className="border-b border-neutral-200 bg-white py-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
-            <LogoSquare />
-            <span className="font-bold text-sm uppercase text-neutral-900 dark:text-white">
-              Krishi Uddokta
-            </span>
+            {siteLogo ? (
+              <div className="h-9 sm:h-11 w-auto max-w-[180px] sm:max-w-[240px] overflow-hidden flex items-center">
+                <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 font-bold">
+                <LogoSquare />
+                <span className="font-bold text-sm uppercase text-neutral-900 dark:text-white">
+                  {siteName}
+                </span>
+              </div>
+            )}
           </Link>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
             Secure Checkout
