@@ -78,13 +78,13 @@ export async function Navbar() {
               className="flex items-center gap-2 font-bold shrink-0"
             >
               {siteLogo ? (
-                <div className="h-8 sm:h-9 w-auto max-w-[140px] sm:max-w-[180px] overflow-hidden flex items-center">
+                <div className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[260px] overflow-hidden flex items-center">
                   <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <LogoSquare />
-                  <span className="text-sm sm:text-base font-bold uppercase tracking-tight text-neutral-900 dark:text-white">
+                  <span className="text-base sm:text-lg font-extrabold uppercase tracking-tight text-neutral-900 dark:text-white">
                     {siteName}
                   </span>
                 </div>
