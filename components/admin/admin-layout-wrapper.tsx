@@ -13,7 +13,7 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
 
   if (isLoginPage) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">{children}</div>
       </div>
     );
@@ -32,14 +32,14 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      {/* Modern SaaS Header */}
-      <header className="sticky top-0 z-50 flex h-14 w-full items-center justify-between border-b border-slate-800/80 bg-slate-900/90 px-4 sm:px-6 backdrop-blur-md">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
+      {/* Light SaaS Header */}
+      <header className="sticky top-0 z-50 flex h-14 w-full items-center justify-between border-b border-slate-200 bg-white/90 px-4 sm:px-6 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          {/* Mobile Menu Hamburger */}
+          {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden flex items-center justify-center rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+            className="md:hidden flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
             aria-label="Toggle Mobile Navigation"
           >
             <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -53,21 +53,21 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
 
           <Link
             href="/admin"
-            className="flex items-center gap-2.5 font-bold tracking-tight text-white hover:opacity-90 transition"
+            className="flex items-center gap-2.5 font-bold tracking-tight text-slate-900 hover:opacity-80 transition"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
               <LogoIcon className="h-4 w-4" />
             </div>
-            <span className="hidden sm:inline text-sm">Krishi Uddokta Console</span>
+            <span className="hidden sm:inline text-sm font-bold">Krishi Uddokta Console</span>
             <span className="sm:hidden font-mono text-xs">Console</span>
           </Link>
 
-          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-4 w-px bg-slate-200 hidden sm:block" />
 
           <Link
             href="/"
             target="_blank"
-            className="hidden items-center gap-1.5 text-xs text-slate-400 hover:text-white transition sm:flex font-medium"
+            className="hidden items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition sm:flex font-medium"
           >
             <span>Storefront</span>
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/products"
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-500 transition cursor-pointer"
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition cursor-pointer"
           >
             <span>+ Add Product</span>
           </Link>
@@ -88,9 +88,9 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex min-h-[calc(100vh-56px)]">
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-60 flex-none border-r border-slate-800/80 bg-slate-900/60 p-4">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 px-2">
+        {/* Desktop Left Sidebar */}
+        <aside className="hidden md:block w-60 flex-none border-r border-slate-200 bg-white p-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">
             Navigation
           </div>
 
@@ -103,8 +103,8 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                   href={link.href}
                   className={`flex items-center rounded-lg px-3 py-2 text-xs font-medium transition ${
                     isActive
-                      ? "bg-slate-800 text-white font-semibold border-l-2 border-emerald-500 pl-2.5 shadow-xs"
-                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                      ? "bg-emerald-50 text-emerald-700 font-semibold border-l-2 border-emerald-600 pl-2.5 shadow-xs"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   <span>{link.label}</span>
@@ -118,15 +118,15 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-40 flex md:hidden">
             <div
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="relative flex w-64 flex-col bg-slate-900 p-5 text-slate-100 shadow-2xl z-50 border-r border-slate-800">
-              <div className="mb-6 flex items-center justify-between border-b border-slate-800 pb-3">
-                <span className="font-bold text-sm text-emerald-400">Admin Console</span>
+            <div className="relative flex w-64 flex-col bg-white p-5 text-slate-900 shadow-2xl z-50 border-r border-slate-200">
+              <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-3">
+                <span className="font-bold text-sm text-emerald-700">Admin Console</span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer"
+                  className="text-slate-500 hover:text-slate-900 font-bold text-lg cursor-pointer"
                 >
                   ✕
                 </button>
@@ -142,8 +142,8 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`block rounded-lg px-3 py-2 text-xs font-medium transition ${
                         isActive
-                          ? "bg-slate-800 text-white font-bold border-l-2 border-emerald-500 pl-2.5"
-                          : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
+                          ? "bg-emerald-50 text-emerald-700 font-bold border-l-2 border-emerald-600 pl-2.5"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                       }`}
                     >
                       {link.label}
@@ -152,11 +152,11 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                 })}
               </nav>
 
-              <div className="mt-auto border-t border-slate-800 pt-4">
+              <div className="mt-auto border-t border-slate-200 pt-4">
                 <Link
                   href="/"
                   target="_blank"
-                  className="block text-center rounded-lg border border-slate-800 py-2 text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition"
+                  className="block text-center rounded-lg border border-slate-200 py-2 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
                 >
                   View Live Storefront ↗
                 </Link>
@@ -166,7 +166,7 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 bg-slate-950 p-4 sm:p-6 text-slate-100">
+        <main className="flex-1 min-w-0 bg-slate-50 p-4 sm:p-6 text-slate-900">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
