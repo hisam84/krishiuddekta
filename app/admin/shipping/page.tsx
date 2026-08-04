@@ -108,7 +108,7 @@ export default function AdminShippingPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Shipping class ${isEdit ? "updated" : "added"} successfully!`);
+        toast.success(`Shipping class ${isEdit ? "updated" : "added"} successfully`);
         setShowClassModal(false);
         resetClassForm();
         fetchShippingData();
@@ -202,7 +202,7 @@ export default function AdminShippingPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Shipping method ${isEdit ? "updated" : "added"} successfully!`);
+        toast.success(`Shipping method ${isEdit ? "updated" : "added"} successfully`);
         setShowMethodModal(false);
         resetMethodForm();
         fetchShippingData();
@@ -236,15 +236,15 @@ export default function AdminShippingPage() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-neutral-300 pb-3 gap-3 dark:border-neutral-800">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white flex items-center gap-2">
-            🚚 Shipping & Delivery Logistics
+          <h1 className="text-xl font-bold tracking-tight text-white">
+            Shipping & Logistics Configuration
           </h1>
-          <p className="text-xs text-neutral-500">
-            Configure Product Weight Classes, Customer Location Methods, and Flexible Delivery Calculation Rules
+          <p className="text-xs text-slate-400 mt-1">
+            Manage product weight classes, location-based methods, and delivery fee calculation rules.
           </p>
         </div>
 
@@ -252,93 +252,93 @@ export default function AdminShippingPage() {
           {activeTab === "classes" ? (
             <button
               onClick={() => { resetClassForm(); setShowClassModal(true); }}
-              className="rounded border border-[#2271b1] bg-[#2271b1] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#135e96] cursor-pointer"
+              className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-500 transition cursor-pointer"
             >
-              + Add Shipping Class
+              Add Shipping Class
             </button>
           ) : (
             <button
               onClick={() => { resetMethodForm(); setShowMethodModal(true); }}
-              className="rounded border border-[#2271b1] bg-[#2271b1] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#135e96] cursor-pointer"
+              className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-500 transition cursor-pointer"
             >
-              + Add Shipping Method
+              Add Shipping Method
             </button>
           )}
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex border-b border-neutral-300 dark:border-neutral-800 text-xs font-bold">
+      {/* Nav Tabs */}
+      <div className="flex border-b border-slate-800 text-xs font-medium">
         <button
           onClick={() => setActiveTab("methods")}
           className={`px-4 py-2.5 border-b-2 cursor-pointer transition ${
             activeTab === "methods"
-              ? "border-[#2271b1] text-[#2271b1] dark:border-blue-400 dark:text-blue-400"
-              : "border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+              ? "border-emerald-500 text-emerald-400 font-semibold"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
-          🚚 Shipping Methods (লোকেশন ভিত্তিক মেথড ও হিসাব করার লজিক)
+          Shipping Methods
         </button>
         <button
           onClick={() => setActiveTab("classes")}
           className={`px-4 py-2.5 border-b-2 cursor-pointer transition ${
             activeTab === "classes"
-              ? "border-[#2271b1] text-[#2271b1] dark:border-blue-400 dark:text-blue-400"
-              : "border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+              ? "border-emerald-500 text-emerald-400 font-semibold"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
-          📦 Shipping Classes (ওজন ভিত্তিক ক্লাস)
+          Shipping Classes
         </button>
       </div>
 
       {loading ? (
-        <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          Loading shipping configurations...
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center text-xs text-slate-400">
+          Loading configuration data...
         </div>
       ) : activeTab === "classes" ? (
         /* ================= TAB 1: SHIPPING CLASSES ================= */
         shippingClasses.length === 0 ? (
-          <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-            <p className="text-neutral-600 dark:text-neutral-300">No shipping classes found.</p>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center text-xs text-slate-400">
+            No shipping classes found.
           </div>
         ) : (
-          <div className="overflow-hidden rounded border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-            <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
-              <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 shadow-xs">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="border-b border-slate-800 bg-slate-900 font-semibold text-slate-400">
                 <tr>
-                  <th className="px-4 py-3">Shipping Class Name</th>
-                  <th className="px-4 py-3">Identifier Slug</th>
-                  <th className="px-4 py-3">Base Default Fee</th>
-                  <th className="px-4 py-3">Weight / Details</th>
+                  <th className="px-4 py-3">Class Name</th>
+                  <th className="px-4 py-3">Slug</th>
+                  <th className="px-4 py-3">Base Rate</th>
+                  <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              <tbody className="divide-y divide-slate-800/60">
                 {shippingClasses.map((sc) => (
-                  <tr key={sc.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
-                    <td className="px-4 py-3 font-bold text-[#2271b1] dark:text-blue-400">
+                  <tr key={sc.id} className="hover:bg-slate-800/40 transition">
+                    <td className="px-4 py-3 font-semibold text-slate-100">
                       {sc.name}
                     </td>
-                    <td className="px-4 py-3 font-mono text-neutral-500">
+                    <td className="px-4 py-3 font-mono text-slate-500">
                       {sc.slug}
                     </td>
-                    <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                    <td className="px-4 py-3 font-mono font-bold text-emerald-400">
                       BDT {Number(sc.cost).toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-3 text-slate-400">
                       {sc.description || "Default class rate"}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEditClass(sc)}
-                          className="rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-600 hover:text-white cursor-pointer"
+                          className="rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteClass(sc.id, sc.name)}
-                          className="rounded border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700 hover:bg-rose-600 hover:text-white cursor-pointer"
+                          className="rounded-md border border-rose-950 bg-rose-950/40 px-2.5 py-1 text-[11px] font-medium text-rose-400 hover:bg-rose-900 hover:text-white transition cursor-pointer"
                         >
                           Delete
                         </button>
@@ -353,80 +353,71 @@ export default function AdminShippingPage() {
       ) : (
         /* ================= TAB 2: SHIPPING METHODS ================= */
         shippingMethods.length === 0 ? (
-          <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-            <p className="text-neutral-600 dark:text-neutral-300">No shipping methods found.</p>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center text-xs text-slate-400">
+            No shipping methods found.
           </div>
         ) : (
           <div className="space-y-4">
             {shippingMethods.map((sm) => (
               <div
                 key={sm.id}
-                className="rounded-lg border border-neutral-300 bg-white p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-xs"
               >
-                <div className="flex items-center justify-between border-b pb-3 dark:border-neutral-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-3 gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
+                      <h3 className="text-sm font-semibold text-white">
                         {sm.name}
                       </h3>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                        sm.locationType === "dhaka"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}>
-                        {sm.locationType === "dhaka" ? "Dhaka City" : "Outside Dhaka / District"}
+                      <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-300 border border-slate-700">
+                        {sm.locationType === "dhaka" ? "Dhaka City" : "Outside Dhaka"}
                       </span>
-                      <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
-                        {sm.calculationType === "per_class" ? "Per Class Rate (Sum)" : "Highest Class Rate (Max)"}
+                      <span className="rounded-md bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                        {sm.calculationType === "per_class" ? "Cumulative Class Rates" : "Highest Class Rate"}
                       </span>
                     </div>
                     {sm.description && (
-                      <p className="mt-1 text-xs text-neutral-500">{sm.description}</p>
+                      <p className="mt-1 text-xs text-slate-400">{sm.description}</p>
                     )}
-                    <p className="mt-1 text-[11px] font-mono text-neutral-700 dark:text-neutral-300">
-                      Base Fee: <strong>BDT {Number(sm.baseCost || 0).toFixed(2)}</strong> | Calculation Rule:{" "}
-                      <strong>
-                        {sm.calculationType === "per_class"
-                          ? "Charge for each shipping class individually (যোগ হবে)"
-                          : "Charge for the most expensive shipping class only (সর্বোচ্চটি প্রযোজ্য)"}
-                      </strong>
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      Base Fee: <span className="font-mono text-white font-semibold">BDT {Number(sm.baseCost || 0).toFixed(2)}</span>
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditMethod(sm)}
-                      className="rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-600 hover:text-white cursor-pointer"
+                      className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition cursor-pointer"
                     >
                       Configure Class Rates
                     </button>
                     <button
                       onClick={() => handleDeleteMethod(sm.id, sm.name)}
-                      className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-600 hover:text-white cursor-pointer"
+                      className="rounded-lg border border-rose-950 bg-rose-950/40 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-900 hover:text-white transition cursor-pointer"
                     >
                       Delete
                     </button>
                   </div>
                 </div>
 
-                {/* Per-Class Rates Table inside Shipping Method */}
-                <div className="mt-3 overflow-x-auto">
+                {/* Per-Class Rates Table */}
+                <div className="mt-4 overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-neutral-100 font-bold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
-                        <th className="px-3 py-1.5">Shipping Class (Product Weight)</th>
-                        <th className="px-3 py-1.5">Delivery Fee for this Location</th>
+                      <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                        <th className="pb-2 pt-1 px-1">Shipping Class</th>
+                        <th className="pb-2 pt-1 px-1 text-right">Delivery Charge</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                    <tbody className="divide-y divide-slate-800/40">
                       {shippingClasses.map((sc) => {
                         const fee = sm.classCosts?.[sc.id] ?? sc.cost;
                         return (
                           <tr key={sc.id}>
-                            <td className="px-3 py-1.5 font-medium text-neutral-800 dark:text-neutral-200">
-                              {sc.name} <span className="text-neutral-400">({sc.description || "Weight class"})</span>
+                            <td className="py-2 px-1 font-medium text-slate-200">
+                              {sc.name} <span className="text-slate-500 font-normal">({sc.description || "Weight class"})</span>
                             </td>
-                            <td className="px-3 py-1.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            <td className="py-2 px-1 text-right font-mono font-bold text-emerald-400">
                               BDT {Number(fee).toFixed(2)}
                             </td>
                           </tr>
@@ -443,15 +434,15 @@ export default function AdminShippingPage() {
 
       {/* ================= MODAL 1: ADD/EDIT SHIPPING CLASS ================= */}
       {showClassModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-lg border border-neutral-300 bg-white p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517]">
-            <div className="mb-4 flex items-center justify-between border-b pb-2 dark:border-neutral-800">
-              <h2 className="text-base font-bold text-neutral-900 dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            <div className="mb-5 flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-sm font-semibold text-white">
                 {editingClass ? "Edit Shipping Class" : "Add Shipping Class"}
               </h2>
               <button
                 onClick={() => { setShowClassModal(false); resetClassForm(); }}
-                className="text-neutral-500 font-bold hover:text-rose-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-200 font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -459,22 +450,22 @@ export default function AdminShippingPage() {
 
             <form onSubmit={handleSaveClass} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Class Name (Product Weight / Type) *
+                <label className="block font-medium text-slate-300 mb-1.5">
+                  Class Name
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Light / Standard (0 - 1 kg)"
+                  placeholder="Light / Standard (0 - 1 kg)"
                   value={className}
                   onChange={(e) => setClassName(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Base Delivery Charge Cost (in BDT) *
+                <label className="block font-medium text-slate-300 mb-1.5">
+                  Base Delivery Charge (BDT)
                 </label>
                 <input
                   type="number"
@@ -482,35 +473,35 @@ export default function AdminShippingPage() {
                   placeholder="60"
                   value={classCost}
                   onChange={(e) => setClassCost(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 font-mono font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 font-mono text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Weight Range / Description
+                <label className="block font-medium text-slate-300 mb-1.5">
+                  Description
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="e.g. Weight 0 - 1 kg / Small packages"
+                  placeholder="Weight range or class details"
                   value={classDescription}
                   onChange={(e) => setClassDescription(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
-              <div className="border-t pt-3 flex gap-2 dark:border-neutral-800">
+              <div className="border-t border-slate-800 pt-4 flex gap-3">
                 <button
                   type="button"
                   onClick={() => { setShowClassModal(false); resetClassForm(); }}
-                  className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 cursor-pointer"
+                  className="w-1/2 rounded-lg border border-slate-700 py-2 font-medium text-slate-300 hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow hover:bg-[#135e96] disabled:opacity-50 cursor-pointer"
+                  className="w-1/2 rounded-lg bg-emerald-600 py-2 font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? "Saving..." : (editingClass ? "Update Class" : "Add Class")}
                 </button>
@@ -522,15 +513,15 @@ export default function AdminShippingPage() {
 
       {/* ================= MODAL 2: ADD/EDIT SHIPPING METHOD ================= */}
       {showMethodModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[90vh] overflow-y-auto">
-            <div className="mb-4 flex items-center justify-between border-b pb-2 dark:border-neutral-800">
-              <h2 className="text-base font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-                🚚 {editingMethod ? "Configure Delivery Method" : "Add New Delivery Method"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="mb-5 flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-sm font-semibold text-white">
+                {editingMethod ? "Configure Shipping Method" : "Add New Shipping Method"}
               </h2>
               <button
                 onClick={() => { setShowMethodModal(false); resetMethodForm(); }}
-                className="text-neutral-500 font-bold hover:text-rose-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-200 font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -538,121 +529,120 @@ export default function AdminShippingPage() {
 
             <form onSubmit={handleSaveMethod} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Shipping Method Title *
+                <label className="block font-medium text-slate-300 mb-1.5">
+                  Shipping Method Title
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Inside Dhaka City (ঢাকা শহরের মধ্যে)"
+                  placeholder="Inside Dhaka City"
                   value={methodName}
                   onChange={(e) => setMethodName(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                    Target Location Zone *
+                  <label className="block font-medium text-slate-300 mb-1.5">
+                    Target Location Zone
                   </label>
                   <select
                     value={locationType}
                     onChange={(e) => setLocationType(e.target.value as any)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-slate-100 focus:border-emerald-500 focus:outline-none"
                   >
-                    <option value="dhaka">Inside Dhaka City (ঢাকা শহরের মধ্যে)</option>
-                    <option value="outside_dhaka">Outside Dhaka / District (ঢাকার বাইরে / সকল জেলা)</option>
+                    <option value="dhaka">Inside Dhaka City</option>
+                    <option value="outside_dhaka">Outside Dhaka / District</option>
                     <option value="custom">Custom Location Option</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                  <label className="block font-medium text-slate-300 mb-1.5">
                     Base Shipping Fee (BDT)
                   </label>
                   <input
                     type="number"
                     value={baseCost}
                     onChange={(e) => setBaseCost(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-mono font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 font-mono text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Delivery Calculation Rule Selector */}
-              <div className="rounded border border-purple-200 bg-purple-50/60 p-3 dark:border-purple-900 dark:bg-purple-950/30">
-                <label className="block font-bold text-purple-900 dark:text-purple-300 mb-1">
-                  ⚙️ Delivery Fee Calculation Rule (ডেলিভারি চার্জ হিসাবের নিয়ম)
+              {/* Delivery Fee Calculation Rule */}
+              <div className="rounded-lg border border-slate-800 bg-slate-950 p-3.5 space-y-2">
+                <label className="block font-semibold text-slate-200 mb-1">
+                  Delivery Fee Calculation Rule
                 </label>
-                <div className="space-y-2 mt-2">
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="calcType"
-                      value="per_order"
-                      checked={calculationType === "per_order"}
-                      onChange={() => setCalculationType("per_order")}
-                      className="mt-0.5 cursor-pointer"
-                    />
-                    <div>
-                      <p className="font-bold text-neutral-900 dark:text-white">
-                        Highest Class Rate: Charge for the most expensive item class only (সর্বোচ্চ ফি প্রযোজ্য)
-                      </p>
-                      <p className="text-[11px] text-neutral-500">
-                        Default rule. Total Fee = Base Fee + Max(Class Fees in cart).
-                      </p>
-                    </div>
-                  </label>
+                
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="calcType"
+                    value="per_order"
+                    checked={calculationType === "per_order"}
+                    onChange={() => setCalculationType("per_order")}
+                    className="mt-0.5 accent-emerald-500 cursor-pointer"
+                  />
+                  <div>
+                    <p className="font-semibold text-slate-200">
+                      Highest Shipping Class Fee
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Applies fee for the most expensive item class in cart.
+                    </p>
+                  </div>
+                </label>
 
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="calcType"
-                      value="per_class"
-                      checked={calculationType === "per_class"}
-                      onChange={() => setCalculationType("per_class")}
-                      className="mt-0.5 cursor-pointer"
-                    />
-                    <div>
-                      <p className="font-bold text-neutral-900 dark:text-white">
-                        Cumulative Class Rates: Charge for each item class individually (সকল ক্লাসের চার্জ যোগ হবে)
-                      </p>
-                      <p className="text-[11px] text-neutral-500">
-                        Total Fee = Base Fee + Sum of all shipping class costs present in cart.
-                      </p>
-                    </div>
-                  </label>
-                </div>
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="calcType"
+                    value="per_class"
+                    checked={calculationType === "per_class"}
+                    onChange={() => setCalculationType("per_class")}
+                    className="mt-0.5 accent-emerald-500 cursor-pointer"
+                  />
+                  <div>
+                    <p className="font-semibold text-slate-200">
+                      Sum of All Shipping Class Fees
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Combines individual shipping fees for every class present in cart.
+                    </p>
+                  </div>
+                </label>
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Method Notes / Description
+                <label className="block font-medium text-slate-300 mb-1.5">
+                  Description
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Delivery fee for metropolitan area"
+                  placeholder="Delivery notes or zone details"
                   value={methodDescription}
                   onChange={(e) => setMethodDescription(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               {/* Specific Delivery Fees per Shipping Class */}
-              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900/60">
-                <label className="block font-bold text-[#2271b1] dark:text-blue-400 mb-2">
-                  💰 Shipping Class Costs for this Location:
+              <div className="rounded-lg border border-slate-800 bg-slate-950 p-3.5 space-y-3">
+                <label className="block font-semibold text-slate-200">
+                  Shipping Class Rates for Location
                 </label>
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {shippingClasses.map((sc) => (
                     <div key={sc.id} className="flex items-center justify-between gap-4">
                       <div>
-                        <p className="font-bold text-neutral-900 dark:text-white">{sc.name}</p>
-                        <p className="text-[10px] text-neutral-400">{sc.description || "Weight class"}</p>
+                        <p className="font-medium text-slate-200">{sc.name}</p>
+                        <p className="text-[10px] text-slate-500">{sc.description || "Weight class"}</p>
                       </div>
-                      <div className="flex items-center gap-1 w-32">
-                        <span className="font-bold text-neutral-500">BDT</span>
+                      <div className="flex items-center gap-1.5 w-32">
+                        <span className="text-slate-500 text-[11px]">BDT</span>
                         <input
                           type="number"
                           required
@@ -663,7 +653,7 @@ export default function AdminShippingPage() {
                               [sc.id]: Number(e.target.value),
                             })
                           }
-                          className="w-full rounded border border-neutral-300 bg-white p-1.5 font-mono font-bold text-emerald-700 text-right focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-emerald-400"
+                          className="w-full rounded-md border border-slate-700 bg-slate-900 p-1.5 font-mono font-bold text-emerald-400 text-right focus:border-emerald-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -671,18 +661,18 @@ export default function AdminShippingPage() {
                 </div>
               </div>
 
-              <div className="border-t pt-3 flex gap-2 dark:border-neutral-800">
+              <div className="border-t border-slate-800 pt-4 flex gap-3">
                 <button
                   type="button"
                   onClick={() => { setShowMethodModal(false); resetMethodForm(); }}
-                  className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 cursor-pointer"
+                  className="w-1/2 rounded-lg border border-slate-700 py-2 font-medium text-slate-300 hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow hover:bg-[#135e96] disabled:opacity-50 cursor-pointer"
+                  className="w-1/2 rounded-lg bg-emerald-600 py-2 font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? "Saving..." : (editingMethod ? "Update Method" : "Add Method")}
                 </button>

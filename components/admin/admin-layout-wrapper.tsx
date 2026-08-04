@@ -13,7 +13,7 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
 
   if (isLoginPage) {
     return (
-      <div className="min-h-screen bg-[#f0f0f1] text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
         <div className="w-full max-w-md">{children}</div>
       </div>
     );
@@ -27,20 +27,20 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
     { href: "/admin/media", label: "Media Library" },
     { href: "/admin/categories", label: "Categories" },
     { href: "/admin/pages", label: "Pages" },
-    { href: "/admin/shipping", label: "Shipping Classes" },
-    { href: "/admin/settings", label: "Site Settings & Hero" },
+    { href: "/admin/shipping", label: "Shipping & Delivery" },
+    { href: "/admin/settings", label: "Settings & Hero" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f0f0f1] text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
-      {/* Top Admin Bar */}
-      <header className="sticky top-0 z-50 flex h-12 w-full items-center justify-between bg-[#1d2327] px-4 text-xs text-white shadow">
-        <div className="flex items-center gap-3">
-          {/* Mobile Menu Hamburger Button */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+      {/* Modern SaaS Header */}
+      <header className="sticky top-0 z-50 flex h-14 w-full items-center justify-between border-b border-slate-800/80 bg-slate-900/90 px-4 sm:px-6 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden flex items-center justify-center rounded p-1.5 text-neutral-300 hover:bg-[#2271b1] hover:text-white cursor-pointer"
-            aria-label="Toggle Mobile Admin Menu"
+            className="md:hidden flex items-center justify-center rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+            aria-label="Toggle Mobile Navigation"
           >
             <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
@@ -53,26 +53,33 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
 
           <Link
             href="/admin"
-            className="flex items-center gap-2 font-bold text-white hover:text-emerald-400"
+            className="flex items-center gap-2.5 font-bold tracking-tight text-white hover:opacity-90 transition"
           >
-            <LogoIcon className="h-4 w-4 text-emerald-400" />
-            <span className="hidden sm:inline">Krishi Uddokta Admin</span>
-            <span className="sm:hidden font-mono text-[11px]">Admin</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
+              <LogoIcon className="h-4 w-4" />
+            </div>
+            <span className="hidden sm:inline text-sm">Krishi Uddokta Console</span>
+            <span className="sm:hidden font-mono text-xs">Console</span>
           </Link>
+
+          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
 
           <Link
             href="/"
             target="_blank"
-            className="hidden items-center gap-1 text-neutral-300 hover:text-white sm:flex"
+            className="hidden items-center gap-1.5 text-xs text-slate-400 hover:text-white transition sm:flex font-medium"
           >
-            <span>Visit Store ↗</span>
+            <span>Storefront</span>
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
           </Link>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href="/admin/products"
-            className="flex items-center gap-1 rounded bg-[#2271b1] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#135e96]"
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-500 transition cursor-pointer"
           >
             <span>+ Add Product</span>
           </Link>
@@ -80,48 +87,46 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="flex min-h-[calc(100vh-48px)]">
-        {/* Desktop Left Sidebar */}
-        <aside className="hidden md:block w-56 flex-none border-r border-[#2c3338] bg-[#1d2327] text-sm text-[#f0f6fc]">
-          <div className="py-3">
-            <div className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-              Admin Navigation
-            </div>
-
-            <nav className="space-y-0.5">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center px-4 py-2.5 font-medium transition ${
-                      isActive
-                        ? "bg-[#2271b1] text-white font-bold"
-                        : "text-neutral-300 hover:bg-[#2271b1]/80 hover:text-white"
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+      <div className="flex min-h-[calc(100vh-56px)]">
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block w-60 flex-none border-r border-slate-800/80 bg-slate-900/60 p-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 px-2">
+            Navigation
           </div>
+
+          <nav className="space-y-1">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center rounded-lg px-3 py-2 text-xs font-medium transition ${
+                    isActive
+                      ? "bg-slate-800 text-white font-semibold border-l-2 border-emerald-500 pl-2.5 shadow-xs"
+                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                  }`}
+                >
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </aside>
 
         {/* Mobile Slide-out Drawer */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-40 flex md:hidden">
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="relative flex w-64 flex-col bg-[#1d2327] p-4 text-white shadow-2xl z-50">
-              <div className="mb-4 flex items-center justify-between border-b border-neutral-700 pb-2">
-                <span className="font-bold text-sm text-emerald-400">Admin Menu</span>
+            <div className="relative flex w-64 flex-col bg-slate-900 p-5 text-slate-100 shadow-2xl z-50 border-r border-slate-800">
+              <div className="mb-6 flex items-center justify-between border-b border-slate-800 pb-3">
+                <span className="font-bold text-sm text-emerald-400">Admin Console</span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-neutral-400 hover:text-white font-bold text-lg cursor-pointer"
+                  className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer"
                 >
                   ✕
                 </button>
@@ -135,10 +140,10 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                       key={link.href}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`block rounded px-3 py-2 text-xs font-semibold transition ${
+                      className={`block rounded-lg px-3 py-2 text-xs font-medium transition ${
                         isActive
-                          ? "bg-[#2271b1] text-white"
-                          : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                          ? "bg-slate-800 text-white font-bold border-l-2 border-emerald-500 pl-2.5"
+                          : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
                       }`}
                     >
                       {link.label}
@@ -147,22 +152,22 @@ export function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                 })}
               </nav>
 
-              <div className="mt-auto border-t border-neutral-800 pt-4">
+              <div className="mt-auto border-t border-slate-800 pt-4">
                 <Link
                   href="/"
                   target="_blank"
-                  className="block text-center rounded border border-neutral-700 py-2 text-xs text-neutral-300 hover:bg-neutral-800"
+                  className="block text-center rounded-lg border border-slate-800 py-2 text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition"
                 >
-                  Visit Store Front ↗
+                  View Live Storefront ↗
                 </Link>
               </div>
             </div>
           </div>
         )}
 
-        {/* Main Content Area (Responsive Padding & Scrollable Tables) */}
-        <main className="flex-1 min-w-0 bg-[#f0f0f1] p-3 sm:p-6 text-[#2c3338] dark:bg-[#101517] dark:text-[#f0f6fc]">
-          <div className="mx-auto max-w-6xl overflow-x-auto">{children}</div>
+        {/* Main Content Area */}
+        <main className="flex-1 min-w-0 bg-slate-950 p-4 sm:p-6 text-slate-100">
+          <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
     </div>
