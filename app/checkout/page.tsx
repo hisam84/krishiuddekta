@@ -68,7 +68,7 @@ export default function CheckoutPage() {
 
   const totalAmount = Number(cart?.cost?.totalAmount?.amount || 0);
 
-  // Compute dynamic delivery fee using WooCommerce Flat Rate algorithm
+  // Compute dynamic delivery fee using location rate & item shipping classes
   const computeDeliveryFee = (): { fee: number; methodName: string } => {
     const isDhaka = district.toLowerCase().includes("dhaka");
     const targetType = isDhaka ? "dhaka" : "outside_dhaka";
@@ -111,11 +111,11 @@ export default function CheckoutPage() {
 
     let calculatedFee = 0;
     if (calcType === "per_class") {
-      // WooCommerce "per_class": Charge for each shipping class individually
+      // "per_class": Charge for each shipping class individually (sum)
       const sumClassFees = classFees.reduce((sum, fee) => sum + fee, 0);
       calculatedFee = baseCost + sumClassFees;
     } else {
-      // WooCommerce "per_order": Charge for the most expensive shipping class only
+      // "per_order": Charge for the most expensive shipping class only (max)
       const maxClassFee = classFees.length > 0 ? Math.max(...classFees) : defaultFee;
       calculatedFee = baseCost + maxClassFee;
     }

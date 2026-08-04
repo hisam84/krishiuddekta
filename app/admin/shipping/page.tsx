@@ -241,10 +241,10 @@ export default function AdminShippingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-neutral-300 pb-3 gap-3 dark:border-neutral-800">
         <div>
           <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white flex items-center gap-2">
-            <i className="fa-brands fa-wordpress text-blue-600"></i> WooCommerce Shipping System
+            🚚 Shipping & Delivery Logistics
           </h1>
           <p className="text-xs text-neutral-500">
-            WooCommerce Style Shipping Engine: Product Weight Classes & Location Methods with Calculation Types
+            Configure Product Weight Classes, Customer Location Methods, and Flexible Delivery Calculation Rules
           </p>
         </div>
 
@@ -377,7 +377,7 @@ export default function AdminShippingPage() {
                         {sm.locationType === "dhaka" ? "Dhaka City" : "Outside Dhaka / District"}
                       </span>
                       <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
-                        {sm.calculationType === "per_class" ? "WooCommerce: Per Class (Sum)" : "WooCommerce: Per Order (Max)"}
+                        {sm.calculationType === "per_class" ? "Per Class Rate (Sum)" : "Highest Class Rate (Max)"}
                       </span>
                     </div>
                     {sm.description && (
@@ -526,8 +526,7 @@ export default function AdminShippingPage() {
           <div className="w-full max-w-lg rounded-lg border border-neutral-300 bg-white p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between border-b pb-2 dark:border-neutral-800">
               <h2 className="text-base font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-                <i className="fa-brands fa-wordpress text-blue-600"></i>
-                {editingMethod ? "Configure WooCommerce Shipping Method" : "Add New Shipping Method"}
+                🚚 {editingMethod ? "Configure Delivery Method" : "Add New Delivery Method"}
               </h2>
               <button
                 onClick={() => { setShowMethodModal(false); resetMethodForm(); }}
@@ -545,7 +544,7 @@ export default function AdminShippingPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Flat Rate — Inside Dhaka City (ঢাকা শহরের মধ্যে)"
+                  placeholder="e.g. Inside Dhaka City (ঢাকা শহরের মধ্যে)"
                   value={methodName}
                   onChange={(e) => setMethodName(e.target.value)}
                   className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
@@ -581,10 +580,10 @@ export default function AdminShippingPage() {
                 </div>
               </div>
 
-              {/* WooCommerce Calculation Type Selector */}
+              {/* Delivery Calculation Rule Selector */}
               <div className="rounded border border-purple-200 bg-purple-50/60 p-3 dark:border-purple-900 dark:bg-purple-950/30">
                 <label className="block font-bold text-purple-900 dark:text-purple-300 mb-1">
-                  ⚙️ WooCommerce Calculation Type (শিপিং চার্জ হিসাব করার লজিক)
+                  ⚙️ Delivery Fee Calculation Rule (ডেলিভারি চার্জ হিসাবের নিয়ম)
                 </label>
                 <div className="space-y-2 mt-2">
                   <label className="flex items-start gap-2 cursor-pointer">
@@ -598,10 +597,10 @@ export default function AdminShippingPage() {
                     />
                     <div>
                       <p className="font-bold text-neutral-900 dark:text-white">
-                        Per Order: Charge for the most expensive shipping class only (সর্বোচ্চ ফি প্রযোজ্য)
+                        Highest Class Rate: Charge for the most expensive item class only (সর্বোচ্চ ফি প্রযোজ্য)
                       </p>
                       <p className="text-[11px] text-neutral-500">
-                        WooCommerce default rule. Total Fee = Base Fee + Max(Class Fees in cart).
+                        Default rule. Total Fee = Base Fee + Max(Class Fees in cart).
                       </p>
                     </div>
                   </label>
@@ -617,7 +616,7 @@ export default function AdminShippingPage() {
                     />
                     <div>
                       <p className="font-bold text-neutral-900 dark:text-white">
-                        Per Class: Charge shipping for each shipping class individually (সব ক্লাসের চার্জ যোগ হবে)
+                        Cumulative Class Rates: Charge for each item class individually (সকল ক্লাসের চার্জ যোগ হবে)
                       </p>
                       <p className="text-[11px] text-neutral-500">
                         Total Fee = Base Fee + Sum of all shipping class costs present in cart.
@@ -633,7 +632,7 @@ export default function AdminShippingPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Flat rate for metropolitan area"
+                  placeholder="e.g. Delivery fee for metropolitan area"
                   value={methodDescription}
                   onChange={(e) => setMethodDescription(e.target.value)}
                   className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
