@@ -52,8 +52,12 @@ export default function AdminProductsPage() {
 
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+
+  // Media Picker State
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<"thumbnail" | "gallery">("thumbnail");
+  const [pickerTab, setPickerTab] = useState<"library" | "upload">("library");
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
@@ -104,19 +108,6 @@ export default function AdminProductsPage() {
     fetchData();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const val = reader.result as string;
-        setImageUrl(val);
-        if (!thumbnailUrl) setThumbnailUrl(val);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const resetForm = () => {
     setEditingProduct(null);
     setTitle("");
@@ -134,14 +125,18 @@ export default function AdminProductsPage() {
     setAvailable(true);
   };
 
-  const handleAddProduct = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price) {
       toast.error("Product title and price are required");
       return;
     }
 
-    const effectiveImageUrl = imageUrl || (galleryImages.length > 0 ? galleryImages[0] : "");
+    let effectiveImageUrl = imageUrl;
+    if ((!effectiveImageUrl || effectiveImageUrl.startsWith("/api/product-image/")) && galleryImages.length > 0) {
+      const validGalleryItem = galleryImages.find((g) => g && !g.startsWith("/api/product-image/"));
+      if (validGalleryItem) effectiveImageUrl = validGalleryItem;
+    }
     const effectiveThumbUrl = thumbnailUrl || effectiveImageUrl;
 
     setSubmitting(true);
@@ -278,8 +273,12 @@ export default function AdminProductsPage() {
       setThumbnailUrl(item.thumbnail_url || item.url);
       setImageUrl(selectedUrl);
       toast.success("Selected cover thumbnail!");
+      setShowMediaPicker(false);
     } else {
-      if (!galleryImages.includes(selectedUrl)) {
+      if (galleryImages.includes(selectedUrl)) {
+        setGalleryImages(galleryImages.filter((u) => u !== selectedUrl));
+        toast.info("Removed image from gallery");
+      } else {
         const updatedGallery = [...galleryImages, selectedUrl];
         setGalleryImages(updatedGallery);
         if (!imageUrl || imageUrl.startsWith("/api/product-image/")) setImageUrl(selectedUrl);
@@ -287,7 +286,64 @@ export default function AdminProductsPage() {
         toast.success("Added photo to product gallery!");
       }
     }
-    setShowMediaPicker(false);
+  };
+
+  const handlePickerFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingMedia(true);
+    let lastUploadedItem: MediaItem | null = null;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file) continue;
+
+      try {
+        const reader = new FileReader();
+        const base64Data: string = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const res = await fetch("/api/admin/media", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            image_data: base64Data,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success && data.media) {
+          lastUploadedItem = data.media;
+          toast.success(`Uploaded ${file.name}`);
+        } else {
+          toast.error(data.message || `Failed to upload ${file.name}`);
+        }
+      } catch (err) {
+        toast.error(`Error uploading ${file.name}`);
+      }
+    }
+
+    setUploadingMedia(false);
+
+    try {
+      const res = await fetch("/api/admin/media");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.media)) {
+        setMediaList(data.media);
+        if (lastUploadedItem && mediaPickerTarget === "thumbnail") {
+          selectMediaItem(lastUploadedItem);
+        } else {
+          setPickerTab("library");
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to refresh media library");
+    }
   };
 
   const removeGalleryImage = (urlToRemove: string) => {
@@ -301,252 +357,280 @@ export default function AdminProductsPage() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-neutral-300 pb-3 gap-3 dark:border-neutral-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-4 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1d2327] dark:text-white">
-            Products Catalog
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            Products Catalog Manager
           </h1>
-          <p className="text-xs text-neutral-500">
-            Manage agricultural products, distinct cover thumbnails, multi-photo galleries & shipping classes
+          <p className="text-xs text-slate-500 mt-1">
+            Manage store inventory, upload cover thumbnails, add gallery photos, and configure shipping classes
           </p>
         </div>
 
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="rounded border border-[#2271b1] bg-[#2271b1] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#135e96] cursor-pointer"
+          className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition cursor-pointer"
         >
           + Add New Product
         </button>
       </div>
 
-      {/* Filter / Search Bar */}
+      {/* Search Input Bar */}
       <div className="flex items-center justify-between gap-4">
-        <input
-          type="text"
-          placeholder="Filter products by title..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-72 rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-        />
+        <div className="relative w-full max-w-sm">
+          <input
+            type="text"
+            placeholder="Search products by title or handle..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:outline-none"
+          />
+        </div>
+        <span className="text-xs font-medium text-slate-500">
+          Total Products: {filteredProducts.length}
+        </span>
       </div>
 
-      {/* Table List */}
+      {/* Products Table */}
       {loading ? (
-        <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-xs">
           Loading catalog...
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div className="rounded border border-neutral-300 bg-white p-8 text-center text-xs shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-neutral-600 dark:text-neutral-300">No products found.</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-xs">
+          No matching products found.
         </div>
       ) : (
-        <div className="overflow-hidden rounded border border-neutral-300 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
-            <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="border-b border-slate-200 bg-slate-50 font-semibold text-slate-600">
               <tr>
-                <th className="px-4 py-3">Thumbnail</th>
-                <th className="px-4 py-3">Product Name</th>
-                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Product</th>
                 <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Stock</th>
+                <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <tbody className="divide-y divide-slate-100">
               {filteredProducts.map((p) => {
-                const thumb = p.thumbnailUrl || p.featuredImage?.url || "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+                const img = p.thumbnailUrl || p.featuredImage?.url;
                 return (
-                  <tr key={p.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
-                    <td className="px-4 py-2.5">
-                      <div className="h-10 w-10 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700">
-                        <img src={thumb} alt={p.title} className="h-full w-full object-cover" />
+                  <tr key={p.id} className="hover:bg-slate-50/80 transition">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 flex-none overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                          {img ? (
+                            <img src={img} alt={p.title} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center font-bold text-slate-400">
+                              NA
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{p.title}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">/{p.handle}</p>
+                        </div>
                       </div>
                     </td>
-                  <td className="px-4 py-3 font-bold text-neutral-900 dark:text-white">
-                    <div>
-                      <p className="font-bold text-[#2271b1] dark:text-blue-400">{p.title}</p>
-                      {p.shortDescription && (
-                        <p className="text-[10px] text-neutral-400 line-clamp-1">{p.shortDescription}</p>
+
+                    <td className="px-4 py-3 font-mono font-bold text-emerald-700">
+                      BDT {Number(p.priceRange?.minVariantPrice?.amount || 0).toFixed(2)}
+                      {p.discountPrice && p.discountPrice < Number(p.priceRange?.minVariantPrice?.amount) && (
+                        <span className="ml-1 text-[10px] text-slate-400 line-through">
+                          BDT {p.discountPrice}
+                        </span>
                       )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 uppercase text-neutral-500">
-                    {p.tags?.[0] || "general"}
-                  </td>
-                  <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                    BDT {Number(p.priceRange?.minVariantPrice?.amount || 0).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      (p.stockQuantity ?? 50) > 0 ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
-                    }`}>
-                      {p.stockQuantity ?? 50} in stock
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(p)}
-                        className="rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-600 hover:text-white cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id, p.title)}
-                        className="rounded border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700 hover:bg-rose-600 hover:text-white cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+                        {p.tags?.[0] || "General"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 font-mono font-semibold text-slate-800">
+                      {p.stockQuantity ?? 50} units
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {p.availableForSale ? (
+                        <span className="rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                          In Stock
+                        </span>
+                      ) : (
+                        <span className="rounded-md bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-800">
+                          Out of Stock
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(p)}
+                          className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id, p.title)}
+                          className="rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Product Add/Edit Modal */}
+      {/* Product Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl rounded-lg border border-neutral-300 bg-white p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[90vh] overflow-y-auto">
-            <div className="mb-4 flex items-center justify-between border-b pb-2 dark:border-neutral-800">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
-                {editingProduct ? "Edit Product" : "Add New Product"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-sm font-semibold text-slate-900">
+                {editingProduct ? "Edit Product Details" : "Add New Product"}
               </h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
-                className="text-neutral-500 font-bold hover:text-rose-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={editingProduct ? handleUpdate : handleAddProduct} className="space-y-4 text-xs">
+            <form onSubmit={editingProduct ? handleUpdate : handleCreate} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                <label className="block font-medium text-slate-700 mb-1.5">
                   Product Title *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Organic Hybrid Tomato Seeds (50g)"
+                  placeholder="Hybrid Tomato Seeds (10g)"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 focus:border-emerald-600 focus:outline-none font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Short Description (Quick Highlights)
+                <label className="block font-medium text-slate-700 mb-1.5">
+                  Short Summary
                 </label>
                 <input
                   type="text"
-                  placeholder="Brief 1-2 sentence highlights shown under title..."
+                  placeholder="High yield hybrid vegetable seed packet"
                   value={shortDescription}
                   onChange={(e) => setShortDescription(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 focus:border-emerald-600 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                <label className="block font-medium text-slate-700 mb-1.5">
                   Full Description
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Full detailed product specifications..."
+                  placeholder="Detailed specifications, usage instructions, and benefits..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full rounded border border-neutral-300 bg-white p-2.5 text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 focus:border-emerald-600 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                  <label className="block font-medium text-slate-700 mb-1.5">
                     Regular Price (BDT) *
                   </label>
                   <input
                     type="number"
                     required
-                    placeholder="350"
+                    placeholder="250"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-mono font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 font-mono font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                    Discount Offer Price (BDT)
+                  <label className="block font-medium text-slate-700 mb-1.5">
+                    Discount Price (BDT)
                   </label>
                   <input
                     type="number"
-                    placeholder="290"
+                    placeholder="200"
                     value={discountPrice}
                     onChange={(e) => setDiscountPrice(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-mono font-bold text-emerald-700 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-emerald-400"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 font-mono font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                    Initial Stock Quantity
+                  <label className="block font-medium text-slate-700 mb-1.5">
+                    Inventory Stock
                   </label>
                   <input
                     type="number"
                     value={stockQuantity}
                     onChange={(e) => setStockQuantity(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-mono font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 font-mono font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Cover Thumbnail Image Selector */}
-              <div className="rounded border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900">
-                <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-2">
-                  📷 Cover Thumbnail Image (Low-Res Optimized)
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 space-y-2">
+                <label className="block font-semibold text-slate-800">
+                  Cover Thumbnail Image
                 </label>
                 <div className="flex items-center gap-3">
                   {thumbnailUrl ? (
-                    <img src={thumbnailUrl} alt="Thumbnail" className="h-12 w-12 rounded object-cover border" />
+                    <img src={thumbnailUrl} alt="Thumbnail" className="h-12 w-12 rounded-lg object-cover border border-slate-200 bg-white" />
                   ) : null}
                   <button
                     type="button"
-                    onClick={() => { setMediaPickerTarget("thumbnail"); setShowMediaPicker(true); }}
-                    className="rounded border border-[#2271b1] bg-white px-3 py-1.5 font-bold text-[#2271b1] hover:bg-blue-50 cursor-pointer"
+                    onClick={() => { setMediaPickerTarget("thumbnail"); setPickerTab("library"); setShowMediaPicker(true); }}
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                   >
-                    Select Cover Thumbnail from Media Library
+                    Select Cover Image from Media Library
                   </button>
                 </div>
               </div>
 
               {/* Multi-Image Product Gallery */}
-              <div className="rounded border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200">
-                    🖼️ Product Gallery Photos (Multiple Images)
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block font-semibold text-slate-800">
+                    Product Gallery Photos
                   </label>
                   <button
                     type="button"
-                    onClick={() => { setMediaPickerTarget("gallery"); setShowMediaPicker(true); }}
-                    className="rounded border border-[#2271b1] bg-[#2271b1] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#135e96] cursor-pointer"
+                    onClick={() => { setMediaPickerTarget("gallery"); setPickerTab("library"); setShowMediaPicker(true); }}
+                    className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer"
                   >
-                    + Add Gallery Photos
+                    + Manage Gallery Photos
                   </button>
                 </div>
 
                 {galleryImages.length === 0 ? (
-                  <p className="text-[11px] text-neutral-400 italic">No extra gallery photos selected.</p>
+                  <p className="text-[11px] text-slate-400 italic">No extra gallery photos selected.</p>
                 ) : (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {galleryImages.map((gUrl, idx) => (
-                      <div key={idx} className="relative group h-14 w-14 rounded border bg-white overflow-hidden">
+                      <div key={idx} className="relative group h-14 w-14 rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
                         <img src={gUrl} alt="Gallery" className="h-full w-full object-cover" />
                         <button
                           type="button"
@@ -563,13 +647,13 @@ export default function AdminProductsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                  <label className="block font-medium text-slate-700 mb-1.5">
                     Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 font-semibold text-slate-900 focus:border-emerald-600 focus:outline-none"
                   >
                     {categories.map((c) => (
                       <option key={c.id || c.handle} value={c.handle}>
@@ -580,13 +664,13 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                    Shipping Class (Product Weight / Size) *
+                  <label className="block font-medium text-slate-700 mb-1.5">
+                    Shipping Class (Weight / Size) *
                   </label>
                   <select
                     value={shippingClassId}
                     onChange={(e) => setShippingClassId(e.target.value)}
-                    className="w-full rounded border border-neutral-300 bg-white p-2.5 font-bold text-neutral-900 focus:border-[#2271b1] focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 font-semibold text-slate-900 focus:border-emerald-600 focus:outline-none"
                   >
                     {shippingClasses.map((sc) => (
                       <option key={sc.id} value={sc.id}>
@@ -597,18 +681,18 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="border-t pt-3 flex gap-2 dark:border-neutral-800">
+              <div className="border-t border-slate-100 pt-4 flex gap-3">
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); resetForm(); }}
-                  className="w-1/2 rounded border border-neutral-300 py-2 font-semibold hover:bg-neutral-100 cursor-pointer"
+                  className="w-1/2 rounded-lg border border-slate-200 py-2 font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-1/2 rounded border border-[#2271b1] bg-[#2271b1] py-2 font-bold text-white shadow hover:bg-[#135e96] disabled:opacity-50 cursor-pointer"
+                  className="w-1/2 rounded-lg bg-emerald-600 py-2 font-semibold text-white hover:bg-emerald-700 transition disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? "Saving..." : (editingProduct ? "Update Product" : "Publish Product")}
                 </button>
@@ -618,44 +702,162 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* Media Picker Modal */}
+      {/* Integrated Media Picker Modal with Upload & Library Tabs */}
       {showMediaPicker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-3xl rounded-lg border border-neutral-300 bg-white p-6 shadow-2xl dark:border-neutral-800 dark:bg-[#101517] max-h-[85vh] overflow-y-auto">
-            <div className="mb-4 flex items-center justify-between border-b pb-2 dark:border-neutral-800">
-              <h2 className="text-base font-bold text-neutral-900 dark:text-white">
-                Select Photo from Media Library ({mediaPickerTarget === "thumbnail" ? "Cover Thumbnail" : "Gallery Images"})
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-4xl rounded-xl border border-slate-200 bg-white shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">
+                  Select Product {mediaPickerTarget === "thumbnail" ? "Cover Thumbnail" : "Gallery Images"}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Select existing photos from media library or upload new files directly
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer shadow-xs">
+                  <span>{uploadingMedia ? "Uploading..." : "+ Upload New Image"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={uploadingMedia}
+                    onChange={handlePickerFileUpload}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  onClick={() => setShowMediaPicker(false)}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 font-bold transition cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-200 bg-white px-6 text-xs font-medium">
               <button
-                onClick={() => setShowMediaPicker(false)}
-                className="text-neutral-500 font-bold hover:text-rose-600 cursor-pointer"
+                onClick={() => setPickerTab("library")}
+                className={`py-3 px-4 border-b-2 font-semibold transition cursor-pointer ${
+                  pickerTab === "library"
+                    ? "border-emerald-600 text-emerald-700"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
+                }`}
               >
-                ✕
+                Media Library ({mediaList.length})
+              </button>
+              <button
+                onClick={() => setPickerTab("upload")}
+                className={`py-3 px-4 border-b-2 font-semibold transition cursor-pointer ${
+                  pickerTab === "upload"
+                    ? "border-emerald-600 text-emerald-700"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                Upload Files
               </button>
             </div>
 
-            {mediaList.length === 0 ? (
-              <div className="p-8 text-center text-xs text-neutral-500">
-                No uploaded photos found. Go to <strong>Media Library</strong> in admin menu to upload photos.
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                {mediaList.map((m) => (
-                  <div
-                    key={m.id}
-                    onClick={() => selectMediaItem(m)}
-                    className="group relative cursor-pointer overflow-hidden rounded-lg border border-neutral-200 bg-white hover:border-[#2271b1] hover:shadow"
-                  >
-                    <div className="aspect-square w-full overflow-hidden">
-                      <img src={m.thumbnail_url || m.url} alt={m.filename} className="h-full w-full object-cover" />
-                    </div>
-                    <div className="p-1 text-[10px] truncate text-center font-bold text-neutral-700">
-                      {m.filename}
-                    </div>
+            {/* Modal Content Body */}
+            <div className="p-6 flex-1 overflow-y-auto min-h-[320px]">
+              {pickerTab === "upload" ? (
+                /* Tab 2: Upload Zone */
+                <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center hover:border-emerald-500 transition">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 mb-3">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
                   </div>
-                ))}
-              </div>
-            )}
+                  <h3 className="text-sm font-bold text-slate-900 mb-1">
+                    Upload Product Images
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-4 max-w-sm">
+                    Select JPEG, PNG, WEBP files from your device to add to media library
+                  </p>
+                  <label className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer shadow-xs">
+                    <span>{uploadingMedia ? "Uploading..." : "Browse Files"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploadingMedia}
+                      onChange={handlePickerFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              ) : (
+                /* Tab 1: Media Library Grid */
+                mediaList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-12 text-center">
+                    <p className="text-xs text-slate-500 mb-3">No uploaded photos in media library yet.</p>
+                    <label className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer">
+                      <span>+ Upload First Image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={uploadingMedia}
+                        onChange={handlePickerFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    {mediaList.map((m) => {
+                      const isSelected =
+                        mediaPickerTarget === "thumbnail"
+                          ? thumbnailUrl === m.url
+                          : galleryImages.includes(m.url);
+
+                      return (
+                        <div
+                          key={m.id}
+                          onClick={() => selectMediaItem(m)}
+                          className={`group relative cursor-pointer overflow-hidden rounded-xl border transition ${
+                            isSelected
+                              ? "border-emerald-600 ring-2 ring-emerald-600/30 bg-emerald-50"
+                              : "border-slate-200 bg-white hover:border-slate-400 hover:shadow-xs"
+                          }`}
+                        >
+                          <div className="aspect-square w-full overflow-hidden bg-slate-100">
+                            <img src={m.thumbnail_url || m.url} alt={m.filename} className="h-full w-full object-cover" />
+                          </div>
+                          <div className="p-2 text-[10px] truncate text-center font-semibold text-slate-700">
+                            {m.filename}
+                          </div>
+                          {isSelected && (
+                            <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs">
+                              ✓
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-3 bg-slate-50 text-xs">
+              <span className="text-slate-500 font-medium">
+                {mediaPickerTarget === "thumbnail" ? "Click image to set as thumbnail" : "Click images to select for product gallery"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowMediaPicker(false)}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-1.5 font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
