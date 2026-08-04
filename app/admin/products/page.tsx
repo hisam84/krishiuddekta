@@ -332,6 +332,7 @@ export default function AdminProductsPage() {
           <table className="w-full text-left text-xs text-neutral-700 dark:text-neutral-300">
             <thead className="border-b border-neutral-300 bg-[#f6f7f7] font-bold text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
               <tr>
+                <th className="px-4 py-3">Thumbnail</th>
                 <th className="px-4 py-3">Product Name</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Price</th>
@@ -340,8 +341,15 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {filteredProducts.map((p) => (
-                <tr key={p.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
+              {filteredProducts.map((p) => {
+                const thumb = p.thumbnailUrl || p.featuredImage?.url || "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+                return (
+                  <tr key={p.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
+                    <td className="px-4 py-2.5">
+                      <div className="h-10 w-10 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700">
+                        <img src={thumb} alt={p.title} className="h-full w-full object-cover" />
+                      </div>
+                    </td>
                   <td className="px-4 py-3 font-bold text-neutral-900 dark:text-white">
                     <div>
                       <p className="font-bold text-[#2271b1] dark:text-blue-400">{p.title}</p>
@@ -380,7 +388,8 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+            })}
             </tbody>
           </table>
         </div>

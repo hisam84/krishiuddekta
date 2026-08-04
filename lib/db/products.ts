@@ -140,16 +140,19 @@ function clearCache() {
   void clearDiskCache();
 }
 
+const DEFAULT_FALLBACK_IMG = "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+
 export function formatDbProductToProduct(item: DbProduct): Product {
   const priceAmount = Number(item.price || 0).toFixed(2);
-  const rawImageUrl = item.image_url || "";
+  const rawImageUrl = (item.image_url || item.thumbnail_url || "").trim();
   const imageUrl = rawImageUrl.startsWith("data:")
     ? `/api/product-image/${item.id}`
-    : rawImageUrl ||
-      "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+    : rawImageUrl || DEFAULT_FALLBACK_IMG;
 
-  const rawThumb = item.thumbnail_url || imageUrl;
-  const thumbnailUrl = rawThumb.startsWith("data:") ? `/api/product-image/${item.id}` : rawThumb;
+  const rawThumb = (item.thumbnail_url || item.image_url || "").trim();
+  const thumbnailUrl = rawThumb.startsWith("data:")
+    ? `/api/product-image/${item.id}`
+    : rawThumb || imageUrl || DEFAULT_FALLBACK_IMG;
 
   let galleryUrls: string[] = [];
   if (item.gallery_images) {
