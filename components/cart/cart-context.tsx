@@ -275,7 +275,7 @@ export function useCart() {
     variant: ProductVariant,
     product: Product,
     quantity: number = 1,
-    shouldOpenModal: boolean = true,
+    shouldOpenModal: boolean = false,
   ) => {
     setLocalCart((prev) => {
       const nextCart = cartReducer(prev ?? serverCart, {

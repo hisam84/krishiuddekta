@@ -93,7 +93,7 @@ export function AddToCart({ product }: { product: Product }) {
   const handleAddToCart = () => {
     if (!finalVariant || !selectedVariantId) return;
 
-    addCartItem(finalVariant, product, quantity);
+    addCartItem(finalVariant, product, quantity, false);
     toast.success(`${productName} (Qty: ${quantity}) added to cart!`);
   };
 

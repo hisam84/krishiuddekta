@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Badge } from "components/ui/badge";
 import { PriceTag } from "components/ui/price-tag";
 import { StarRating } from "components/ui/star-rating";
+import { useCart } from "components/cart/cart-context";
+import { toast } from "sonner";
+import type { Product } from "lib/shopify/types";
 
 const DEFAULT_FALLBACK =
   "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
@@ -25,6 +28,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({
+  id,
   handle,
   title,
   description,
@@ -37,6 +41,7 @@ export function ProductCard({
   rating = 5,
   reviewCount = 12,
 }: ProductCardProps) {
+  const { addCartItem } = useCart();
   const isDiscounted = discountPrice && discountPrice < price;
   const discountPercent = isDiscounted
     ? Math.round(((price - discountPrice) / price) * 100)
@@ -47,6 +52,45 @@ export function ProductCard({
   useEffect(() => {
     setImgSrc(imageUrl || DEFAULT_FALLBACK);
   }, [imageUrl]);
+
+  const effectivePrice = discountPrice && discountPrice < price ? discountPrice : price;
+
+  const productObj: Product = {
+    id,
+    handle,
+    title,
+    description: description || "",
+    descriptionHtml: `<p>${description || ""}</p>`,
+    availableForSale,
+    featuredImage: { url: imgSrc, altText: title, width: 800, height: 800 },
+    images: [{ url: imgSrc, altText: title, width: 800, height: 800 }],
+    priceRange: {
+      maxVariantPrice: { amount: String(effectivePrice), currencyCode: currency },
+      minVariantPrice: { amount: String(effectivePrice), currencyCode: currency },
+    },
+    options: [],
+    variants: [
+      {
+        id: `var-${id}`,
+        title: "Default",
+        availableForSale,
+        selectedOptions: [],
+        price: { amount: String(effectivePrice), currencyCode: currency },
+      },
+    ],
+    tags: [],
+    seo: { title, description: description || "" },
+    updatedAt: new Date().toISOString(),
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!availableForSale) return;
+    const variantObj = productObj.variants[0]!;
+    addCartItem(variantObj, productObj, 1, false);
+    toast.success(`${title} added to cart!`);
+  };
 
   return (
     <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xs transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
@@ -107,12 +151,32 @@ export function ProductCard({
 
       {/* Action Footer */}
       <div className="p-4 pt-0">
-        <Link
-          href={`/product/${handle}`}
-          className="block w-full rounded-xl bg-emerald-600 py-2.5 text-center text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 active:bg-emerald-800 cursor-pointer"
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!availableForSale}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-center text-xs font-bold text-white shadow-md transition cursor-pointer ${
+            availableForSale
+              ? "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.98]"
+              : "bg-neutral-400 opacity-60 cursor-not-allowed"
+          }`}
         >
-          {availableForSale ? "Order Now" : "Out of Stock"}
-        </Link>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
+          {availableForSale ? "Add To Cart" : "Out of Stock"}
+        </button>
       </div>
     </div>
   );
