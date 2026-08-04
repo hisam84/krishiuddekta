@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CartProvider } from "components/cart/cart-context";
 import { Navbar } from "components/layout/navbar";
 import { NavbarWrapper } from "components/layout/navbar-wrapper";
+import { PageLoadingIndicator } from "components/layout/page-loading-bar";
 import { WelcomeToast } from "components/welcome-toast";
 import { GeistSans } from "geist/font/sans";
 import { Suspense, ReactNode } from "react";
@@ -28,8 +29,6 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // The cart is managed client-side (persisted in localStorage),
-  // so there is no server cart to fetch on every request.
   const cartPromise = Promise.resolve(undefined);
 
   return (
@@ -43,6 +42,9 @@ export default async function RootLayout({
       </head>
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
         <CartProvider cartPromise={cartPromise}>
+          <Suspense fallback={null}>
+            <PageLoadingIndicator />
+          </Suspense>
           <NavbarWrapper>
             <Suspense fallback={null}>
               <Navbar />

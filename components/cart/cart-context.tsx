@@ -28,6 +28,10 @@ type CartAction =
 
 type CartContextType = {
   cartPromise: Promise<Cart | undefined>;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  localCart: Cart | undefined;
+  setLocalCart: React.Dispatch<React.SetStateAction<Cart | undefined>>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -201,8 +205,13 @@ export function CartProvider({
   children: React.ReactNode;
   cartPromise: Promise<Cart | undefined>;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [localCart, setLocalCart] = useState<Cart | undefined>(undefined);
+
   return (
-    <CartContext.Provider value={{ cartPromise }}>
+    <CartContext.Provider
+      value={{ cartPromise, isOpen, setIsOpen, localCart, setLocalCart }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -215,7 +224,7 @@ export function useCart() {
   }
 
   const serverCart = use(context.cartPromise);
-  const [localCart, setLocalCart] = useState<Cart | undefined>(undefined);
+  const { isOpen, setIsOpen, localCart, setLocalCart } = context;
 
   // Restore cart from localStorage on first mount
   useEffect(() => {
@@ -230,7 +239,7 @@ export function useCart() {
     } catch (e) {
       // Ignore corrupted storage data
     }
-  }, []);
+  }, [setLocalCart]);
 
   // The local (client-side) cart takes precedence over the server cart
   const cart = localCart ?? serverCart ?? createEmptyCart();
@@ -246,6 +255,9 @@ export function useCart() {
     }
   }, [localCart]);
 
+  const openCartModal = () => setIsOpen(true);
+  const closeCartModal = () => setIsOpen(false);
+
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
     setLocalCart((prev) => {
       const nextCart = cartReducer(prev ?? serverCart, {
@@ -259,7 +271,12 @@ export function useCart() {
     });
   };
 
-  const addCartItem = (variant: ProductVariant, product: Product, quantity: number = 1) => {
+  const addCartItem = (
+    variant: ProductVariant,
+    product: Product,
+    quantity: number = 1,
+    shouldOpenModal: boolean = true,
+  ) => {
     setLocalCart((prev) => {
       const nextCart = cartReducer(prev ?? serverCart, {
         type: "ADD_ITEM",
@@ -270,10 +287,16 @@ export function useCart() {
       } catch (e) {}
       return nextCart;
     });
+    if (shouldOpenModal) {
+      setIsOpen(true);
+    }
   };
 
   return {
     cart,
+    isOpen,
+    openCartModal,
+    closeCartModal,
     updateCartItem,
     addCartItem,
   };

@@ -2,24 +2,16 @@
 
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { GridTileImage } from "components/grid/tile";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function Gallery({
   images,
 }: {
   images: { src: string; altText: string }[];
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const imageIndex = searchParams.has("image")
-    ? parseInt(searchParams.get("image")!)
-    : 0;
+  const [imageIndex, setImageIndex] = useState(0);
 
-  const updateImage = (index: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("image", index);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  };
+  if (!images || images.length === 0) return null;
 
   const nextImageIndex = imageIndex + 1 < images.length ? imageIndex + 1 : 0;
   const previousImageIndex =
@@ -29,35 +21,40 @@ export function Gallery({
     "h-full px-6 transition-all ease-in-out hover:scale-110 hover:text-black dark:hover:text-white flex items-center justify-center cursor-pointer";
 
   return (
-    <form>
-      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden">
-        {images[imageIndex] && (
-          // eslint-disable-next-line @next/next/no-img-element
+    <div>
+      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs">
+        {images.map((img, idx) => (
           <img
-            className="h-full w-full object-contain"
-            alt={images[imageIndex]?.altText as string}
-            src={images[imageIndex]?.src as string}
+            key={img.src + idx}
+            className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 ${
+              idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+            }`}
+            alt={img.altText || "Product Image"}
+            src={img.src}
             decoding="async"
+            loading={idx === 0 ? "eager" : "lazy"}
           />
-        )}
+        ))}
 
         {images.length > 1 ? (
-          <div className="absolute bottom-[15%] flex w-full justify-center">
-            <div className="mx-auto flex h-11 items-center rounded-full border border-white bg-neutral-50/80 text-neutral-500 backdrop-blur-sm dark:border-black dark:bg-neutral-900/80">
+          <div className="absolute bottom-4 z-20 flex w-full justify-center">
+            <div className="mx-auto flex h-11 items-center rounded-full border border-neutral-200 bg-white/90 px-2 text-neutral-700 shadow-md backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/90 dark:text-neutral-200">
               <button
-                formAction={() => updateImage(previousImageIndex.toString())}
+                type="button"
+                onClick={() => setImageIndex(previousImageIndex)}
                 aria-label="Previous product image"
                 className={buttonClassName}
               >
-                <ArrowLeftIcon className="h-5" />
+                <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <div className="mx-1 h-6 w-px bg-neutral-500"></div>
+              <div className="mx-1 h-5 w-px bg-neutral-300 dark:bg-neutral-700"></div>
               <button
-                formAction={() => updateImage(nextImageIndex.toString())}
+                type="button"
+                onClick={() => setImageIndex(nextImageIndex)}
                 aria-label="Next product image"
                 className={buttonClassName}
               >
-                <ArrowRightIcon className="h-5" />
+                <ArrowRightIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -65,16 +62,17 @@ export function Gallery({
       </div>
 
       {images.length > 1 ? (
-        <ul className="my-12 flex items-center flex-wrap justify-center gap-2 overflow-auto py-1 lg:mb-0">
+        <ul className="my-6 flex items-center flex-wrap justify-center gap-3 overflow-auto py-1">
           {images.map((image, index) => {
             const isActive = index === imageIndex;
 
             return (
-              <li key={image.src} className="h-20 w-20">
+              <li key={image.src + index} className="h-20 w-20">
                 <button
-                  formAction={() => updateImage(index.toString())}
+                  type="button"
+                  onClick={() => setImageIndex(index)}
                   aria-label="Select product image"
-                  className="h-full w-full cursor-pointer"
+                  className="h-full w-full cursor-pointer focus:outline-none"
                 >
                   <GridTileImage
                     alt={image.altText}
@@ -89,6 +87,6 @@ export function Gallery({
           })}
         </ul>
       ) : null}
-    </form>
+    </div>
   );
 }

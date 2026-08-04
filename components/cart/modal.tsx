@@ -18,32 +18,15 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-  const { cart, updateCartItem } = useCart();
-  const [isOpen, setIsOpen] = useState(false);
-  const quantityRef = useRef(cart?.totalQuantity);
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
-
-  useEffect(() => {
-    if (
-      cart?.totalQuantity &&
-      cart?.totalQuantity !== quantityRef.current &&
-      cart?.totalQuantity > 0
-    ) {
-      if (!isOpen) {
-        setIsOpen(true);
-      }
-      quantityRef.current = cart?.totalQuantity;
-    }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
+  const { cart, updateCartItem, isOpen, openCartModal, closeCartModal } = useCart();
 
   return (
     <>
-      <button aria-label="Open cart" onClick={openCart}>
+      <button aria-label="Open cart" onClick={openCartModal}>
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
       <Transition show={isOpen}>
-        <Dialog onClose={closeCart} className="relative z-50">
+        <Dialog onClose={closeCartModal} className="relative z-50">
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"
@@ -67,7 +50,7 @@ export default function CartModal() {
             <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-200 bg-white/80 p-6 text-black backdrop-blur-xl md:w-[390px] dark:border-neutral-700 dark:bg-black/80 dark:text-white">
               <div className="flex items-center justify-between">
                 <p className="text-lg font-semibold">My Cart</p>
-                <button aria-label="Close cart" onClick={closeCart}>
+                <button aria-label="Close cart" onClick={closeCartModal}>
                   <CloseCart />
                 </button>
               </div>
@@ -140,7 +123,7 @@ export default function CartModal() {
                                   </div>
                                   <Link
                                     href={merchandiseUrl}
-                                    onClick={closeCart}
+                                    onClick={closeCartModal}
                                     className="z-30 ml-2 flex flex-row space-x-4"
                                   >
                                     <div className="flex flex-1 flex-col text-base">
@@ -212,7 +195,7 @@ export default function CartModal() {
                   </div>
                   <Link
                     href="/checkout"
-                    onClick={closeCart}
+                    onClick={closeCartModal}
                     className="block w-full rounded-full bg-emerald-600 p-3 text-center text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-md"
                   >
                     Proceed to Checkout
