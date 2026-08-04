@@ -104,6 +104,8 @@ export function ProductCard({
             <img
               src={imgSrc}
               alt={title}
+              loading="lazy"
+              decoding="async"
               onError={() => setImgSrc(DEFAULT_FALLBACK)}
               className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             />

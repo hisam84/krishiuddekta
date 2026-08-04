@@ -48,7 +48,7 @@ export function ComboDealsSection() {
             className="flex flex-col sm:flex-row items-center gap-4 overflow-hidden rounded-2xl border border-emerald-100 bg-white p-5 shadow-xs transition hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div className="relative h-36 w-36 flex-none overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-800">
-              <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+              <img src={item.imageUrl} alt={item.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
               <div className="absolute top-2 left-2">
                 <Badge variant="discount">{item.badge}</Badge>
               </div>
