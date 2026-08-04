@@ -842,6 +842,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
             id: r.id,
             name: r.name,
             locationType: (r.location_type || "dhaka") as any,
+            baseCost: Number(r.base_cost || 0),
+            calculationType: (r.calculation_type || "per_order") as any,
             classCosts,
             isActive: Boolean(r.is_active),
             description: r.description || "",
@@ -855,6 +857,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
           id: "sm-inside-dhaka",
           name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
           locationType: "dhaka",
+          baseCost: 0,
+          calculationType: "per_order",
           classCosts: {
             "sc-standard": 60,
             "sc-medium": 90,
@@ -868,6 +872,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
           id: "sm-outside-dhaka",
           name: "Outside Dhaka / All Districts (ঢাকার বাইরে / জেলা শহর)",
           locationType: "outside_dhaka",
+          baseCost: 0,
+          calculationType: "per_order",
           classCosts: {
             "sc-standard": 120,
             "sc-medium": 180,
@@ -886,6 +892,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
           id: "sm-inside-dhaka",
           name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
           locationType: "dhaka",
+          baseCost: 0,
+          calculationType: "per_order",
           classCosts: { "sc-standard": 60, "sc-heavy": 120, "sc-free": 0 },
           isActive: true,
           description: "Inside Dhaka city delivery",
@@ -894,6 +902,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
           id: "sm-outside-dhaka",
           name: "Outside Dhaka / All Districts (ঢাকার বাইরে)",
           locationType: "outside_dhaka",
+          baseCost: 0,
+          calculationType: "per_order",
           classCosts: { "sc-standard": 120, "sc-heavy": 250, "sc-free": 0 },
           isActive: true,
           description: "Outside Dhaka district delivery",
@@ -906,6 +916,8 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
 export async function addDbShippingMethod(data: {
   name: string;
   location_type: string;
+  base_cost?: number;
+  calculation_type?: "per_order" | "per_class";
   class_costs: Record<string, number>;
   description?: string;
 }): Promise<boolean> {
@@ -914,10 +926,12 @@ export async function addDbShippingMethod(data: {
     const sql = getDb();
     const id = `sm-${Date.now()}`;
     const costsJson = JSON.stringify(data.class_costs || {});
+    const baseFee = data.base_cost !== undefined ? data.base_cost : 0;
+    const calcType = data.calculation_type || "per_order";
 
     await sql`
-      INSERT INTO shipping_methods (id, name, location_type, class_costs, is_active, description)
-      VALUES (${id}, ${data.name}, ${data.location_type || "dhaka"}, ${costsJson}, true, ${data.description || ""});
+      INSERT INTO shipping_methods (id, name, location_type, base_cost, calculation_type, class_costs, is_active, description)
+      VALUES (${id}, ${data.name}, ${data.location_type || "dhaka"}, ${baseFee}, ${calcType}, ${costsJson}, true, ${data.description || ""});
     `;
     clearCache();
     return true;
@@ -932,6 +946,8 @@ export async function updateDbShippingMethod(
   data: {
     name?: string;
     location_type?: string;
+    base_cost?: number;
+    calculation_type?: "per_order" | "per_class";
     class_costs?: Record<string, number>;
     is_active?: boolean;
     description?: string;
@@ -944,6 +960,10 @@ export async function updateDbShippingMethod(
       await sql`UPDATE shipping_methods SET name = ${data.name} WHERE id = ${id}`;
     if (data.location_type !== undefined)
       await sql`UPDATE shipping_methods SET location_type = ${data.location_type} WHERE id = ${id}`;
+    if (data.base_cost !== undefined)
+      await sql`UPDATE shipping_methods SET base_cost = ${data.base_cost} WHERE id = ${id}`;
+    if (data.calculation_type !== undefined)
+      await sql`UPDATE shipping_methods SET calculation_type = ${data.calculation_type} WHERE id = ${id}`;
     if (data.class_costs !== undefined)
       await sql`UPDATE shipping_methods SET class_costs = ${JSON.stringify(data.class_costs)} WHERE id = ${id}`;
     if (data.is_active !== undefined)

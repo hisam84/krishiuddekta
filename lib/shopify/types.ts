@@ -80,6 +80,8 @@ export type ShippingMethod = {
   id: string;
   name: string;
   locationType: "dhaka" | "outside_dhaka" | "custom";
+  baseCost: number;
+  calculationType: "per_order" | "per_class";
   classCosts: Record<string, number>;
   isActive: boolean;
   description?: string;

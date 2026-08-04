@@ -63,6 +63,8 @@ export interface DbShippingMethod {
   id: string;
   name: string;
   location_type: string;
+  base_cost: number;
+  calculation_type: "per_order" | "per_class";
   class_costs: string;
   is_active: boolean;
   description?: string;
@@ -179,6 +181,8 @@ export async function initDatabase() {
           id VARCHAR(100) PRIMARY KEY,
           name VARCHAR(150) NOT NULL,
           location_type VARCHAR(50) DEFAULT 'dhaka',
+          base_cost NUMERIC(10, 2) DEFAULT 0.00,
+          calculation_type VARCHAR(50) DEFAULT 'per_order',
           class_costs TEXT DEFAULT '{}',
           is_active BOOLEAN DEFAULT TRUE,
           description TEXT

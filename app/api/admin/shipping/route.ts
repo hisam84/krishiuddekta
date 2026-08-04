@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { target_type, name, cost, description, location_type, class_costs } = body;
+    const { target_type, name, cost, description, location_type, base_cost, calculation_type, class_costs } = body;
 
     if (target_type === "method") {
       if (!name || !location_type) {
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
       const success = await addDbShippingMethod({
         name,
         location_type,
+        base_cost: base_cost !== undefined ? Number(base_cost) : 0,
+        calculation_type: calculation_type || "per_order",
         class_costs: class_costs || {},
         description,
       });
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, target_type, name, cost, description, location_type, class_costs, is_active } = body;
+    const { id, target_type, name, cost, description, location_type, base_cost, calculation_type, class_costs, is_active } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, message: "ID required" }, { status: 400 });
@@ -82,6 +84,8 @@ export async function PUT(req: NextRequest) {
       const success = await updateDbShippingMethod(id, {
         name,
         location_type,
+        base_cost: base_cost !== undefined ? Number(base_cost) : undefined,
+        calculation_type,
         class_costs,
         is_active,
         description,

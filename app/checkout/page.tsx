@@ -19,6 +19,8 @@ interface ShippingMethod {
   id: string;
   name: string;
   locationType: string;
+  baseCost?: number;
+  calculationType?: "per_order" | "per_class";
   classCosts: Record<string, number>;
   isActive: boolean;
 }
@@ -66,7 +68,7 @@ export default function CheckoutPage() {
 
   const totalAmount = Number(cart?.cost?.totalAmount?.amount || 0);
 
-  // Compute dynamic delivery fee based on customer location (Shipping Method) & product Shipping Classes
+  // Compute dynamic delivery fee using WooCommerce Flat Rate algorithm
   const computeDeliveryFee = (): { fee: number; methodName: string } => {
     const isDhaka = district.toLowerCase().includes("dhaka");
     const targetType = isDhaka ? "dhaka" : "outside_dhaka";
@@ -77,33 +79,48 @@ export default function CheckoutPage() {
       null;
 
     const defaultFee = isDhaka ? 60 : 120;
-    const methodName = activeMethod?.name || (isDhaka ? "Inside Dhaka" : "Outside Dhaka");
+    const methodName = activeMethod?.name || (isDhaka ? "Inside Dhaka City" : "Outside Dhaka");
 
     if (!cart?.lines || cart.lines.length === 0) {
       return { fee: defaultFee, methodName };
     }
 
-    let maxClassFee = 0;
+    const baseCost = Number(activeMethod?.baseCost ?? 0);
+    const calcType = activeMethod?.calculationType || "per_order";
+
+    // Collect fees for unique shipping classes present in the cart
+    const classFeesMap = new Map<string, number>();
 
     cart.lines.forEach((line) => {
       const prodShippingId = (line.merchandise.product as any)?.shippingClassId || "sc-standard";
       
-      let itemFee = defaultFee;
+      let classFee = defaultFee;
       if (activeMethod?.classCosts && activeMethod.classCosts[prodShippingId] !== undefined) {
-        itemFee = Number(activeMethod.classCosts[prodShippingId]);
+        classFee = Number(activeMethod.classCosts[prodShippingId]);
       } else {
         const sc = shippingClasses.find((item) => item.id === prodShippingId);
         if (sc) {
-          itemFee = sc.cost;
+          classFee = sc.cost;
         }
       }
 
-      if (itemFee > maxClassFee) {
-        maxClassFee = itemFee;
-      }
+      classFeesMap.set(prodShippingId, classFee);
     });
 
-    return { fee: maxClassFee, methodName };
+    const classFees = Array.from(classFeesMap.values());
+
+    let calculatedFee = 0;
+    if (calcType === "per_class") {
+      // WooCommerce "per_class": Charge for each shipping class individually
+      const sumClassFees = classFees.reduce((sum, fee) => sum + fee, 0);
+      calculatedFee = baseCost + sumClassFees;
+    } else {
+      // WooCommerce "per_order": Charge for the most expensive shipping class only
+      const maxClassFee = classFees.length > 0 ? Math.max(...classFees) : defaultFee;
+      calculatedFee = baseCost + maxClassFee;
+    }
+
+    return { fee: calculatedFee, methodName };
   };
 
   const { fee: deliveryFee, methodName: deliveryMethodName } = computeDeliveryFee();
