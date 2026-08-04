@@ -10,7 +10,8 @@ import { Suspense } from "react";
 
 import type { Metadata } from "next";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
