@@ -15,6 +15,14 @@ interface ShippingClass {
   cost: number;
 }
 
+interface ShippingMethod {
+  id: string;
+  name: string;
+  locationType: string;
+  classCosts: Record<string, number>;
+  isActive: boolean;
+}
+
 export default function CheckoutPage() {
   const { cart } = useCart();
   const [customerName, setCustomerName] = useState("");
@@ -26,6 +34,7 @@ export default function CheckoutPage() {
   const [district, setDistrict] = useState("Dhaka");
   
   const [shippingClasses, setShippingClasses] = useState<ShippingClass[]>([]);
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<{ orderId: string } | null>(null);
@@ -35,12 +44,13 @@ export default function CheckoutPage() {
   const availableDistricts = currentDivisionObj.districts;
 
   useEffect(() => {
-    // Fetch shipping classes for dynamic fee calculation
+    // Fetch shipping classes & location shipping methods for dynamic fee calculation
     fetch("/api/admin/shipping")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.shippingClasses)) {
-          setShippingClasses(data.shippingClasses);
+        if (data.success) {
+          if (Array.isArray(data.shippingClasses)) setShippingClasses(data.shippingClasses);
+          if (Array.isArray(data.shippingMethods)) setShippingMethods(data.shippingMethods);
         }
       })
       .catch(() => {});
@@ -56,26 +66,47 @@ export default function CheckoutPage() {
 
   const totalAmount = Number(cart?.cost?.totalAmount?.amount || 0);
 
-  // Compute dynamic delivery fee based on product shipping classes & cart total
-  const computeDeliveryFee = (): number => {
-    if (totalAmount >= 1000) return 0; // Free delivery for orders over BDT 1000
+  // Compute dynamic delivery fee based on customer location (Shipping Method) & product Shipping Classes
+  const computeDeliveryFee = (): { fee: number; methodName: string } => {
+    const isDhaka = district.toLowerCase().includes("dhaka");
+    const targetType = isDhaka ? "dhaka" : "outside_dhaka";
 
-    if (!cart?.lines || cart.lines.length === 0) return 60;
+    const activeMethod =
+      shippingMethods.find((m) => m.locationType === targetType && m.isActive) ||
+      shippingMethods.find((m) => m.isActive) ||
+      null;
 
-    let maxClassFee = 60; // Base default delivery fee
+    const defaultFee = isDhaka ? 60 : 120;
+    const methodName = activeMethod?.name || (isDhaka ? "Inside Dhaka" : "Outside Dhaka");
+
+    if (!cart?.lines || cart.lines.length === 0) {
+      return { fee: defaultFee, methodName };
+    }
+
+    let maxClassFee = 0;
 
     cart.lines.forEach((line) => {
       const prodShippingId = (line.merchandise.product as any)?.shippingClassId || "sc-standard";
-      const sc = shippingClasses.find((item) => item.id === prodShippingId);
-      if (sc && sc.cost > maxClassFee) {
-        maxClassFee = sc.cost;
+      
+      let itemFee = defaultFee;
+      if (activeMethod?.classCosts && activeMethod.classCosts[prodShippingId] !== undefined) {
+        itemFee = Number(activeMethod.classCosts[prodShippingId]);
+      } else {
+        const sc = shippingClasses.find((item) => item.id === prodShippingId);
+        if (sc) {
+          itemFee = sc.cost;
+        }
+      }
+
+      if (itemFee > maxClassFee) {
+        maxClassFee = itemFee;
       }
     });
 
-    return maxClassFee;
+    return { fee: maxClassFee, methodName };
   };
 
-  const deliveryFee = computeDeliveryFee();
+  const { fee: deliveryFee, methodName: deliveryMethodName } = computeDeliveryFee();
   const grandTotal = totalAmount + deliveryFee;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -342,7 +373,9 @@ export default function CheckoutPage() {
               <div className="flex justify-between items-center">
                 <div>
                   <span>Delivery Charge</span>
-                  <p className="text-[10px] text-neutral-400">Calculated from product shipping class</p>
+                  <p className="text-[10px] text-neutral-400">
+                    {deliveryMethodName} (Weight class rate)
+                  </p>
                 </div>
                 <span className="font-mono font-bold text-emerald-600">
                   {deliveryFee === 0 ? "FREE" : `BDT ${deliveryFee.toFixed(2)}`}

@@ -59,6 +59,15 @@ export interface DbShippingClass {
   description?: string;
 }
 
+export interface DbShippingMethod {
+  id: string;
+  name: string;
+  location_type: string;
+  class_costs: string;
+  is_active: boolean;
+  description?: string;
+}
+
 export interface DbOrder {
   id: string;
   customer_name: string;
@@ -162,6 +171,16 @@ export async function initDatabase() {
           name VARCHAR(150) NOT NULL,
           slug VARCHAR(150) UNIQUE NOT NULL,
           cost NUMERIC(10, 2) NOT NULL DEFAULT 60.00,
+          description TEXT
+        );
+      `,
+      sql`
+        CREATE TABLE IF NOT EXISTS shipping_methods (
+          id VARCHAR(100) PRIMARY KEY,
+          name VARCHAR(150) NOT NULL,
+          location_type VARCHAR(50) DEFAULT 'dhaka',
+          class_costs TEXT DEFAULT '{}',
+          is_active BOOLEAN DEFAULT TRUE,
           description TEXT
         );
       `,

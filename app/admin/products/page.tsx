@@ -581,7 +581,7 @@ export default function AdminProductsPage() {
 
                 <div>
                   <label className="block font-bold text-neutral-800 dark:text-neutral-200 mb-1">
-                    Shipping Class *
+                    Shipping Class (Product Weight / Size) *
                   </label>
                   <select
                     value={shippingClassId}
@@ -590,7 +590,7 @@ export default function AdminProductsPage() {
                   >
                     {shippingClasses.map((sc) => (
                       <option key={sc.id} value={sc.id}>
-                        {sc.name} (Fee: BDT {Number(sc.cost).toFixed(2)})
+                        {sc.name} {sc.description ? `— ${sc.description}` : ""}
                       </option>
                     ))}
                   </select>

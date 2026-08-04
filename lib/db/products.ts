@@ -1,6 +1,6 @@
 import { getDb } from "./index";
-import { DbOrder, DbProduct, DbCollection, DbPage, DbShippingClass, DbMedia, initDatabase } from "./schema";
-import { Product, Collection, Page, ShippingClass } from "lib/shopify/types";
+import { DbOrder, DbProduct, DbCollection, DbPage, DbShippingClass, DbShippingMethod, DbMedia, initDatabase } from "./schema";
+import { Product, Collection, Page, ShippingClass, ShippingMethod } from "lib/shopify/types";
 
 let dbInitialized = false;
 let initPromise: Promise<unknown> | null = null;
@@ -735,19 +735,28 @@ export async function getDbShippingClasses(): Promise<ShippingClass[]> {
       await ensureDb();
       const sql = getDb();
       const rows = (await sql`SELECT * FROM shipping_classes;`) as DbShippingClass[];
-      return rows.map((r) => ({
-        id: r.id,
-        name: r.name,
-        slug: r.slug,
-        cost: Number(r.cost),
-        description: r.description || "",
-      }));
+      if (rows.length > 0) {
+        return rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          slug: r.slug,
+          cost: Number(r.cost),
+          description: r.description || "",
+        }));
+      }
+      return [
+        { id: "sc-standard", name: "Light / Standard (0 - 1 kg)", slug: "standard-delivery", cost: 60, description: "Weight 0 - 1 kg" },
+        { id: "sc-medium", name: "Medium Weight (1 - 5 kg)", slug: "medium-weight", cost: 90, description: "Weight 1 - 5 kg" },
+        { id: "sc-heavy", name: "Heavy Equipment (>5 kg)", slug: "heavy-equipment", cost: 120, description: "Weight > 5 kg" },
+        { id: "sc-free", name: "Free Shipping Class", slug: "free-shipping", cost: 0, description: "Zero delivery charge" },
+      ];
     } catch (error) {
       console.error("Error fetching shipping classes:", error);
       return [
-        { id: "sc-standard", name: "Standard Delivery", slug: "standard-delivery", cost: 60, description: "Standard fee" },
-        { id: "sc-heavy", name: "Heavy Equipment", slug: "heavy-equipment", cost: 250, description: "Heavy fee" },
-        { id: "sc-free", name: "Free Shipping", slug: "free-shipping", cost: 0, description: "Free fee" },
+        { id: "sc-standard", name: "Light / Standard (0 - 1 kg)", slug: "standard-delivery", cost: 60, description: "Weight 0 - 1 kg" },
+        { id: "sc-medium", name: "Medium Weight (1 - 5 kg)", slug: "medium-weight", cost: 90, description: "Weight 1 - 5 kg" },
+        { id: "sc-heavy", name: "Heavy Equipment (>5 kg)", slug: "heavy-equipment", cost: 120, description: "Weight > 5 kg" },
+        { id: "sc-free", name: "Free Shipping Class", slug: "free-shipping", cost: 0, description: "Zero delivery charge" },
       ];
     }
   });
@@ -810,6 +819,154 @@ export async function deleteDbShippingClass(id: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error deleting shipping class:", error);
+    return false;
+  }
+}
+
+// Shipping Methods Management (Location-based methods with per-class rates)
+export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
+  return cached("shipping_methods", async () => {
+    try {
+      await ensureDb();
+      const sql = getDb();
+      const rows = (await sql`SELECT * FROM shipping_methods;`) as DbShippingMethod[];
+      if (rows.length > 0) {
+        return rows.map((r) => {
+          let classCosts: Record<string, number> = {};
+          if (r.class_costs) {
+            try {
+              classCosts = JSON.parse(r.class_costs);
+            } catch (e) {}
+          }
+          return {
+            id: r.id,
+            name: r.name,
+            locationType: (r.location_type || "dhaka") as any,
+            classCosts,
+            isActive: Boolean(r.is_active),
+            description: r.description || "",
+          };
+        });
+      }
+
+      // Default seed shipping methods
+      const defaultMethods: ShippingMethod[] = [
+        {
+          id: "sm-inside-dhaka",
+          name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
+          locationType: "dhaka",
+          classCosts: {
+            "sc-standard": 60,
+            "sc-medium": 90,
+            "sc-heavy": 120,
+            "sc-free": 0,
+          },
+          isActive: true,
+          description: "Metropolitan Dhaka area delivery",
+        },
+        {
+          id: "sm-outside-dhaka",
+          name: "Outside Dhaka / All Districts (ঢাকার বাইরে / জেলা শহর)",
+          locationType: "outside_dhaka",
+          classCosts: {
+            "sc-standard": 120,
+            "sc-medium": 180,
+            "sc-heavy": 250,
+            "sc-free": 0,
+          },
+          isActive: true,
+          description: "All districts across Bangladesh outside Dhaka",
+        },
+      ];
+      return defaultMethods;
+    } catch (error) {
+      console.error("Error fetching shipping methods:", error);
+      return [
+        {
+          id: "sm-inside-dhaka",
+          name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
+          locationType: "dhaka",
+          classCosts: { "sc-standard": 60, "sc-heavy": 120, "sc-free": 0 },
+          isActive: true,
+          description: "Inside Dhaka city delivery",
+        },
+        {
+          id: "sm-outside-dhaka",
+          name: "Outside Dhaka / All Districts (ঢাকার বাইরে)",
+          locationType: "outside_dhaka",
+          classCosts: { "sc-standard": 120, "sc-heavy": 250, "sc-free": 0 },
+          isActive: true,
+          description: "Outside Dhaka district delivery",
+        },
+      ];
+    }
+  });
+}
+
+export async function addDbShippingMethod(data: {
+  name: string;
+  location_type: string;
+  class_costs: Record<string, number>;
+  description?: string;
+}): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const id = `sm-${Date.now()}`;
+    const costsJson = JSON.stringify(data.class_costs || {});
+
+    await sql`
+      INSERT INTO shipping_methods (id, name, location_type, class_costs, is_active, description)
+      VALUES (${id}, ${data.name}, ${data.location_type || "dhaka"}, ${costsJson}, true, ${data.description || ""});
+    `;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error adding shipping method:", error);
+    return false;
+  }
+}
+
+export async function updateDbShippingMethod(
+  id: string,
+  data: {
+    name?: string;
+    location_type?: string;
+    class_costs?: Record<string, number>;
+    is_active?: boolean;
+    description?: string;
+  },
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    if (data.name !== undefined)
+      await sql`UPDATE shipping_methods SET name = ${data.name} WHERE id = ${id}`;
+    if (data.location_type !== undefined)
+      await sql`UPDATE shipping_methods SET location_type = ${data.location_type} WHERE id = ${id}`;
+    if (data.class_costs !== undefined)
+      await sql`UPDATE shipping_methods SET class_costs = ${JSON.stringify(data.class_costs)} WHERE id = ${id}`;
+    if (data.is_active !== undefined)
+      await sql`UPDATE shipping_methods SET is_active = ${data.is_active} WHERE id = ${id}`;
+    if (data.description !== undefined)
+      await sql`UPDATE shipping_methods SET description = ${data.description} WHERE id = ${id}`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error updating shipping method:", error);
+    return false;
+  }
+}
+
+export async function deleteDbShippingMethod(id: string): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    await sql`DELETE FROM shipping_methods WHERE id = ${id};`;
+    clearCache();
+    return true;
+  } catch (error) {
+    console.error("Error deleting shipping method:", error);
     return false;
   }
 }

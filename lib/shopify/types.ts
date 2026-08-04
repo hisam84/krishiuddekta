@@ -76,6 +76,15 @@ export type ShippingClass = {
   description?: string;
 };
 
+export type ShippingMethod = {
+  id: string;
+  name: string;
+  locationType: "dhaka" | "outside_dhaka" | "custom";
+  classCosts: Record<string, number>;
+  isActive: boolean;
+  description?: string;
+};
+
 export type MediaItem = {
   id: string;
   filename: string;
