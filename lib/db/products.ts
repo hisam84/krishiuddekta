@@ -734,30 +734,33 @@ export async function getDbShippingClasses(): Promise<ShippingClass[]> {
     try {
       await ensureDb();
       const sql = getDb();
-      const rows = (await sql`SELECT * FROM shipping_classes;`) as DbShippingClass[];
-      if (rows.length > 0) {
-        return rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          slug: r.slug,
-          cost: Number(r.cost),
-          description: r.description || "",
-        }));
+      let rows = (await sql`SELECT * FROM shipping_classes;`) as DbShippingClass[];
+      
+      if (rows.length === 0) {
+        try {
+          await sql`
+            INSERT INTO shipping_classes (id, name, slug, cost, description)
+            VALUES 
+              ('sc-standard', 'Light / Standard (0 - 1 kg)', 'standard-delivery', 60.00, 'Weight 0 - 1 kg'),
+              ('sc-medium', 'Medium Weight (1 - 5 kg)', 'medium-weight', 90.00, 'Weight 1 - 5 kg'),
+              ('sc-heavy', 'Heavy Equipment (>5 kg)', 'heavy-equipment', 120.00, 'Weight > 5 kg'),
+              ('sc-free', 'Free Shipping Class', 'free-shipping', 0.00, 'Zero delivery charge')
+            ON CONFLICT (id) DO NOTHING;
+          `;
+          rows = (await sql`SELECT * FROM shipping_classes;`) as DbShippingClass[];
+        } catch (e) {}
       }
-      return [
-        { id: "sc-standard", name: "Light / Standard (0 - 1 kg)", slug: "standard-delivery", cost: 60, description: "Weight 0 - 1 kg" },
-        { id: "sc-medium", name: "Medium Weight (1 - 5 kg)", slug: "medium-weight", cost: 90, description: "Weight 1 - 5 kg" },
-        { id: "sc-heavy", name: "Heavy Equipment (>5 kg)", slug: "heavy-equipment", cost: 120, description: "Weight > 5 kg" },
-        { id: "sc-free", name: "Free Shipping Class", slug: "free-shipping", cost: 0, description: "Zero delivery charge" },
-      ];
+
+      return rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        cost: Number(r.cost),
+        description: r.description || "",
+      }));
     } catch (error) {
       console.error("Error fetching shipping classes:", error);
-      return [
-        { id: "sc-standard", name: "Light / Standard (0 - 1 kg)", slug: "standard-delivery", cost: 60, description: "Weight 0 - 1 kg" },
-        { id: "sc-medium", name: "Medium Weight (1 - 5 kg)", slug: "medium-weight", cost: 90, description: "Weight 1 - 5 kg" },
-        { id: "sc-heavy", name: "Heavy Equipment (>5 kg)", slug: "heavy-equipment", cost: 120, description: "Weight > 5 kg" },
-        { id: "sc-free", name: "Free Shipping Class", slug: "free-shipping", cost: 0, description: "Zero delivery charge" },
-      ];
+      return [];
     }
   });
 }
@@ -796,8 +799,14 @@ export async function updateDbShippingClass(
   try {
     await ensureDb();
     const sql = getDb();
-    if (data.name !== undefined)
-      await sql`UPDATE shipping_classes SET name = ${data.name} WHERE id = ${id}`;
+    if (data.name !== undefined) {
+      const slug = data.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_]+/g, "-");
+      await sql`UPDATE shipping_classes SET name = ${data.name}, slug = ${slug} WHERE id = ${id}`;
+    }
     if (data.cost !== undefined)
       await sql`UPDATE shipping_classes SET cost = ${data.cost} WHERE id = ${id}`;
     if (data.description !== undefined)
@@ -829,86 +838,42 @@ export async function getDbShippingMethods(): Promise<ShippingMethod[]> {
     try {
       await ensureDb();
       const sql = getDb();
-      const rows = (await sql`SELECT * FROM shipping_methods;`) as DbShippingMethod[];
-      if (rows.length > 0) {
-        return rows.map((r) => {
-          let classCosts: Record<string, number> = {};
-          if (r.class_costs) {
-            try {
-              classCosts = JSON.parse(r.class_costs);
-            } catch (e) {}
-          }
-          return {
-            id: r.id,
-            name: r.name,
-            locationType: (r.location_type || "dhaka") as any,
-            baseCost: Number(r.base_cost || 0),
-            calculationType: (r.calculation_type || "per_order") as any,
-            classCosts,
-            isActive: Boolean(r.is_active),
-            description: r.description || "",
-          };
-        });
+      let rows = (await sql`SELECT * FROM shipping_methods;`) as DbShippingMethod[];
+
+      if (rows.length === 0) {
+        try {
+          await sql`
+            INSERT INTO shipping_methods (id, name, location_type, base_cost, calculation_type, class_costs, is_active, description)
+            VALUES 
+              ('sm-inside-dhaka', 'Inside Dhaka City (ঢাকা শহরের মধ্যে)', 'dhaka', 0.00, 'per_order', '{"sc-standard":60,"sc-medium":90,"sc-heavy":120,"sc-free":0}', true, 'Metropolitan Dhaka area delivery'),
+              ('sm-outside-dhaka', 'Outside Dhaka / All Districts (ঢাকার বাইরে / জেলা শহর)', 'outside_dhaka', 0.00, 'per_order', '{"sc-standard":120,"sc-medium":180,"sc-heavy":250,"sc-free":0}', true, 'All districts across Bangladesh outside Dhaka')
+            ON CONFLICT (id) DO NOTHING;
+          `;
+          rows = (await sql`SELECT * FROM shipping_methods;`) as DbShippingMethod[];
+        } catch (e) {}
       }
 
-      // Default seed shipping methods
-      const defaultMethods: ShippingMethod[] = [
-        {
-          id: "sm-inside-dhaka",
-          name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
-          locationType: "dhaka",
-          baseCost: 0,
-          calculationType: "per_order",
-          classCosts: {
-            "sc-standard": 60,
-            "sc-medium": 90,
-            "sc-heavy": 120,
-            "sc-free": 0,
-          },
-          isActive: true,
-          description: "Metropolitan Dhaka area delivery",
-        },
-        {
-          id: "sm-outside-dhaka",
-          name: "Outside Dhaka / All Districts (ঢাকার বাইরে / জেলা শহর)",
-          locationType: "outside_dhaka",
-          baseCost: 0,
-          calculationType: "per_order",
-          classCosts: {
-            "sc-standard": 120,
-            "sc-medium": 180,
-            "sc-heavy": 250,
-            "sc-free": 0,
-          },
-          isActive: true,
-          description: "All districts across Bangladesh outside Dhaka",
-        },
-      ];
-      return defaultMethods;
+      return rows.map((r) => {
+        let classCosts: Record<string, number> = {};
+        if (r.class_costs) {
+          try {
+            classCosts = JSON.parse(r.class_costs);
+          } catch (e) {}
+        }
+        return {
+          id: r.id,
+          name: r.name,
+          locationType: (r.location_type || "dhaka") as any,
+          baseCost: Number(r.base_cost || 0),
+          calculationType: (r.calculation_type || "per_order") as any,
+          classCosts,
+          isActive: Boolean(r.is_active),
+          description: r.description || "",
+        };
+      });
     } catch (error) {
       console.error("Error fetching shipping methods:", error);
-      return [
-        {
-          id: "sm-inside-dhaka",
-          name: "Inside Dhaka City (ঢাকা শহরের মধ্যে)",
-          locationType: "dhaka",
-          baseCost: 0,
-          calculationType: "per_order",
-          classCosts: { "sc-standard": 60, "sc-heavy": 120, "sc-free": 0 },
-          isActive: true,
-          description: "Inside Dhaka city delivery",
-        },
-        {
-          id: "sm-outside-dhaka",
-          name: "Outside Dhaka / All Districts (ঢাকার বাইরে)",
-          locationType: "outside_dhaka",
-          baseCost: 0,
-          calculationType: "per_order",
-          classCosts: { "sc-standard": 120, "sc-heavy": 250, "sc-free": 0 },
-          isActive: true,
-          description: "Outside Dhaka district delivery",
-        },
-      ];
+      return [];
     }
   });
 }
