@@ -94,6 +94,18 @@ export async function shopifyFetch<T>({
   query: string;
   variables?: ExtractVariables<T>;
 }): Promise<{ status: number; body: T } | never> {
+  // If using default/unconfigured dummy domain, skip network request fast (0ms)
+  if (
+    !process.env.SHOPIFY_STORE_DOMAIN ||
+    rawDomain === defaultDomain ||
+    rawDomain.includes("next-js-store.myshopify.com")
+  ) {
+    return {
+      status: 200,
+      body: { data: {} } as T,
+    };
+  }
+
   try {
     const result = await fetch(endpoint, {
       method: "POST",
@@ -330,6 +342,12 @@ export async function getCollectionProducts({
     return dbProducts;
   }
 
+  // Fallback to top database products if category returns 0 (e.g. homepage carousel)
+  const allDbProducts = await getDbProducts();
+  if (allDbProducts.length > 0) {
+    return allDbProducts.slice(0, 8);
+  }
+
   const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
     query: getCollectionProductsQuery,
     variables: {
@@ -385,6 +403,14 @@ export async function getMenu(handle: string): Promise<Menu[]> {
     { title: "Fertilizers", path: "/search/fertilizer" },
     { title: "Agro Tools", path: "/search/tools" },
   ];
+
+  if (
+    !process.env.SHOPIFY_STORE_DOMAIN ||
+    rawDomain === defaultDomain ||
+    rawDomain.includes("next-js-store.myshopify.com")
+  ) {
+    return defaultMenu;
+  }
 
   const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,

@@ -107,7 +107,7 @@ async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
     cache.set(key, { value: disk, expiresAt: Date.now() + CACHE_TTL_MS });
     void fn()
       .then((fresh) => {
-        if (!isEmptyValue(fresh)) {
+        if (fresh !== undefined && fresh !== null) {
           cache.set(key, {
             value: fresh,
             expiresAt: Date.now() + CACHE_TTL_MS,
@@ -123,13 +123,13 @@ async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
 
   const value = await fn();
 
-  // Don't cache empty results so transient DB failures aren't sticky.
+  // Cache empty/falsy results with a short 60s TTL to prevent database hammering on missing items
   const isEmpty = isEmptyValue(value);
+  const ttl = isEmpty ? 60_000 : CACHE_TTL_MS;
 
+  cache.set(key, { value, expiresAt: Date.now() + ttl });
   if (!isEmpty) {
-    cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
     void writeDiskCache(key, value);
-    return value;
   }
 
   return value;

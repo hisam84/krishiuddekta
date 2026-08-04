@@ -21,8 +21,15 @@ export default function Search() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Debounced live search autocomplete (300ms) to prevent unneeded backend requests
   useEffect(() => {
-    if (query.trim().length > 1) {
+    if (query.trim().length <= 1) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
       fetch(`/api/admin/products`)
         .then((res) => res.json())
         .then((data) => {
@@ -35,10 +42,9 @@ export default function Search() {
           }
         })
         .catch(() => setSuggestions([]));
-    } else {
-      setSuggestions([]);
-      setShowDropdown(false);
-    }
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
