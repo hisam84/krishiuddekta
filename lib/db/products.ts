@@ -144,27 +144,63 @@ const DEFAULT_FALLBACK_IMG = "https://images.unsplash.com/photo-1592841200221-a6
 
 export function formatDbProductToProduct(item: DbProduct): Product {
   const priceAmount = Number(item.price || 0).toFixed(2);
-  const rawImageUrl = (item.image_url || item.thumbnail_url || "").trim();
-  const imageUrl = rawImageUrl.startsWith("data:")
-    ? `/api/product-image/${item.id}`
-    : rawImageUrl || DEFAULT_FALLBACK_IMG;
-
-  const rawThumb = (item.thumbnail_url || item.image_url || "").trim();
-  const thumbnailUrl = rawThumb.startsWith("data:")
-    ? `/api/product-image/${item.id}`
-    : rawThumb || imageUrl || DEFAULT_FALLBACK_IMG;
+  let rawImageUrl = (item.image_url || item.thumbnail_url || "").trim();
+  let rawThumb = (item.thumbnail_url || item.image_url || "").trim();
 
   let galleryUrls: string[] = [];
   if (item.gallery_images) {
     try {
-      galleryUrls = JSON.parse(item.gallery_images);
+      const parsed = JSON.parse(item.gallery_images);
+      if (Array.isArray(parsed)) {
+        galleryUrls = parsed.filter(
+          (u: any) => typeof u === "string" && u.trim().length > 0
+        );
+      }
     } catch (e) {}
   }
 
-  const allImageObjs = [
-    { url: imageUrl, altText: item.title, width: 800, height: 800 },
-    ...galleryUrls.map((gUrl) => ({ url: gUrl, altText: item.title, width: 800, height: 800 })),
-  ];
+  // If rawImageUrl is empty or points to a circular /api/product-image/ path, fallback to first gallery image
+  if (
+    (!rawImageUrl || rawImageUrl.startsWith("/api/product-image/")) &&
+    galleryUrls.length > 0
+  ) {
+    if (!rawImageUrl.startsWith("data:")) {
+      const firstValidGallery = galleryUrls.find(
+        (u) => u && !u.startsWith("/api/product-image/")
+      );
+      if (firstValidGallery) {
+        rawImageUrl = firstValidGallery;
+      }
+    }
+  }
+
+  if (!rawThumb && rawImageUrl) {
+    rawThumb = rawImageUrl;
+  }
+
+  const imageUrl = rawImageUrl.startsWith("data:")
+    ? `/api/product-image/${item.id}`
+    : rawImageUrl || DEFAULT_FALLBACK_IMG;
+
+  const thumbnailUrl = rawThumb.startsWith("data:")
+    ? `/api/product-image/${item.id}`
+    : rawThumb || imageUrl || DEFAULT_FALLBACK_IMG;
+
+  // Build unique clean list of image objects
+  const rawList = [imageUrl, ...galleryUrls];
+  const uniqueUrls: string[] = [];
+  for (const u of rawList) {
+    if (u && !uniqueUrls.includes(u)) {
+      uniqueUrls.push(u);
+    }
+  }
+
+  const allImageObjs = uniqueUrls.map((url) => ({
+    url,
+    altText: item.title,
+    width: 800,
+    height: 800,
+  }));
 
   return {
     id: item.id,

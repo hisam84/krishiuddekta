@@ -8,9 +8,11 @@ import { getProducts } from "lib/shopify";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import type { Metadata } from "next";
+
 export const revalidate = 60;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
   description:
     "High-yielding seeds, organic fertilizers, and modern agricultural tools storefront.",

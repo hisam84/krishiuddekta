@@ -12,28 +12,45 @@ export async function GET(
 
   try {
     const product = await getDbProductById(id);
-    const imageUrl = product?.image_url;
+    let imageUrl = (product?.image_url || product?.thumbnail_url || "").trim();
 
-    if (!imageUrl) {
+    // Check gallery images if main image is missing or circular
+    if (!imageUrl || imageUrl.startsWith("/api/product-image/")) {
+      if (product?.gallery_images) {
+        try {
+          const gallery = JSON.parse(product.gallery_images);
+          if (Array.isArray(gallery)) {
+            const validItem = gallery.find(
+              (u: any) =>
+                typeof u === "string" &&
+                u.trim().length > 0 &&
+                !u.startsWith("/api/product-image/")
+            );
+            if (validItem) imageUrl = validItem;
+          }
+        } catch (e) {}
+      }
+    }
+
+    if (!imageUrl || imageUrl.startsWith("/api/product-image/")) {
       return new NextResponse("Not found", { status: 404 });
     }
 
-    if (!imageUrl.startsWith("data:")) {
-      // Not a stored data URI — redirect to the real image URL.
-      return NextResponse.redirect(imageUrl);
+    if (imageUrl.startsWith("data:")) {
+      const [meta, data] = imageUrl.split(",");
+      const mime = meta?.match(/data:([^;]+)/)?.[1] || "image/png";
+      const buffer = Buffer.from(data || "", "base64");
+
+      return new NextResponse(buffer, {
+        headers: {
+          "Content-Type": mime,
+          "Content-Length": String(buffer.length),
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
     }
 
-    const [meta, data] = imageUrl.split(",");
-    const mime = meta?.match(/data:([^;]+)/)?.[1] || "image/png";
-    const buffer = Buffer.from(data || "", "base64");
-
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": mime,
-        "Content-Length": String(buffer.length),
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
+    return NextResponse.redirect(imageUrl);
   } catch (error) {
     console.error("Error serving product image:", error);
     return new NextResponse("Server error", { status: 500 });

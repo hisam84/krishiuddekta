@@ -11,6 +11,8 @@ export function Gallery({
 }) {
   const [imageIndex, setImageIndex] = useState(0);
 
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+
   if (!images || images.length === 0) return null;
 
   const nextImageIndex = imageIndex + 1 < images.length ? imageIndex + 1 : 0;
@@ -23,18 +25,26 @@ export function Gallery({
   return (
     <div>
       <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs">
-        {images.map((img, idx) => (
-          <img
-            key={img.src + idx}
-            className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 ${
-              idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-            }`}
-            alt={img.altText || "Product Image"}
-            src={img.src}
-            decoding="async"
-            loading={idx === 0 ? "eager" : "lazy"}
-          />
-        ))}
+        {images.map((img, idx) => {
+          const isError = imageErrors[idx];
+          const displaySrc = isError
+            ? "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800"
+            : img.src;
+
+          return (
+            <img
+              key={img.src + idx}
+              className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 ${
+                idx === imageIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+              alt={img.altText || "Product Image"}
+              src={displaySrc}
+              onError={() => setImageErrors((prev) => ({ ...prev, [idx]: true }))}
+              decoding="async"
+              loading={idx === 0 ? "eager" : "lazy"}
+            />
+          );
+        })}
 
         {images.length > 1 ? (
           <div className="absolute bottom-4 z-20 flex w-full justify-center">

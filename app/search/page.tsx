@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
 import { defaultSort, sorting } from "lib/constants";
@@ -7,7 +8,7 @@ import { Button } from "components/ui/button";
 
 export const revalidate = 60;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Search Products | Krishi Uddokta",
   description: "Search agricultural seeds, organic fertilizers, and tools.",
 };

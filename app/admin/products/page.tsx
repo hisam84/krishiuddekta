@@ -141,6 +141,9 @@ export default function AdminProductsPage() {
       return;
     }
 
+    const effectiveImageUrl = imageUrl || (galleryImages.length > 0 ? galleryImages[0] : "");
+    const effectiveThumbUrl = thumbnailUrl || effectiveImageUrl;
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/products", {
@@ -153,8 +156,8 @@ export default function AdminProductsPage() {
           price: Number(price),
           discount_price: discountPrice ? Number(discountPrice) : undefined,
           badge,
-          image_url: imageUrl,
-          thumbnail_url: thumbnailUrl || imageUrl,
+          image_url: effectiveImageUrl,
+          thumbnail_url: effectiveThumbUrl,
           gallery_images: JSON.stringify(galleryImages),
           category,
           shipping_class_id: shippingClassId,
@@ -204,6 +207,13 @@ export default function AdminProductsPage() {
       return;
     }
 
+    let effectiveImageUrl = imageUrl;
+    if ((!effectiveImageUrl || effectiveImageUrl.startsWith("/api/product-image/")) && galleryImages.length > 0) {
+      const validGalleryItem = galleryImages.find((g) => g && !g.startsWith("/api/product-image/"));
+      if (validGalleryItem) effectiveImageUrl = validGalleryItem;
+    }
+    const effectiveThumbUrl = thumbnailUrl || effectiveImageUrl;
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/products", {
@@ -217,8 +227,8 @@ export default function AdminProductsPage() {
           price: Number(price),
           discount_price: discountPrice ? Number(discountPrice) : undefined,
           badge,
-          image_url: imageUrl,
-          thumbnail_url: thumbnailUrl || imageUrl,
+          image_url: effectiveImageUrl,
+          thumbnail_url: effectiveThumbUrl,
           gallery_images: JSON.stringify(galleryImages),
           category,
           shipping_class_id: shippingClassId,
@@ -263,13 +273,17 @@ export default function AdminProductsPage() {
   };
 
   const selectMediaItem = (item: MediaItem) => {
+    const selectedUrl = item.url || item.thumbnail_url;
     if (mediaPickerTarget === "thumbnail") {
       setThumbnailUrl(item.thumbnail_url || item.url);
-      if (!imageUrl) setImageUrl(item.url);
+      setImageUrl(selectedUrl);
       toast.success("Selected cover thumbnail!");
     } else {
-      if (!galleryImages.includes(item.url)) {
-        setGalleryImages([...galleryImages, item.url]);
+      if (!galleryImages.includes(selectedUrl)) {
+        const updatedGallery = [...galleryImages, selectedUrl];
+        setGalleryImages(updatedGallery);
+        if (!imageUrl || imageUrl.startsWith("/api/product-image/")) setImageUrl(selectedUrl);
+        if (!thumbnailUrl || thumbnailUrl.startsWith("/api/product-image/")) setThumbnailUrl(selectedUrl);
         toast.success("Added photo to product gallery!");
       }
     }

@@ -1,4 +1,7 @@
+"use client";
+
 import clsx from "clsx";
+import { useState, useEffect } from "react";
 import Label from "../label";
 
 type GridTileImageProps = {
@@ -20,6 +23,9 @@ type GridTileImageProps = {
   className?: string;
 };
 
+const DEFAULT_FALLBACK =
+  "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800";
+
 export function GridTileImage({
   isInteractive = true,
   active,
@@ -31,6 +37,12 @@ export function GridTileImage({
   height,
   className,
 }: GridTileImageProps) {
+  const [imgSrc, setImgSrc] = useState(src || DEFAULT_FALLBACK);
+
+  useEffect(() => {
+    setImgSrc(src || DEFAULT_FALLBACK);
+  }, [src]);
+
   return (
     <div
       className={clsx(
@@ -42,15 +54,16 @@ export function GridTileImage({
         },
       )}
     >
-      {src ? (
+      {imgSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={src}
+          src={imgSrc}
           alt={alt || ""}
           width={width}
           height={height}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
+          onError={() => setImgSrc(DEFAULT_FALLBACK)}
           className={clsx(
             "relative h-full w-full object-contain",
             {
