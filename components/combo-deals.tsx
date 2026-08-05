@@ -12,6 +12,7 @@ export function ComboDealsSection() {
       discountPrice: 650,
       badge: "Save 19%",
       imageUrl: "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800",
+      href: "/product/high-yield-tomato-seeds",
     },
     {
       id: "combo-2",
@@ -21,6 +22,7 @@ export function ComboDealsSection() {
       discountPrice: 820,
       badge: "Save 18%",
       imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=80&w=800",
+      href: "/product/thai-baramasi-mango-sapling",
     },
   ];
 
@@ -61,7 +63,7 @@ export function ComboDealsSection() {
               <div className="flex items-center justify-between pt-2">
                 <PriceTag price={item.price} discountPrice={item.discountPrice} />
                 <Link
-                  href="/search"
+                  href={item.href}
                   className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-md"
                 >
                   View Details

@@ -278,6 +278,28 @@ export async function initDatabase() {
       `,
     ]);
 
+    // Automatic content & data fixes in Neon DB
+    try {
+      await Promise.all([
+        sql`UPDATE products SET title = REPLACE(title, 'পন্য', 'পণ্য'), description = REPLACE(description, 'পন্য', 'পণ্য') WHERE title LIKE '%পন্য%' OR description LIKE '%পন্য%';`,
+        sql`UPDATE settings SET value = REPLACE(value, 'পন্য', 'পণ্য') WHERE value LIKE '%পন্য%';`,
+        sql`UPDATE settings SET value = REPLACE(value, 'Krishi Uddekta', 'Krishi Uddokta') WHERE value LIKE '%Krishi Uddekta%';`,
+        sql`
+          UPDATE products 
+          SET 
+            title = 'Strawberry Pickle 700g | স্ট্রবেরি আচার ৭০০ গ্রাম',
+            description = REPLACE(description, 'নিট ওজন: ৫০০ গ্রাম', 'নিট ওজন: ৭০০ গ্রাম'),
+            image_url = CASE 
+              WHEN image_url LIKE '%/api/product-image/%' OR image_url IS NULL OR image_url = '' THEN 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&q=80&w=800'
+              ELSE image_url 
+            END
+          WHERE handle LIKE '%strawberry%' OR title LIKE '%Strawberry%' OR title LIKE '%স্ট্রবেরি%';
+        `,
+      ]);
+    } catch (e) {
+      console.error("Database automatic cleanup warning:", e);
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Failed to initialize database tables:", error);

@@ -16,8 +16,8 @@ export async function Navbar() {
 
   const siteName = settings.site_name || process.env.SITE_NAME || "Krishi Uddokta";
   const siteLogo = settings.site_logo;
-  const helpline = settings.header_helpline || "01700-000000";
-  const announcement = settings.header_announcement || "Nationwide Cash on Delivery Available";
+  const helpline = settings.header_helpline || "+880 1604-649648";
+  const announcement = settings.header_announcement || "সারাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery Available)";
   const headerBgColor = settings.header_bg_color || "emerald";
 
   const getAnnouncementBgClass = () => {
@@ -43,13 +43,27 @@ export async function Navbar() {
               <svg className="h-3.5 w-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              <span>Helpline: <strong className="font-bold">{helpline}</strong></span>
+              <span>Helpline: <a href="tel:+8801604649648" className="hover:underline"><strong className="font-bold">{helpline}</strong></a></span>
             </span>
             <span className="hidden sm:inline text-white/40">|</span>
             <span className="truncate text-[11px] sm:text-xs opacity-90">{announcement}</span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link
+              href="/pages/delivery-charge"
+              className="text-[11px] sm:text-xs hover:underline opacity-90 transition font-medium hidden sm:inline"
+            >
+              ডেলিভারি চার্জ
+            </Link>
+            <span className="hidden sm:inline text-white/40">|</span>
+            <Link
+              href="/pages/refund-policy"
+              className="text-[11px] sm:text-xs hover:underline opacity-90 transition font-medium hidden sm:inline"
+            >
+              রিফান্ড পলিসি
+            </Link>
+            <span className="hidden sm:inline text-white/40">|</span>
             <Link
               href="/admin"
               className="rounded bg-black/20 px-2 py-0.5 text-[10px] sm:text-[11px] hover:bg-black/40 transition font-semibold"

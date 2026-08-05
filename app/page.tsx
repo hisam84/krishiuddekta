@@ -16,7 +16,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Krishi Uddokta | 100% Pure & Organic Agro Products",
   description:
-    "High-yielding seeds, organic fertilizers, and modern agricultural tools storefront.",
+    "কৃষি উদ্যোক্তা — উচ্চফলনশীল বীজ, ১০০% খাঁটি অর্গানিক সার, ফলদ চারা এবং আধুনিক কৃষি যন্ত্রপাতি। সারাদেশে ক্যাশ অন ডেলিভারি। High-yielding hybrid seeds, organic fertilizers, and modern agro tools with nationwide Cash on Delivery.",
 };
 
 function ProductGridSkeleton() {
@@ -117,8 +117,32 @@ async function TopSellingProducts() {
 }
 
 export default function HomePage() {
+  const storeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    name: "Krishi Uddokta",
+    alternateName: "কৃষি উদ্যোক্তা",
+    url: "https://krishiuddekta.vercel.app/",
+    logo: "https://krishiuddekta.vercel.app/api/site-favicon",
+    description:
+      "উচ্চফলনশীল বীজ, ১০০% খাঁটি অর্গানিক সার, ফলদ চারা এবং আধুনিক কৃষি যন্ত্রপাতি। সারাদেশে ক্যাশ অন ডেলিভারি।",
+    telephone: "+8801604649648",
+    email: "info@krishiuddekta.com",
+    priceRange: "৳৳",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "BD",
+    },
+  };
+
   return (
     <div className="bg-neutral-50 dark:bg-neutral-950 min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(storeJsonLd),
+        }}
+      />
       {/* 1. Hero Banner Slider */}
       <Suspense
         fallback={

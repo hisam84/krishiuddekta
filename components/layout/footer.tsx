@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="ku-footer-container">
           {/* Column 1: Brand */}
           <div className="ku-brand">
-            <h2 className="ku-brand-text">Krishi Uddekta</h2>
+            <h2 className="ku-brand-text">Krishi Uddokta</h2>
             <p className="ku-desc">
               আমরা একজন কৃষি উদ্যোক্তা হিসেবে বাংলাদেশের কৃষকদের উন্নয়নে কাজ
               করছি। উন্নত মানের কৃষি উপকরণ, পরামর্শ এবং প্রযুক্তি সেবা প্রদান
@@ -17,16 +17,16 @@ export default function Footer() {
             </p>
             <h3 className="ku-social-title">Social Links</h3>
             <div className="ku-social-icons">
-              <a href="#" aria-label="Facebook">
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
                 <i className="fab fa-facebook-f" />
               </a>
-              <a href="#" aria-label="YouTube">
+              <a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">
                 <i className="fab fa-youtube" />
               </a>
-              <a href="#" aria-label="TikTok">
+              <a href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
                 <i className="fab fa-tiktok" />
               </a>
-              <a href="#" aria-label="WhatsApp">
+              <a href="https://wa.me/8801604649648" target="_blank" rel="noreferrer" aria-label="WhatsApp">
                 <i className="fab fa-whatsapp" />
               </a>
             </div>
@@ -59,14 +59,16 @@ export default function Footer() {
             <h3 className="ku-col-title">Contact Us</h3>
             <ul className="ku-contact-info">
               <li>
-                <i className="fas fa-phone-alt" /> <span>01604-649648</span>
-              </li>
-              <li>
-                <i className="fas fa-phone-alt" /> <span>01604-649648</span>
+                <i className="fas fa-phone-alt" />{" "}
+                <a href="tel:+8801604649648" className="hover:underline">
+                  +880 1604-649648
+                </a>
               </li>
               <li>
                 <i className="fas fa-envelope" />{" "}
-                <span>abulkasem@gmail.com</span>
+                <a href="mailto:info@krishiuddekta.com" className="hover:underline">
+                  info@krishiuddekta.com
+                </a>
               </li>
             </ul>
           </div>
@@ -75,7 +77,7 @@ export default function Footer() {
         {/* Footer Bottom Bar */}
         <div className="ku-footer-bottom">
           <div className="ku-footer-bottom-container">
-            <p>&copy; {currentYear} Krishi Uddekta. All Rights Reserved.</p>
+            <p>&copy; {currentYear} Krishi Uddokta. All Rights Reserved.</p>
             <p>
               Developed by:{" "}
               <a
