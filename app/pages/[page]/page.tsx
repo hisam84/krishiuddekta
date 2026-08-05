@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-
 import Prose from "components/prose";
+import Footer from "components/layout/footer";
 import { getPage } from "lib/shopify";
 import { notFound } from "next/navigation";
 
@@ -12,20 +12,17 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const page = await getPage(params.page);
 
-  if (!page) return notFound();
+  if (!page) {
+    return {
+      title: "Page Not Found | Krishi Uddokta",
+    };
+  }
 
   return {
-    title: page.seo?.title || page.title,
+    title: page.seo?.title || `${page.title} | Krishi Uddokta`,
     description: page.seo?.description || page.bodySummary,
-    openGraph: {
-      publishedTime: page.createdAt,
-      modifiedTime: page.updatedAt,
-      type: "article",
-    },
   };
 }
-
-import Footer from "components/layout/footer";
 
 export default async function Page(props: {
   params: Promise<{ page: string }>;

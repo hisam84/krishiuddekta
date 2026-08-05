@@ -276,6 +276,14 @@ export async function initDatabase() {
         ('col-3', 'tools', 'Agro Tools & Equipment', 'Modern and durable agricultural equipment')
         ON CONFLICT (id) DO NOTHING;
       `,
+      sql`
+        INSERT INTO pages (id, handle, title, body, body_summary)
+        VALUES 
+        ('page-about', 'about', 'About Us | আমাদের সম্পর্কে', '<p><strong>কৃষি উদ্যোক্তা (Krishi Uddokta)</strong> বাংলাদেশের কৃষকদের উন্নত মানের কৃষি উপকরণ ও সরঞ্জাম সরবরাহ করার মাধ্যমে আধুনিক কৃষির সম্প্রসারণে কাজ করছে।</p>', 'কৃষি উদ্যোক্তা — উচ্চফলনশীল বীজ, অর্গানিক সার ও আধুনিক কৃষি উপকরণের নির্ভরযোগ্য প্ল্যাটফর্ম।'),
+        ('page-delivery', 'delivery-charge', 'Delivery Charge Policy | ডেলিভারি চার্জ নীতি', '<p><strong>সারাদেশে ক্যাশ অন ডেলিভারি:</strong> ঢাকায় ৬০ টাকা, ঢাকার বাইরে ১২০ টাকা।</p>', 'ঢাকায় ৬০ টাকা, ঢাকার বাইরে ১২০ টাকা। সারাদেশে ক্যাশ অন ডেলিভারি।'),
+        ('page-refund', 'refund-policy', 'Refund Policy | রিফান্ড পলিসি', '<p>পণ্য গ্রহণে কোনো সমস্যা বা অমিল থাকলে ডেলিভারির সময় তাত্ক্ষণিক রিটার্ন বা ২৪-৪৮ ঘণ্টার মধ্যে সহজে টাকা ফেরতের ব্যবস্থা রয়েছে।</p>', 'সহজ ও নির্ভরযোগ্য রিটার্ন ও রিফান্ড সুবিধা।')
+        ON CONFLICT (handle) DO NOTHING;
+      `,
     ]);
 
     // Automatic content & data fixes in Neon DB

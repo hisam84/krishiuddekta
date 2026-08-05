@@ -1,9 +1,32 @@
 import Link from "next/link";
 import { Badge } from "components/ui/badge";
 import { PriceTag } from "components/ui/price-tag";
+import { getProducts } from "lib/shopify";
 
-export function ComboDealsSection() {
-  const comboDeals = [
+export async function ComboDealsSection() {
+  const products = await getProducts({});
+  const dbCombos = products
+    .filter(
+      (p) =>
+        p.discountPrice ||
+        p.tags?.includes("combo") ||
+        p.badge?.toLowerCase().includes("save") ||
+        p.badge?.toLowerCase().includes("organic")
+    )
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      subtitle: p.description,
+      price: Number(p.priceRange.maxVariantPrice.amount),
+      discountPrice: p.discountPrice,
+      badge: p.badge || "Special Bundle",
+      imageUrl:
+        p.featuredImage?.url ||
+        "https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&q=80&w=800",
+      href: `/product/${p.handle}`,
+    }));
+
+  const fallbackDeals = [
     {
       id: "combo-1",
       title: "Complete Farming Starter Combo",
@@ -25,6 +48,8 @@ export function ComboDealsSection() {
       href: "/product/thai-baramasi-mango-sapling",
     },
   ];
+
+  const comboDeals = dbCombos.length > 0 ? dbCombos.slice(0, 4) : fallbackDeals;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

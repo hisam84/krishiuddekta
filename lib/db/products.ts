@@ -956,14 +956,33 @@ export async function deleteDbShippingMethod(id: string): Promise<boolean> {
   }
 }
 
+const DEFAULT_PAGES_FALLBACK: Record<string, { title: string; body: string; body_summary: string }> = {
+  about: {
+    title: "About Us | আমাদের সম্পর্কে",
+    body_summary: "কৃষি উদ্যোক্তা — উন্নত মানের বীজ, অর্গানিক সার এবং আধুনিক কৃষি উপকরণের সবচেয়ে নির্ভরযোগ্য ই-কমার্স প্ল্যাটফর্ম।",
+    body: `<p><strong>কৃষি উদ্যোক্তা (Krishi Uddokta)</strong> বাংলাদেশের কৃষকদের সার্বিক উন্নয়নে নিবেদিত একটি আধুনিক কৃষি প্রযুক্তি ও ইকমার্স প্ল্যাটফর্ম।</p><p>আমরা সরাসরি উচ্চফলনশীল হাইব্রিড বীজ, ১০০% খাঁটি ভার্মিকম্পোস্ট ও জৈব সার, ফলদ চারা এবং আধুনিক স্প্রেয়ার ও বাগান পরিচর্যার সরঞ্জাম কৃষকদের দৌড়গোড়ায় পৌঁছে দিই।</p><h3>আমাদের অঙ্গীকার:</h3><ul><li>১০০% খাঁটি ও গুণমান নিশ্চিত বীজ ও পণ্য।</li><li>সারাদেশে নির্ভরযোগ্য ক্যাশ অন ডেলিভারি (Cash on Delivery)।</li><li>কৃষি পরামর্শ ও সার্বক্ষণিক হেল্পলাইন সহায়তা (+880 1604-649648)।</li></ul>`,
+  },
+  "delivery-charge": {
+    title: "Delivery Charge & Policies | ডেলিভারি চার্জ ও তথ্য",
+    body_summary: "সারাদেশে ক্যাশ অন ডেলিভারি সুবিধা। ঢাকার ভেতরে ৬০ টাকা, ঢাকার বাইরে ১২০ টাকা।",
+    body: `<h3>ডেলিভারি চার্জ ও সময়সূচী:</h3><table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; margin-bottom:20px;"><thead><tr style="background-color:#f0fdf4;"><th>অঞ্চল (Location)</th><th>চার্জ (Delivery Charge)</th><th>আনুমানিক সময় (Estimated Time)</th></tr></thead><tbody><tr><td>ঢাকা সিটি (Inside Dhaka)</td><td>৳ ৬০ (BDT 60)</td><td>২৪ - ৪৮ ঘণ্টা</td></tr><tr><td>ঢাকার বাইরে (Outside Dhaka)</td><td>৳ ১২০ (BDT 120)</td><td>২ - ৪ কার্যদিবস</td></tr></tbody></table><p><strong>ক্যাশ অন ডেলিভারি:</strong> পণ্য বুঝে পেয়ে মূল্য পরিশোধ করার পূর্ণ সুবিধা।</p>`,
+  },
+  "refund-policy": {
+    title: "Refund & Return Policy | রিফান্ড ও রিটার্ন পলিসি",
+    body_summary: "পণ্য গ্রহণে ক্রুটি বা অমিল থাকলে সহজ রিটার্ন ও রিফান্ড সুবিধা।",
+    body: `<h3>রিফান্ড এবং রিটার্ন পলিসি:</h3><p>কৃষি উদ্যোক্তা গ্রাহকদের সর্বোচ্চ সন্তুষ্টি নিশ্চিত করতে প্রতিশ্রুতিবদ্ধ।</p><ul><li><strong>ডেলিভারির সময় যাচাই:</strong> ডেলিভারি ম্যানের সামনে পণ্য দেখে বুঝে নিন। কোনো ক্ষতি বা ভুল পণ্য থাকলে ডেলিভারি ম্যানকে সাথে সাথে ফেরত দিন।</li><li><strong>রিফান্ড প্রক্রিয়াকরণ:</strong> রিটার্ন নিশ্চিত হওয়ার ২৪-৪৮ ঘণ্টার মধ্যে বিকাশ/নগদ/ব্যাংক অ্যাকাউন্টে টাকা ফেরত দেওয়া হয়।</li><li><strong>যোগাযোগ:</strong> হেল্পলাইন +880 1604-649648 অথবা ইমেইল info@krishiuddekta.com</li></ul>`,
+  },
+};
+
 // Custom Dynamic Pages Management
 export async function getDbPages(): Promise<Page[]> {
   return cached("pages", async () => {
+    let pages: Page[] = [];
     try {
       await ensureDb();
       const sql = getDb();
       const rows = (await sql`SELECT * FROM pages ORDER BY created_at DESC;`) as DbPage[];
-      return rows.map((p) => ({
+      pages = rows.map((p) => ({
         id: p.id,
         title: p.title,
         handle: p.handle,
@@ -975,14 +994,49 @@ export async function getDbPages(): Promise<Page[]> {
       }));
     } catch (error) {
       console.error("Error fetching pages:", error);
-      return [];
     }
+
+    // Merge default fallback pages if missing in DB
+    const existingHandles = pages.map((p) => p.handle);
+    for (const [handle, def] of Object.entries(DEFAULT_PAGES_FALLBACK)) {
+      if (!existingHandles.includes(handle)) {
+        pages.push({
+          id: `default-${handle}`,
+          handle,
+          title: def.title,
+          body: def.body,
+          bodySummary: def.body_summary,
+          seo: { title: def.title, description: def.body_summary },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    return pages;
   });
 }
 
 export async function getDbPage(handle: string): Promise<Page | undefined> {
   const pages = await getDbPages();
-  return pages.find((p) => p.handle === handle);
+  const found = pages.find((p) => p.handle === handle);
+  if (found) return found;
+
+  const fallback = DEFAULT_PAGES_FALLBACK[handle];
+  if (fallback) {
+    return {
+      id: `default-${handle}`,
+      handle,
+      title: fallback.title,
+      body: fallback.body,
+      bodySummary: fallback.body_summary,
+      seo: { title: fallback.title, description: fallback.body_summary },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  return undefined;
 }
 
 export async function addDbPage(data: {

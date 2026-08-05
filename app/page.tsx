@@ -222,7 +222,9 @@ export default function HomePage() {
       </Suspense>
 
       {/* 4. Combo Deals Section */}
-      <ComboDealsSection />
+      <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6"><div className="h-48 animate-pulse rounded-2xl bg-neutral-200 dark:bg-neutral-800" /></div>}>
+        <ComboDealsSection />
+      </Suspense>
 
       {/* 5. Product Carousel Section */}
       <Suspense fallback={<CarouselSkeleton />}>
