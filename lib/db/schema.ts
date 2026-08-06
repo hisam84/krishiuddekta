@@ -79,6 +79,10 @@ export interface DbOrder {
   total_amount: number;
   status: "Pending" | "Processing" | "Completed" | "Cancelled";
   items: string; // JSON string of cart items
+  consignment_id?: string;
+  tracking_code?: string;
+  steadfast_status?: string;
+  steadfast_submitted_at?: string;
   created_at?: string;
 }
 
@@ -234,6 +238,10 @@ export async function initDatabase() {
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;`,
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 2) DEFAULT 5.0;`,
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 12;`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS consignment_id VARCHAR(100);`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_code VARCHAR(100);`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS steadfast_status VARCHAR(50);`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS steadfast_submitted_at TIMESTAMP WITH TIME ZONE;`,
       ]);
     } catch (e) {}
 

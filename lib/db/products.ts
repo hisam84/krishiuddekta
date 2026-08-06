@@ -582,6 +582,51 @@ export async function updateDbOrderStatus(
   }
 }
 
+export async function getDbOrderById(id: string): Promise<DbOrder | undefined> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const rows = (await sql`SELECT * FROM orders WHERE id = ${id} LIMIT 1;`) as DbOrder[];
+    return rows[0];
+  } catch (error) {
+    console.error("Failed to fetch order by ID:", error);
+    return undefined;
+  }
+}
+
+export async function updateDbOrderSteadfastInfo(
+  id: string,
+  data: {
+    consignment_id: string;
+    tracking_code: string;
+    steadfast_status: string;
+    status?: string;
+  }
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const now = new Date().toISOString();
+    const status = data.status || "Processing";
+
+    await sql`
+      UPDATE orders 
+      SET 
+        consignment_id = ${data.consignment_id},
+        tracking_code = ${data.tracking_code},
+        steadfast_status = ${data.steadfast_status},
+        steadfast_submitted_at = ${now},
+        status = ${status}
+      WHERE id = ${id};
+    `;
+    return true;
+  } catch (error) {
+    console.error("Failed to update order Steadfast info:", error);
+    return false;
+  }
+}
+
+
 const reviewCache = new Map<string, { value: any; expiresAt: number }>();
 // Shorter TTL than product data (and caches empty results too) so page loads
 // stay fast even when there are no reviews yet or the DB is slow, while new

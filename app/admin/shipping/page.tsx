@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import SteadfastSettingsCard from "@/components/admin/steadfast-settings-card";
 
 interface ShippingClassItem {
   id: string;
@@ -23,7 +24,7 @@ interface ShippingMethodItem {
 }
 
 export default function AdminShippingPage() {
-  const [activeTab, setActiveTab] = useState<"classes" | "methods">("methods");
+  const [activeTab, setActiveTab] = useState<"methods" | "classes" | "steadfast">("methods");
 
   const [shippingClasses, setShippingClasses] = useState<ShippingClassItem[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethodItem[]>([]);
@@ -289,9 +290,21 @@ export default function AdminShippingPage() {
         >
           Shipping Classes
         </button>
+        <button
+          onClick={() => setActiveTab("steadfast")}
+          className={`px-4 py-2.5 border-b-2 cursor-pointer transition ${
+            activeTab === "steadfast"
+              ? "border-blue-600 text-blue-700 font-semibold"
+              : "border-transparent text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Steadfast Courier API
+        </button>
       </div>
 
-      {loading ? (
+      {activeTab === "steadfast" ? (
+        <SteadfastSettingsCard />
+      ) : loading ? (
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-xs">
           Loading configuration data...
         </div>
