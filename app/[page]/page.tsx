@@ -25,8 +25,6 @@ export async function generateMetadata(props: {
   };
 }
 
-import Footer from "components/layout/footer";
-
 export default async function Page(props: {
   params: Promise<{ page: string }>;
 }) {
@@ -53,7 +51,6 @@ export default async function Page(props: {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
