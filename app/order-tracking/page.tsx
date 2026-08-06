@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "components/layout/navbar";
 import Footer from "components/layout/footer";
 import { toast } from "sonner";
 
@@ -307,8 +306,7 @@ function OrderTrackerContent() {
 
 export default function OrderTrackingPage() {
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col justify-between">
-      <Navbar />
+    <div className="min-h-[70vh] bg-neutral-50 dark:bg-neutral-950 flex flex-col justify-between">
       <main className="flex-1">
         <Suspense fallback={<div className="p-8 text-center text-xs text-neutral-500">Loading Order Tracking...</div>}>
           <OrderTrackerContent />
@@ -318,3 +316,4 @@ export default function OrderTrackingPage() {
     </div>
   );
 }
+
