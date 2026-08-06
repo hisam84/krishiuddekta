@@ -1,4 +1,4 @@
-import { getDb } from "./db";
+import { getDb } from "./db/index";
 
 export interface SteadfastConfig {
   apiKey: string;

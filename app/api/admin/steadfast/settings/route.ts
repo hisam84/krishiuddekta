@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "lib/db";
+import { getDb } from "lib/db/index";
 import { getSteadfastConfig, getSteadfastBalance } from "lib/steadfast";
 
 export async function GET() {
