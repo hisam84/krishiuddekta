@@ -76,9 +76,16 @@ export interface DbOrder {
   customer_phone: string;
   address: string;
   district: string;
+  division?: string;
+  subtotal?: number;
+  delivery_charge?: number;
+  payment_method?: string;
   total_amount: number;
-  status: "Pending" | "Processing" | "Completed" | "Cancelled";
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Completed" | "Cancelled";
   items: string; // JSON string of cart items
+  internal_notes?: string;
+  public_notes?: string;
+  status_history?: string; // JSON string of status history log
   consignment_id?: string;
   tracking_code?: string;
   steadfast_status?: string;
@@ -199,9 +206,16 @@ export async function initDatabase() {
           customer_phone VARCHAR(50) NOT NULL,
           address TEXT NOT NULL,
           district VARCHAR(100) NOT NULL,
+          division VARCHAR(100) DEFAULT 'Dhaka',
+          subtotal NUMERIC(10, 2) DEFAULT 0.00,
+          delivery_charge NUMERIC(10, 2) DEFAULT 60.00,
+          payment_method VARCHAR(50) DEFAULT 'COD',
           total_amount NUMERIC(10, 2) NOT NULL,
           status VARCHAR(50) DEFAULT 'Pending',
           items TEXT NOT NULL,
+          internal_notes TEXT DEFAULT '',
+          public_notes TEXT DEFAULT '',
+          status_history TEXT DEFAULT '[]',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
       `,
@@ -238,6 +252,13 @@ export async function initDatabase() {
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;`,
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS rating NUMERIC(3, 2) DEFAULT 5.0;`,
         sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 12;`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS division VARCHAR(100) DEFAULT 'Dhaka';`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal NUMERIC(10, 2) DEFAULT 0.00;`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_charge NUMERIC(10, 2) DEFAULT 60.00;`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'COD';`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS internal_notes TEXT DEFAULT '';`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS public_notes TEXT DEFAULT '';`,
+        sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_history TEXT DEFAULT '[]';`,
         sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS consignment_id VARCHAR(100);`,
         sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_code VARCHAR(100);`,
         sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS steadfast_status VARCHAR(50);`,

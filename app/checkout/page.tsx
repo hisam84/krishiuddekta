@@ -193,11 +193,21 @@ export default function CheckoutPage() {
           <p className="text-xs text-neutral-500">
             Our delivery agent will contact you shortly on <strong>{customerPhone}</strong>.
           </p>
-          <Link href="/" className="block pt-4">
-            <Button size="lg" className="w-full cursor-pointer">
-              Return to Store
-            </Button>
-          </Link>
+          <div className="w-full space-y-2 pt-2">
+            <Link
+              href={`/order-tracking?orderId=${orderSuccess.orderId}&phone=${encodeURIComponent(customerPhone)}`}
+              className="block w-full"
+            >
+              <Button size="lg" className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 font-bold">
+                Track Order Real-Time ↗
+              </Button>
+            </Link>
+            <Link href="/" className="block w-full">
+              <Button size="lg" variant="outline" className="w-full cursor-pointer">
+                Return to Store
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );

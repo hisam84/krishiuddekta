@@ -51,6 +51,13 @@ export async function Navbar() {
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
+              href="/order-tracking"
+              className="text-[11px] sm:text-xs hover:underline opacity-95 transition font-bold text-amber-200"
+            >
+              ট্রাক অর্ডার (Track Order)
+            </Link>
+            <span className="text-white/40">|</span>
+            <Link
               href="/pages/delivery-charge"
               className="text-[11px] sm:text-xs hover:underline opacity-90 transition font-medium hidden sm:inline"
             >

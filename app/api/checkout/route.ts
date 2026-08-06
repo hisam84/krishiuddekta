@@ -4,7 +4,18 @@ import { createDbOrder } from "lib/db/products";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { customer_name, customer_phone, address, district, total_amount, items } = body;
+    const {
+      customer_name,
+      customer_phone,
+      address,
+      district,
+      division,
+      subtotal,
+      delivery_charge,
+      payment_method,
+      total_amount,
+      items,
+    } = body;
 
     if (!customer_name || !customer_phone || !address) {
       return NextResponse.json(
@@ -18,6 +29,10 @@ export async function POST(req: NextRequest) {
       customer_phone,
       address,
       district: district || "Dhaka",
+      division: division || "Dhaka",
+      subtotal: subtotal !== undefined ? Number(subtotal) : undefined,
+      delivery_charge: delivery_charge !== undefined ? Number(delivery_charge) : 60,
+      payment_method: payment_method || "COD",
       total_amount: Number(total_amount || 0),
       items: items || [],
     });
@@ -35,3 +50,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
+

@@ -547,18 +547,44 @@ export async function createDbOrder(orderData: {
   customer_phone: string;
   address: string;
   district: string;
+  division?: string;
+  subtotal?: number;
+  delivery_charge?: number;
+  payment_method?: string;
   total_amount: number;
   items: any[];
+  public_notes?: string;
+  internal_notes?: string;
 }): Promise<string | null> {
   try {
     await ensureDb();
     const sql = getDb();
     const orderId = `ORD-${Date.now().toString().slice(-6)}`;
     const itemsJson = JSON.stringify(orderData.items);
+    const division = orderData.division || "Dhaka";
+    const subtotal = orderData.subtotal || (orderData.total_amount - 60 > 0 ? orderData.total_amount - 60 : orderData.total_amount);
+    const deliveryCharge = orderData.delivery_charge !== undefined ? orderData.delivery_charge : 60;
+    const paymentMethod = orderData.payment_method || "COD";
+    const now = new Date().toISOString();
+    const initialHistory = JSON.stringify([
+      {
+        status: "Pending",
+        timestamp: now,
+        note: "Order placed by customer",
+      },
+    ]);
 
     await sql`
-      INSERT INTO orders (id, customer_name, customer_phone, address, district, total_amount, status, items)
-      VALUES (${orderId}, ${orderData.customer_name}, ${orderData.customer_phone}, ${orderData.address}, ${orderData.district}, ${orderData.total_amount}, 'Pending', ${itemsJson});
+      INSERT INTO orders (
+        id, customer_name, customer_phone, address, district, division, 
+        subtotal, delivery_charge, payment_method, total_amount, status, 
+        items, public_notes, internal_notes, status_history
+      )
+      VALUES (
+        ${orderId}, ${orderData.customer_name}, ${orderData.customer_phone}, ${orderData.address}, ${orderData.district}, ${division}, 
+        ${subtotal}, ${deliveryCharge}, ${paymentMethod}, ${orderData.total_amount}, 'Pending', 
+        ${itemsJson}, ${orderData.public_notes || ""}, ${orderData.internal_notes || ""}, ${initialHistory}
+      );
     `;
     return orderId;
   } catch (error) {
@@ -570,14 +596,69 @@ export async function createDbOrder(orderData: {
 export async function updateDbOrderStatus(
   id: string,
   status: string,
+  note?: string
+): Promise<boolean> {
+  return updateDbOrderStatusWithHistory(id, status, note);
+}
+
+export async function updateDbOrderStatusWithHistory(
+  id: string,
+  status: string,
+  note?: string
 ): Promise<boolean> {
   try {
     await ensureDb();
     const sql = getDb();
-    await sql`UPDATE orders SET status = ${status} WHERE id = ${id};`;
+    const currentOrder = await getDbOrderById(id);
+    let history: Array<{ status: string; timestamp: string; note?: string }> = [];
+
+    if (currentOrder && currentOrder.status_history) {
+      try {
+        history = JSON.parse(currentOrder.status_history);
+      } catch (e) {
+        history = [];
+      }
+    }
+
+    history.push({
+      status,
+      timestamp: new Date().toISOString(),
+      note: note || `Status changed to ${status}`,
+    });
+
+    await sql`
+      UPDATE orders 
+      SET status = ${status}, status_history = ${JSON.stringify(history)} 
+      WHERE id = ${id};
+    `;
     return true;
   } catch (error) {
-    console.error("Failed to update order status:", error);
+    console.error("Failed to update order status with history:", error);
+    return false;
+  }
+}
+
+export async function updateDbOrderNotes(
+  id: string,
+  notes: { internal_notes?: string; public_notes?: string }
+): Promise<boolean> {
+  try {
+    await ensureDb();
+    const sql = getDb();
+    const currentOrder = await getDbOrderById(id);
+    if (!currentOrder) return false;
+
+    const internalNotes = notes.internal_notes !== undefined ? notes.internal_notes : (currentOrder.internal_notes || "");
+    const publicNotes = notes.public_notes !== undefined ? notes.public_notes : (currentOrder.public_notes || "");
+
+    await sql`
+      UPDATE orders 
+      SET internal_notes = ${internalNotes}, public_notes = ${publicNotes} 
+      WHERE id = ${id};
+    `;
+    return true;
+  } catch (error) {
+    console.error("Failed to update order notes:", error);
     return false;
   }
 }
@@ -609,6 +690,21 @@ export async function updateDbOrderSteadfastInfo(
     const now = new Date().toISOString();
     const status = data.status || "Processing";
 
+    const currentOrder = await getDbOrderById(id);
+    let history: Array<{ status: string; timestamp: string; note?: string }> = [];
+    if (currentOrder && currentOrder.status_history) {
+      try {
+        history = JSON.parse(currentOrder.status_history);
+      } catch (e) {
+        history = [];
+      }
+    }
+    history.push({
+      status,
+      timestamp: now,
+      note: `Dispatched via Steadfast Courier (CID: ${data.consignment_id})`,
+    });
+
     await sql`
       UPDATE orders 
       SET 
@@ -616,7 +712,8 @@ export async function updateDbOrderSteadfastInfo(
         tracking_code = ${data.tracking_code},
         steadfast_status = ${data.steadfast_status},
         steadfast_submitted_at = ${now},
-        status = ${status}
+        status = ${status},
+        status_history = ${JSON.stringify(history)}
       WHERE id = ${id};
     `;
     return true;

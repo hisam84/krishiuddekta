@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -253,17 +254,36 @@ export default function AdminOrdersPage() {
                 return (
                   <tr key={o.id} className="hover:bg-[#f6f7f7]/60 dark:hover:bg-neutral-800/40">
                     <td className="px-4 py-3 font-mono">
-                      <p className="font-bold text-[#2271b1] dark:text-blue-400">#{o.id}</p>
-                      <button
-                        onClick={() => setSelectedOrderForItems(o)}
-                        className="mt-1 text-[11px] text-slate-500 hover:text-slate-900 dark:hover:text-white underline cursor-pointer"
+                      <Link
+                        href={`/admin/orders/${o.id}`}
+                        className="font-bold text-[#2271b1] hover:underline dark:text-blue-400"
                       >
-                        View {orderItemsList.length} items
-                      </button>
+                        #{o.id}
+                      </Link>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Link
+                          href={`/admin/orders/${o.id}`}
+                          className="text-[11px] font-semibold text-emerald-600 hover:underline"
+                        >
+                          Details
+                        </Link>
+                        <span className="text-slate-300">•</span>
+                        <button
+                          onClick={() => setSelectedOrderForItems(o)}
+                          className="text-[11px] text-slate-500 hover:text-slate-900 dark:hover:text-white underline cursor-pointer"
+                        >
+                          {orderItemsList.length} items
+                        </button>
+                      </div>
                     </td>
 
                     <td className="px-4 py-3">
-                      <p className="font-bold text-neutral-900 dark:text-white">{o.customer_name}</p>
+                      <Link
+                        href={`/admin/orders/${o.id}`}
+                        className="font-bold text-neutral-900 hover:text-emerald-600 dark:text-white dark:hover:text-emerald-400"
+                      >
+                        {o.customer_name}
+                      </Link>
                       <p className="font-mono text-emerald-700 dark:text-emerald-400">{o.customer_phone}</p>
                     </td>
 
